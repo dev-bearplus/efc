@@ -1,5 +1,5 @@
 const script = () => {
-    console.log("run")
+    console.log("run 1")
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
@@ -393,11 +393,122 @@ const script = () => {
                 };
             }
             animationReveal() {
+                console.log('animationReveal');
 
             }
             animationScrub() {
             }
             interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-grow-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+            }
+            interact() {
+                this.growSwiperEvent();
+                this.setupReadMoreClamp();
+            }
+            growSwiperEvent() {
+                let growSwiperEvent = new Swiper(".home-grow-cms", {
+                    slidesPerView: "auto",
+                    spaceBetween: 10,
+                    loop: true,
+                    navigation: {
+                        prevEl: ".home-grow-control-navi-item.prev",
+                        nextEl: ".home-grow-control-navi-item.next",
+                    },
+                    pagination: {
+                        el: '.home-grow-content-pagi',
+                        bulletClass: 'home-grow-content-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
+                    },
+                });
+            }
+            setupReadMoreClamp() {
+                const items = $(this).find('.home-grow-item');
+
+                items.each((_, item) => {
+                    const $item = $(item);
+                    const $description = $item.find('.home-grow-item-content-description');
+                    const $toggle = $item.find('.home-grow-item-link-read-more, .link-read-more').first();
+                    const $toggleText = $toggle.find('.txt');
+
+                    if (!$description.length || !$toggle.length) return;
+
+                    const setState = (isExpanded) => {
+                        if (isExpanded) {
+                            $description.addClass('is-expanded');
+                            $toggle.addClass('is-expanded');
+                            $toggleText.text('Show less');
+                        } else {
+                            $description.removeClass('is-expanded');
+                            $toggle.removeClass('is-expanded');
+                            $toggleText.text('Read more');
+                        }
+                    };
+
+                    setState($description.hasClass('is-expanded'));
+
+                    $toggle.off('click.readMoreToggle').on('click.readMoreToggle', (e) => {
+                        e.preventDefault();
+                        setState(!$description.hasClass('is-expanded'));
+                    });
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-questions-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+            }
+            interact() {
+                const accordionItems = $(this).find('.accordion');
+                const animationDuration = 300;
+
+                accordionItems.on('click', (e) => {
+                    e.preventDefault();
+                    const $clickedItem = $(e.currentTarget);
+                    const $clickedAccordion = $clickedItem.closest('.accordion');
+                    const isActive = $clickedAccordion.hasClass('active');
+                    const $allContents = accordionItems.find('.accordion-content');
+                    const $targetContent = $clickedAccordion.find('.accordion-content');
+
+                    accordionItems.removeClass('active');
+                    $allContents.stop(true, true).slideUp(animationDuration);
+
+                    if (!isActive) {
+                        $clickedAccordion.addClass('active');
+                        $targetContent.stop(true, true).slideDown(animationDuration);
+                    }
+                });
+
+                accordionItems.not('.active').find('.accordion-content').hide();
+                accordionItems.filter('.active').find('.accordion-content').show();
             }
             destroy() {
                 super.destroy();
@@ -409,7 +520,6 @@ const script = () => {
             if (!page || typeof page !== 'object') {
                 throw new Error('Invalid page configuration');
             }
-
             // Store registered component names to prevent duplicate registration
             this.registeredComponents = new Set();
 
@@ -442,10 +552,9 @@ const script = () => {
             });
         }
     }
-    const pageName = $('.main-inner').attr('data-namespace');
+    const pageName = $('.main-inner').attr('data-namespace'); 
     const pageConfig = {
-        home: HomePage,
-        about: AboutPage,
+        home: HomePage
     };
     const registry = {};
     registry[pageName]?.destroy();
