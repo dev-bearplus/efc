@@ -110,6 +110,50 @@ const script = () => {
             }
         });
     };
+    const childSelect = (parent) => {
+        return (child) => child ? $(parent).find(child) : parent;
+    }
+    const swiper = {
+        setup: (parent, options = {}) => {
+            return new Swiper(parent('.swiper').get(), {
+                slidesPerView: options.onView || 1,
+                spaceBetween: options.spacing || 0,
+                allowTouchMove: options.touchMove || false,
+                navigation: options.nav ? ({
+                    nextEl: parent('.next').get(),
+                    prevEl: parent('.prev').get(),
+                    disabledClass: "disabled"
+                }) : false,
+                ...options,
+                on: options.on
+            })
+        },
+        changeCurrentItem: (parent, index, callback) => {
+            parent(".curr-item").html(index);
+            if (callback) callback();
+        },
+        initTotalSlide: (parent) => {
+            let totalSlide = parent(".swiper-slide").length;
+            parent(".total-slide").html(totalSlide);
+        },
+        initPagination: (parent) => {
+            let totalSlide = parent(".swiper-slide").length;
+            let paginationItem = parent('.bp-swiper-pagi-item');
+            gsap.set(paginationItem, { width: `${100 / totalSlide}%`, left: 0 });
+        },
+        activePagination: (parent, index) => {
+            let activeLine = parent('.bp-swiper-pagi-item')
+            gsap.to(activeLine, { x: index * activeLine.width(), duration: 0.3, ease: 'expo' })
+        },
+        initClassName: (parent) => {
+            parent('[data-swiper]').each((_, item) => {
+                if ($(item).attr('data-swiper') == 'swiper')
+                    $(item).addClass('swiper')
+                else
+                    $(item).addClass(`swiper-${$(item).attr('data-swiper')}`)
+            })
+        }
+    };
     function resetScroll() {
         if (window.location.hash !== '') {
             if ($(window.location.hash).length >= 1) {
@@ -368,13 +412,29 @@ const script = () => {
             if (this.isOpen) return;
             $(this.el).addClass('on-open-nav');
             $(this.el).find('.header-toggle').addClass('active');
+            const $mobileMenu = $(this.el).find('.header-act-mobile');
+            gsap.fromTo($mobileMenu, 
+                { height: 0, opacity: 0 },
+                { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' }
+            );
             this.isOpen = true;
             smoothScroll.lenis.stop();
         }
         close() {
             if (!this.isOpen) return;
-            $(this.el).removeClass('on-open-nav');
-            $(this.el).find('.header-toggle').removeClass('active');
+            // $(this.el).removeClass('on-open-nav');
+            // $(this.el).find('.header-toggle').removeClass('active');
+            const $mobileMenu = $(this.el).find('.header-act-mobile');
+            gsap.to($mobileMenu, {
+                height: 0,
+                opacity: 0,
+                duration: 0.3,
+                ease: 'power2.in',
+                onComplete: () => {
+                    $(this.el).removeClass('on-open-nav');
+                    $(this.el).find('.header-toggle').removeClass('active');
+                }
+            });
             this.isOpen = false;
             smoothScroll.lenis.start();
         }
@@ -473,6 +533,53 @@ const script = () => {
                 super.destroy();
             }
         },
+        'home-spending-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                console.log('animationReveal1');
+
+            }
+            animationScrub() {
+            }
+            interact() {
+                console.log('interact');
+
+                const swiperSpending = () => {
+                    const parent = childSelect('.home-spending-list-swiper');
+                    swiper.initClassName(parent);
+                    // swiper.setup(parent, {
+                    //     spacing: 100,
+                    //     speed: 900,
+                    //     effect: "slide",
+                    //     centeredSlides: true,
+                    //     loop: true,
+                    //     touchMove: true,
+                    //     nav: true,
+                    //     breakpoints: {
+                    //         768: {
+                    //             slidesPerView: 'auto',
+                    //         }
+                    //     },
+                    // })
+                }
+                // console.log(viewport.w, device.tablet);
+                if(viewport.w < device.tablet) {
+                    console.log('tesSwiperSpending');
+                    swiperSpending();
+                }
+            }
+
+            destroy() {
+                super.destroy();
+            }
+        },
         'home-questions-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -488,27 +595,25 @@ const script = () => {
             }
             interact() {
                 const accordionItems = $(this).find('.accordion');
-                const animationDuration = 300;
-
-                accordionItems.on('click', (e) => {
+                const animationDuration = 400;
+            
+                accordionItems.on('click', '.accordion-title', (e) => {
                     e.preventDefault();
-                    const $clickedItem = $(e.currentTarget);
-                    const $clickedAccordion = $clickedItem.closest('.accordion');
+                    const $clickedAccordion = $(e.currentTarget).closest('.accordion');
                     const isActive = $clickedAccordion.hasClass('active');
-                    const $allContents = accordionItems.find('.accordion-content');
                     const $targetContent = $clickedAccordion.find('.accordion-content');
 
-                    accordionItems.removeClass('active');
-                    $allContents.stop(true, true).slideUp(animationDuration);
-
-                    if (!isActive) {
+                    accordionItems.not($clickedAccordion).removeClass('active');
+                    accordionItems.not($clickedAccordion).find('.accordion-content').stop(true, false).slideUp(animationDuration);
+                    if (isActive) {
+                        $clickedAccordion.removeClass('active');
+                        $targetContent.stop(true, false).slideUp(animationDuration);
+                    } else {
                         $clickedAccordion.addClass('active');
-                        $targetContent.stop(true, true).slideDown(animationDuration);
+                        $targetContent.stop(true, false).slideDown(animationDuration);
                     }
                 });
-
                 accordionItems.not('.active').find('.accordion-content').hide();
-                accordionItems.filter('.active').find('.accordion-content').show();
             }
             destroy() {
                 super.destroy();
