@@ -416,14 +416,16 @@ const script = () => {
                 { height: 0, opacity: 0 },
                 { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' }
             );
+            $mobileMenu.addClass('active');
             this.isOpen = true;
-            smoothScroll.lenis.stop();
+            // smoothScroll.lenis.stop();
         }
         close() {
             if (!this.isOpen) return;
             // $(this.el).removeClass('on-open-nav');
             // $(this.el).find('.header-toggle').removeClass('active');
             const $mobileMenu = $(this.el).find('.header-act-mobile');
+            $mobileMenu.removeClass('active');
             gsap.to($mobileMenu, {
                 height: 0,
                 opacity: 0,
@@ -435,7 +437,7 @@ const script = () => {
                 }
             });
             this.isOpen = false;
-            smoothScroll.lenis.start();
+            // smoothScroll.lenis.start();
         }
     }
     const header = new Header();
