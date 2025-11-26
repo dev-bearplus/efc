@@ -598,10 +598,8 @@ const script = () => {
             animationReveal() {
             }
             animationScrub() {
-                console.log("run")
             }
             interact() {
-                console.log(viewport.w)
                 if (viewport.w <= device.desktop) {
                     $('.home-plan-content-sticky-row .home-plan-content-sticky-head').remove()
                     $('.home-plan-content-sticky-row').addClass('swiper');
@@ -616,12 +614,19 @@ const script = () => {
                         })
                     }
                     const swiper = new Swiper(".home-plan-content-sticky-row", {
-                        slidesPerView: "auto",
+                        slidesPerView: 1,
                         spaceBetween: 0,
+                        centeredSlides: true,
                         pagination: {
                             el: '.home-plan-content-stick-pagin',
                             bulletClass: 'home-plan-content-stick-pagin-dot',
                             bulletActiveClass: 'active'
+                        },
+                        breakpoints: {
+                            768: {
+                                slidesPerView: 'auto',
+                                centeredSlides: false,
+                            }
                         },
                         on: {
                             slideChange: (e) => {
