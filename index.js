@@ -401,7 +401,11 @@ const script = () => {
         }
         toggleNav() {
             $(this.el).find('.header-toggle').on('click', this.handleClick.bind(this));
-            $(this.el).find('.header-link, .header-logo, .header-btn').on('click', () => setTimeout(() => this.close(), 800));
+            $(window).on('click', (e) => {
+                if (!$(e.target).closest('.header-toggle').length) {
+                    this.close();
+                }
+            });
         }
         handleClick(e) {
             e.preventDefault();
@@ -572,12 +576,68 @@ const script = () => {
                     // })
                 }
                 // console.log(viewport.w, device.tablet);
-                if(viewport.w < device.tablet) {
+                if(viewport.w <= device.tablet) {
                     console.log('tesSwiperSpending');
                     swiperSpending();
                 }
             }
 
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-plan-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+                console.log("run")
+            }
+            interact() {
+                console.log(viewport.w)
+                if (viewport.w <= device.desktop) {
+                    $('.home-plan-content-sticky-row .home-plan-content-sticky-head').remove()
+                    $('.home-plan-content-sticky-row').addClass('swiper');
+                    $('.home-plan-content-sticky-body').addClass('swiper-wrapper');
+                    $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').addClass('swiper-slide');
+
+                    const activeIndex = (idx) => {
+                        $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').eq(idx).addClass('active').siblings().removeClass('active');
+                        $('.home-plan-content-row-body .home-plan-content-table-body-col').eq(idx).addClass('active').siblings().removeClass('active');
+                        $('.home-plan-content-table-row .home-plan-content-row-body').each((_, item) => {
+                            $(item).find('.home-plan-content-table-body-col').eq(idx).addClass('active').siblings().removeClass('active');
+                        })
+                    }
+                    const swiper = new Swiper(".home-plan-content-sticky-row", {
+                        slidesPerView: "auto",
+                        spaceBetween: 0,
+                        pagination: {
+                            el: '.home-plan-content-stick-pagin',
+                            bulletClass: 'home-plan-content-stick-pagin-dot',
+                            bulletActiveClass: 'active'
+                        },
+                        on: {
+                            slideChange: (e) => {
+                                activeIndex(e.activeIndex);
+                            }
+                        }
+                    });
+
+                    $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').on('click', function() {
+                        let index = $(this).index();
+                        swiper.slideTo(index);
+                        activeIndex(index);
+                    })
+                    activeIndex(0);
+                }
+            }
             destroy() {
                 super.destroy();
             }
