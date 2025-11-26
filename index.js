@@ -483,10 +483,10 @@ const script = () => {
                 this.setupReadMoreClamp();
             }
             growSwiperEvent() {
+                $('.home-grow-list').css('gap', 0);
                 let growSwiperEvent = new Swiper(".home-grow-cms", {
                     slidesPerView: "auto",
-                    spaceBetween: 10,
-                    loop: true,
+                    spaceBetween: cvUnit(10, 'rem'),
                     navigation: {
                         prevEl: ".home-grow-control-navi-item.prev",
                         nextEl: ".home-grow-control-navi-item.next",
@@ -496,8 +496,9 @@ const script = () => {
                         bulletClass: 'home-grow-content-pagi-item',
                         bulletActiveClass: 'active',
                         clickable: true,
-                    },
+                    }
                 });
+                growSwiperEvent.slideTo(1);
             }
             setupReadMoreClamp() {
                 const items = $(this).find('.home-grow-item');
