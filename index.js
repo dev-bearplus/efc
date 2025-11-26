@@ -1,5 +1,4 @@
 const script = () => {
-    console.log("run 1")
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
@@ -382,7 +381,7 @@ const script = () => {
             this.toggleScroll(inst);
         }
         toggleScroll(inst) {
-            if (inst.scroll > $(this.el).height() * 2) $(this.el).addClass("on-scroll");
+            if (inst.scroll > cvUnit(44, 'rem')) $(this.el).addClass("on-scroll");
             else $(this.el).removeClass("on-scroll");
         }
         toggleHide(inst) {
@@ -413,7 +412,7 @@ const script = () => {
             $(this.el).addClass('on-open-nav');
             $(this.el).find('.header-toggle').addClass('active');
             const $mobileMenu = $(this.el).find('.header-act-mobile');
-            gsap.fromTo($mobileMenu, 
+            gsap.fromTo($mobileMenu,
                 { height: 0, opacity: 0 },
                 { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' }
             );
@@ -596,7 +595,7 @@ const script = () => {
             interact() {
                 const accordionItems = $(this).find('.accordion');
                 const animationDuration = 400;
-            
+
                 accordionItems.on('click', '.accordion-title', (e) => {
                     e.preventDefault();
                     const $clickedAccordion = $(e.currentTarget).closest('.accordion');
@@ -657,7 +656,7 @@ const script = () => {
             });
         }
     }
-    const pageName = $('.main-inner').attr('data-namespace'); 
+    const pageName = $('.main-inner').attr('data-namespace');
     const pageConfig = {
         home: HomePage
     };
