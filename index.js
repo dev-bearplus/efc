@@ -624,10 +624,10 @@ const script = () => {
                     const swiper = new Swiper(".home-stories-content", {
                         slidesPerView: "auto",
                         spaceBetween: cvUnit(16, 'rem'),
-                        pagination: {
-                            el: '.home-stories-pagin',
-                            bulletClass: 'home-stories-pagin-dot',
-                            bulletActiveClass: 'active'
+                        navigation: {
+                            prevEl: ".home-stories-ctrl-btn.prev",
+                            nextEl: ".home-stories-ctrl-btn.next",
+                            disabledClass: 'disabled',
                         },
                         on: {
                             touchStart: (e) => {
