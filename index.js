@@ -109,50 +109,6 @@ const script = () => {
             }
         });
     };
-    const childSelect = (parent) => {
-        return (child) => child ? $(parent).find(child) : parent;
-    }
-    const swiper = {
-        setup: (parent, options = {}) => {
-            return new Swiper(parent('.swiper').get(), {
-                slidesPerView: options.onView || 1,
-                spaceBetween: options.spacing || 0,
-                allowTouchMove: options.touchMove || false,
-                navigation: options.nav ? ({
-                    nextEl: parent('.next').get(),
-                    prevEl: parent('.prev').get(),
-                    disabledClass: "disabled"
-                }) : false,
-                ...options,
-                on: options.on
-            })
-        },
-        changeCurrentItem: (parent, index, callback) => {
-            parent(".curr-item").html(index);
-            if (callback) callback();
-        },
-        initTotalSlide: (parent) => {
-            let totalSlide = parent(".swiper-slide").length;
-            parent(".total-slide").html(totalSlide);
-        },
-        initPagination: (parent) => {
-            let totalSlide = parent(".swiper-slide").length;
-            let paginationItem = parent('.bp-swiper-pagi-item');
-            gsap.set(paginationItem, { width: `${100 / totalSlide}%`, left: 0 });
-        },
-        activePagination: (parent, index) => {
-            let activeLine = parent('.bp-swiper-pagi-item')
-            gsap.to(activeLine, { x: index * activeLine.width(), duration: 0.3, ease: 'expo' })
-        },
-        initClassName: (parent) => {
-            parent('[data-swiper]').each((_, item) => {
-                if ($(item).attr('data-swiper') == 'swiper')
-                    $(item).addClass('swiper')
-                else
-                    $(item).addClass(`swiper-${$(item).attr('data-swiper')}`)
-            })
-        }
-    };
     function resetScroll() {
         if (window.location.hash !== '') {
             if ($(window.location.hash).length >= 1) {
@@ -489,17 +445,21 @@ const script = () => {
             growSwiperEvent() {
                 $('.home-grow-list').css('gap', 0);
                 let growSwiperEvent = new Swiper(".home-grow-cms", {
-                    slidesPerView: "auto",
+                    slidesPerView: 1,
                     spaceBetween: cvUnit(10, 'rem'),
+                    breakpoints: {
+                        768: {
+                            slidesPerView: 'auto',
+                        }
+                    },
                     navigation: {
                         prevEl: ".home-grow-control-navi-item.prev",
                         nextEl: ".home-grow-control-navi-item.next",
                     },
                     pagination: {
-                        el: '.home-grow-content-pagi',
-                        bulletClass: 'home-grow-content-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,
+                        el: '.home-grow-pagin',
+                        bulletClass: 'home-grow-pagin-dot',
+                        bulletActiveClass: 'active'
                     }
                 });
                 growSwiperEvent.slideTo(1);
@@ -556,29 +516,21 @@ const script = () => {
             }
             interact() {
                 console.log('interact');
+                if (viewport.w <= device.tablet) {
+                    $('.home-spending-list-swiper').addClass('swiper');
+                    $('.home-spending-list').addClass('swiper-wrapper');
+                    $('.home-spending-list-item').addClass('swiper-slide');
+                    $('.home-spending-list').css('grid-column-gap', 0);
 
-                const swiperSpending = () => {
-                    const parent = childSelect('.home-spending-list-swiper');
-                    swiper.initClassName(parent);
-                    // swiper.setup(parent, {
-                    //     spacing: 100,
-                    //     speed: 900,
-                    //     effect: "slide",
-                    //     centeredSlides: true,
-                    //     loop: true,
-                    //     touchMove: true,
-                    //     nav: true,
-                    //     breakpoints: {
-                    //         768: {
-                    //             slidesPerView: 'auto',
-                    //         }
-                    //     },
-                    // })
-                }
-                // console.log(viewport.w, device.tablet);
-                if(viewport.w <= device.tablet) {
-                    console.log('tesSwiperSpending');
-                    swiperSpending();
+                    const swiper = new Swiper(".home-spending-list-swiper", {
+                        slidesPerView: "auto",
+                        spaceBetween: cvUnit(16, 'rem'),
+                        pagination: {
+                            el: '.home-spending-pagin',
+                            bulletClass: 'home-spending-pagin-dot',
+                            bulletActiveClass: 'active'
+                        }
+                    });
                 }
             }
 
@@ -605,7 +557,9 @@ const script = () => {
                     $('.home-plan-content-sticky-row').addClass('swiper');
                     $('.home-plan-content-sticky-body').addClass('swiper-wrapper');
                     $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').addClass('swiper-slide');
-
+                    if (viewport.w <= device.tablet) {
+                        $('.home-plan-content-sticky-body').css('grid-column-gap', 0)
+                    }
                     const activeIndex = (idx) => {
                         $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').eq(idx).addClass('active').siblings().removeClass('active');
                         $('.home-plan-content-row-body .home-plan-content-table-body-col').eq(idx).addClass('active').siblings().removeClass('active');
@@ -641,6 +595,84 @@ const script = () => {
                         activeIndex(index);
                     })
                     activeIndex(0);
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-stories-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+            }
+            interact() {
+                if (viewport.w <= device.tablet) {
+                    $('.home-stories-content').addClass('swiper');
+                    $('.home-stories-content-wrap').addClass('swiper-wrapper');
+                    $('.home-stories-item').addClass('swiper-slide');
+                    $('.home-stories-content-wrap').css('grid-column-gap', 0);
+
+                    const swiper = new Swiper(".home-stories-content", {
+                        slidesPerView: "auto",
+                        spaceBetween: cvUnit(16, 'rem'),
+                        pagination: {
+                            el: '.home-stories-pagin',
+                            bulletClass: 'home-stories-pagin-dot',
+                            bulletActiveClass: 'active'
+                        },
+                        on: {
+                            touchStart: (e) => {
+                                $('.home-stories-content-wrap').removeClass('ready');
+                            },
+                            touchEnd: (e) => {
+                                $('.home-stories-content-wrap').addClass('ready');
+                            }
+                        }
+                    });
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-why-choose-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationScrub();
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationScrub() {
+            }
+            animationReveal() {
+            }
+            interact() {
+                if (viewport.w <= device.tablet) {
+                    $('.home-why-choose-content-slide').addClass('swiper');
+                    $('.home-why-choose-content').addClass('swiper-wrapper');
+                    $('.home-why-choose-item').addClass('swiper-slide');
+                    $('.home-why-choose-content').css('grid-column-gap', 0);
+
+                    const swiper = new Swiper(".home-why-choose-content-slide", {
+                        slidesPerView: "auto",
+                        spaceBetween: cvUnit(10, 'rem'),
+                        pagination: {
+                            el: '.home-why-choose-pagin',
+                            bulletClass: 'home-why-choose-pagin-dot',
+                            bulletActiveClass: 'active'
+                        }
+                    })
                 }
             }
             destroy() {
