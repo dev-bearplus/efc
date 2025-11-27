@@ -372,11 +372,7 @@ const script = () => {
             $(this.el).addClass('on-open-nav');
             $(this.el).find('.header-toggle').addClass('active');
             const $mobileMenu = $(this.el).find('.header-act-mobile');
-            gsap.fromTo($mobileMenu,
-                { height: 0, opacity: 0 },
-                { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' }
-            );
-            $mobileMenu.addClass('active');
+            $mobileMenu.stop(true, true).slideDown(400).addClass('active');
             this.isOpen = true;
             // smoothScroll.lenis.stop();
         }
@@ -385,16 +381,11 @@ const script = () => {
             // $(this.el).removeClass('on-open-nav');
             // $(this.el).find('.header-toggle').removeClass('active');
             const $mobileMenu = $(this.el).find('.header-act-mobile');
-            $mobileMenu.removeClass('active');
-            gsap.to($mobileMenu, {
-                height: 0,
-                opacity: 0,
-                duration: 0.3,
-                ease: 'power2.in',
-                onComplete: () => {
-                    $(this.el).removeClass('on-open-nav');
-                    $(this.el).find('.header-toggle').removeClass('active');
-                }
+            $mobileMenu.removeClass('active')
+            .stop(true, true)
+            .slideUp(400, () => {
+                $(this.el).removeClass('on-open-nav');
+                $(this.el).find('.header-toggle').removeClass('active');
             });
             this.isOpen = false;
             // smoothScroll.lenis.start();
