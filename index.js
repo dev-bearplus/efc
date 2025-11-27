@@ -447,6 +447,7 @@ const script = () => {
                 let growSwiperEvent = new Swiper(".home-grow-cms", {
                     slidesPerView: 1,
                     spaceBetween: cvUnit(10, 'rem'),
+                    loop: true,
                     breakpoints: {
                         768: {
                             slidesPerView: 'auto',
