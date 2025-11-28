@@ -495,26 +495,24 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    this.animationReveal();
-                    this.animationScrub();
+                    // this.animationReveal();
+                    // this.animationScrub();
                     this.interact();
                 };
             }
             animationReveal() {
-                console.log('animationReveal1');
-
             }
             animationScrub() {
             }
             interact() {
-                console.log('interact');
+                console.log("run")
                 if (viewport.w <= device.tablet) {
                     $('.home-spending-list-swiper').addClass('swiper');
                     $('.home-spending-list').addClass('swiper-wrapper');
                     $('.home-spending-list-item').addClass('swiper-slide');
                     $('.home-spending-list').css('grid-column-gap', 0);
 
-                    const swiper = new Swiper(".home-spending-list-swiper", {
+                    const swiper = new Swiper('.home-spending-list-swiper', {
                         slidesPerView: "auto",
                         spaceBetween: cvUnit(16, 'rem'),
                         pagination: {
@@ -525,7 +523,6 @@ const script = () => {
                     });
                 }
             }
-
             destroy() {
                 super.destroy();
             }
@@ -544,22 +541,21 @@ const script = () => {
             animationScrub() {
             }
             interact() {
+                let currentIndex = 0;
+                let swiper = null;
                 if (viewport.w <= device.desktop) {
                     $('.home-plan-content-sticky-row .home-plan-content-sticky-head').remove()
                     $('.home-plan-content-sticky-row').addClass('swiper');
                     $('.home-plan-content-sticky-body').addClass('swiper-wrapper');
                     $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').addClass('swiper-slide');
-                    if (viewport.w <= device.tablet) {
-                        $('.home-plan-content-sticky-body').css('grid-column-gap', 0)
-                    }
-                    const activeIndex = (idx) => {
-                        $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').eq(idx).addClass('active').siblings().removeClass('active');
-                        $('.home-plan-content-row-body .home-plan-content-table-body-col').eq(idx).addClass('active').siblings().removeClass('active');
+                    const updateActiveIndex = () => {
+                        $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').eq(currentIndex).addClass('active').siblings().removeClass('active');
+                        $('.home-plan-content-row-body .home-plan-content-table-body-col').eq(currentIndex).addClass('active').siblings().removeClass('active');
                         $('.home-plan-content-table-row .home-plan-content-row-body').each((_, item) => {
-                            $(item).find('.home-plan-content-table-body-col').eq(idx).addClass('active').siblings().removeClass('active');
+                            $(item).find('.home-plan-content-table-body-col').eq(currentIndex).addClass('active').siblings().removeClass('active');
                         })
                     }
-                    const swiper = new Swiper(".home-plan-content-sticky-row", {
+                    swiper = new Swiper(".home-plan-content-sticky-row", {
                         slidesPerView: 1,
                         spaceBetween: 0,
                         centeredSlides: true,
@@ -576,17 +572,55 @@ const script = () => {
                         },
                         on: {
                             slideChange: (e) => {
-                                activeIndex(e.activeIndex);
+                                currentIndex = e.activeIndex;
+                                updateActiveIndex();
                             }
                         }
                     });
 
                     $('.home-plan-content-sticky-body .home-plan-head-table-row-grp').on('click', function() {
-                        let index = $(this).index();
-                        swiper.slideTo(index);
-                        activeIndex(index);
+                        currentIndex = $(this).index();
+                        swiper?.slideTo(currentIndex);
                     })
-                    activeIndex(0);
+                    updateActiveIndex();
+
+                    if (viewport.w <= device.tablet) {
+                        $('.home-plan-content-sticky-body').css('grid-column-gap', 0);
+                        $('.home-plan-content-table-row-grp').css('touch-action', 'pan-y');
+                        let hasSlid = false;
+                        const handleOnDown = (e) => {
+                            const startX = e.clientX;
+                            const startY = e.clientY;
+                            hasSlid = false;
+
+                            const handleOnMove = (e) => {
+                                if (hasSlid) {
+                                    return;
+                                }
+
+                                const deltaX = e.clientX - startX;
+                                const deltaY = e.clientY - startY;
+
+                                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                                    hasSlid = true;
+                                    if (deltaX > 0) {
+                                        swiper?.slidePrev();
+                                    } else {
+                                        swiper?.slideNext();
+                                    }
+                                }
+                            };
+
+                            const handleOnEnd = () => {
+                                hasSlid = false;
+                            };
+
+                            $('.home-plan-content-table-row-grp').get(0).ontouchmove = (e) => handleOnMove(e.touches[0]);
+                            $('.home-plan-content-table-row-grp').get(0).ontouchend = handleOnEnd;
+                            $('.home-plan-content-table-row-grp').get(0).ontouchcancel = handleOnEnd;
+                        };
+                        $('.home-plan-content-table-row-grp').get(0).ontouchstart = (e) => handleOnDown(e.touches[0]);
+                    }
                 }
             }
             destroy() {
@@ -709,7 +743,7 @@ const script = () => {
             destroy() {
                 super.destroy();
             }
-        },
+        }
     }
     class PageManager {
         constructor(page) {
