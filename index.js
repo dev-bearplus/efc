@@ -405,8 +405,6 @@ const script = () => {
                 };
             }
             animationReveal() {
-                console.log('animationReveal');
-
             }
             animationScrub() {
             }
@@ -505,7 +503,6 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                console.log("run")
                 if (viewport.w <= device.tablet) {
                     $('.home-spending-list-swiper').addClass('swiper');
                     $('.home-spending-list').addClass('swiper-wrapper');
