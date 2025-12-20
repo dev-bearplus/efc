@@ -408,6 +408,10 @@ const script = () => {
                 let swiper = new Swiper('.home-testi-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.home-testi-control-item.item-next',
+                        prevEl: '.home-testi-control-item.item-prev',
+                    },
                 });
             }
             animationScrub() {
