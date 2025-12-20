@@ -600,6 +600,17 @@ const script = () => {
                         nextEl: '.home-testi-control-item.item-next',
                         prevEl: '.home-testi-control-item.item-prev',
                     },
+                    pagination: {
+                        el: '.home-testi-pagi',
+                        bulletClass: 'home-testi-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                    breakpoints: {
+                        991: {
+                            slidesPerView: 2,
+                        }
+                    },
                 });
             }
             animationScrub() {
