@@ -157,27 +157,67 @@ const script = () => {
           navigator.msMaxTouchPoints > 0
         );
       };
-      if (!isTouchDevice()) {
-        $("html").attr("data-has-cursor", "true");
-        window.addEventListener("pointermove", function (e) {
-          updatePointer(e);
-        });
-      } else {
-        $("html").attr("data-has-cursor", "false");
-        window.addEventListener("pointerdown", function (e) {
-          updatePointer(e);
-        });
-      }
-      function updatePointer(e) {
-        pointer.x = e.clientX;
-        pointer.y = e.clientY;
-        pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
-        pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
-        if (cursor.userMoved != true) {
-          cursor.userMoved = true;
-          cursor.init();
+    if (!isTouchDevice()) {
+    $("html").attr("data-has-cursor", "true");
+    window.addEventListener("pointermove", function (e) {
+        updatePointer(e);
+    });
+    } else {
+    $("html").attr("data-has-cursor", "false");
+    window.addEventListener("pointerdown", function (e) {
+        updatePointer(e);
+    });
+    }
+    function updatePointer(e) {
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
+    pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
+    pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
+    if (cursor.userMoved != true) {
+        cursor.userMoved = true;
+        cursor.init();
+    }
+    }
+    class Marquee {
+        constructor(list, item, duration = 40, direction) {
+           this.list = list;
+           this.item = item;
+           this.duration = duration;
+           this.direction = direction || 'left';
         }
-      }
+        setup() {
+           let itemWidth = this.item.width();
+           const windowWidth = $(window).width();
+           console.log(itemWidth, windowWidth);
+           if (!itemWidth || itemWidth <= 0 || !windowWidth || windowWidth <= 0) {
+              return;
+           }
+           const cloneAmount = Math.ceil(windowWidth / itemWidth) + 1;
+           if (!Number.isFinite(cloneAmount) || cloneAmount <= 0 || cloneAmount > 1000) {
+              return;
+           }
+  
+           let itemClone = this.item.clone();
+           this.list.html('');
+           new Array(cloneAmount).fill().forEach(() => {
+              let html = itemClone.clone()
+              html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
+              if(this.direction == 'left') {
+                 html.addClass('marquee-left');
+              } else {
+                 html.addClass('marquee-right');
+              }
+              this.list.append(html);
+           });
+        }
+        play() {
+           if(this.direction == 'left') {
+              $(this.list).find('.marquee-left').addClass('anim');
+           } else {
+              $(this.list).find('.marquee-right').addClass('anim');
+           }
+        }
+    }
     class Loading {
         constructor() {}
         isDoneLoading() {
@@ -583,6 +623,19 @@ const script = () => {
     header.init();
 
     const HomePage = {
+        'home-trust-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                 let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
+                 marquee.setup();
+                 marquee.play();
+            }
+        },
         'home-testi-wrap': class extends TriggerSetup {
             constructor() {
                 super();
