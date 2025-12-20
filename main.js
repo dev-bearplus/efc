@@ -29,7 +29,19 @@ const script = () => {
 		},
     }
     const device = { desktop: 991, tablet: 767, mobile: 479 }
-
+    const pointer = {
+        x: $(window).width() / 2,
+        y: $(window).height() / 2,
+        xNor: $(window).width() / 2 / $(window).width(),
+        yNor: $(window).height() / 2 / $(window).height(),
+      };
+      const xSetter = (el) => gsap.quickSetter(el, "x", `px`);
+      const ySetter = (el) => gsap.quickSetter(el, "y", `px`);
+      const xGetter = (el) => gsap.getProperty(el, "x");
+      const yGetter = (el) => gsap.getProperty(el, "y");
+      const lerp = (a, b, t = 0.08) => {
+        return a + (b - a) * t;
+      };
     const debounce = (func, timeout = 300) => {
         let timer
 
@@ -138,6 +150,182 @@ const script = () => {
             scrollTop()
         }
     };
+    const isTouchDevice = () => {
+        return (
+          "ontouchstart" in window ||
+          navigator.maxTouchPoints > 0 ||
+          navigator.msMaxTouchPoints > 0
+        );
+      };
+      if (!isTouchDevice()) {
+        $("html").attr("data-has-cursor", "true");
+        window.addEventListener("pointermove", function (e) {
+          updatePointer(e);
+        });
+      } else {
+        $("html").attr("data-has-cursor", "false");
+        window.addEventListener("pointerdown", function (e) {
+          updatePointer(e);
+        });
+      }
+      function updatePointer(e) {
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
+        pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
+        if (cursor.userMoved != true) {
+          cursor.userMoved = true;
+          cursor.init();
+        }
+      }
+    class Loading {
+        constructor() {}
+        isDoneLoading() {
+          return true;
+        }
+      }
+    let load = new Loading();
+    class Cursor {
+    constructor() {
+        this.targetX = pointer.x;
+        this.targetY = pointer.y;
+        this.userMoved = false;
+        xSetter(".cursor-main")(this.targetX);
+        ySetter(".cursor-main")(this.targetY);
+    }
+    init() {
+        requestAnimationFrame(this.update.bind(this));
+        $(".cursor-main .cursor-inner").addClass("active");
+    }
+    isUserMoved() {
+        return this.userMoved;
+    }
+    update() {
+        if (this.userMoved || load.isDoneLoading()) {
+        this.updatePosition();
+        }
+        requestAnimationFrame(this.update.bind(this));
+    }
+    updatePosition() {
+        this.targetX = pointer.x;
+        this.targetY = pointer.y;
+        let targetInnerX = xGetter(".cursor-main");
+        let targetInnerY = yGetter(".cursor-main");
+
+        if ($("[data-cursor]:hover").length) {
+        this.onHover();
+        } else {
+        this.reset();
+        }
+
+        if (
+        Math.hypot(this.targetX - targetInnerX, this.targetY - targetInnerY) >
+            1 ||
+        Math.abs(smoothScroll.lenis.velocity) > 0.1
+        ) {
+        xSetter(".cursor-main")(lerp(targetInnerX, this.targetX, 0.1));
+        ySetter(".cursor-main")(
+            lerp(targetInnerY, this.targetY - smoothScroll.lenis.velocity / 16, 0.1)
+        );
+        }
+        ['blue', 'black'].forEach(color => {
+        const inSectionColor = $(`[data-section="${color}"]`).toArray().some(el => this.isMouseInSection(el));
+        if(inSectionColor) {
+            $('.cursor-inner').addClass(`on-${color}`);
+        } else {
+            $('.cursor-inner').removeClass(`on-${color}`);
+        }
+        });
+        if ($('[data-cursor="drag"]:hover').length) {
+        const midX = viewport.w / 2;
+        let controlPrev = $('[data-cursor="drag"]:hover').attr('data-control-prev');
+        let controlNext = $('[data-cursor="drag"]:hover').attr('data-control-next');
+        if (pointer.x > midX) {
+            // Bên phải -> prev
+            $(".cursor").removeClass("left").addClass("right");
+            if ($(`.${controlNext}`).hasClass("swiper-button-disabled")) {
+            $(".cursor").addClass("disabled");
+            } else {
+            $(".cursor").removeClass("disabled");
+            }
+        } else {
+            // Bên trái -> next
+            $(".cursor").removeClass("right").addClass("left");
+        
+            if ($(`.${controlPrev}`).hasClass("swiper-button-disabled")) {
+            $(".cursor").addClass("disabled");
+            } else {
+            $(".cursor").removeClass("disabled");
+            }
+        }
+        } else {
+        $(".cursor").removeClass("left right disabled");
+        }      
+    }
+    isMouseInSection(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+        pointer.x >= rect.left &&
+        pointer.x <= rect.right &&
+        pointer.y >= rect.top &&
+        pointer.y <= rect.bottom
+        );
+    }
+    
+    onHover() {
+        let type = $("[data-cursor]:hover").attr("data-cursor");
+        let gotBtnSize = false;
+        if ($("[data-cursor]:hover").length) {
+        switch (type) {
+            case "hidden":
+            $(".cursor").addClass("on-hover-hidden");
+            break;
+            case "arrow":
+            $(".cursor").addClass("on-hover-arrow");
+            break;
+            case "drag":
+            $(".cursor").addClass("on-hover-drag");
+            break;
+            case "txtLink":
+            $(".cursor-inner").addClass("on-hover-sm");
+            let targetEl;
+            if (
+                $("[data-cursor]:hover").attr("data-cursor-txtLink") == "parent"
+            ) {
+                targetEl = $("[data-cursor]:hover").parent();
+            } else if (
+                $("[data-cursor]:hover").attr("data-cursor-txtLink") == "child"
+            ) {
+                targetEl = $("[data-cursor]:hover").find(
+                "[data-cursor-txtLink-child]"
+                );
+            } else {
+                targetEl = $("[data-cursor]:hover");
+            }
+
+            let targetGap = cvUnit(8, 'rem');
+            this.targetX =
+            targetEl.get(0).getBoundingClientRect().left;
+            $('[data-cursor]:hover .txt').css('transform', `translateX(${targetGap + $(".cursor-inner.on-hover-sm").width()}px)`)
+            this.targetY =
+                targetEl.get(0).getBoundingClientRect().top +
+                targetEl.get(0).getBoundingClientRect().height / 2;
+            break;
+            default:
+            break;
+        }
+        } else {
+        gotBtnSize = false;
+        }
+    }
+    reset() {
+        $(".cursor").removeClass("on-hover-hidden");
+        $(".cursor").removeClass("on-hover-arrow");
+        $(".cursor").removeClass("on-hover-drag");
+        $('[data-cursor] .txt').css('transform', 'translateX(0px)')
+    }
+    }
+    let cursor = new Cursor();
     function scrollTop(onComplete) {
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -498,7 +686,7 @@ const script = () => {
     const pageConfig = {
         home: HomePage
     };
-    console.log('pageConfig', pageConfig[pageName]);
+    cursor.init();
     const registry = {};
     registry[pageName]?.destroy();
 
