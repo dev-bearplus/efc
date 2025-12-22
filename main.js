@@ -355,14 +355,14 @@ const script = () => {
 
                     bgDotX = (pointer.x - targetBg.get(0).getBoundingClientRect().left)
                     bgDotY = (pointer.y - targetBg.get(0).getBoundingClientRect().top)
-                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .09)
-                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .09)
+                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
+                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
                     gotBtnSize = true
                 } else {
                     bgDotX = xGetter('[data-cursor]:hover .bg-dot')
                     bgDotY = yGetter('[data-cursor]:hover .bg-dot')
-                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .09)
-                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .09)
+                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
+                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
                 }
 
                 break;
@@ -595,7 +595,7 @@ const script = () => {
         init(data) {
             this.el = document.querySelector('.header');
             if (viewport.w <= 991) {
-                this.toggleNav();
+                this.interact();
             }
         }
         updateOnScroll(inst) {
@@ -621,40 +621,23 @@ const script = () => {
                 $(this.el).removeClass("on-hide");
             }
         }
-        toggleNav() {
-            $(this.el).find('.header-toggle').on('click', this.handleClick.bind(this));
+        interact() {
+            $(this.el).find('.header-toggle').on('click', (e)=>{
+                e.preventDefault();
+                $(e.currentTarget).toggleClass('active');
+                $(this.el).find('.header-menu').toggleClass('active');
+            });
             $(window).on('click', (e) => {
-                if (!$(e.target).closest('.header-toggle').length) {
-                    this.close();
+                if (!$(e.target).closest('.header-toggle').length && !$(e.target).closest('.header-menu').length) {
+                   $(this.el).find('.header-toggle').removeClass('active');
+                   $(this.el).find('.header-menu').removeClass('active');
                 }
             });
-        }
-        handleClick(e) {
-            e.preventDefault();
-            this.isOpen ? this.close() : this.open();
-        }
-        open() {
-            if (this.isOpen) return;
-            $(this.el).addClass('on-open-nav');
-            $(this.el).find('.header-toggle').addClass('active');
-            const $mobileMenu = $(this.el).find('.header-act-mobile');
-            $mobileMenu.stop(true, true).slideDown(400).addClass('active');
-            this.isOpen = true;
-            // smoothScroll.lenis.stop();
-        }
-        close() {
-            if (!this.isOpen) return;
-            // $(this.el).removeClass('on-open-nav');
-            // $(this.el).find('.header-toggle').removeClass('active');
-            const $mobileMenu = $(this.el).find('.header-act-mobile');
-            $mobileMenu.removeClass('active')
-            .stop(true, true)
-            .slideUp(400, () => {
-                $(this.el).removeClass('on-open-nav');
-                $(this.el).find('.header-toggle').removeClass('active');
+            $('.header-menu-item.parent').on('click', (e)=>{
+                e.preventDefault();
+                $(e.currentTarget).closest('.header-menu-item-wrap').toggleClass('active');
+                $(e.currentTarget).closest('.header-menu-item-wrap').find('.header-menu-sub-wrap').slideToggle();
             });
-            this.isOpen = false;
-            // smoothScroll.lenis.start();
         }
     }
     const header = new Header();
@@ -701,6 +684,92 @@ const script = () => {
                         991: {
                             slidesPerView: 2,
                         }
+                    },
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-pricing-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            initSwiper() {
+                $('.home-pricing-head-cms').addClass('swiper');
+                $('.home-pricing-head-list').addClass('swiper-wrapper');
+                $('.home-pricing-head-item').addClass('swiper-slide');
+                const swiper = new Swiper('.home-pricing-head-cms', {
+                    slidesPerView: 1,
+                    spaceBetween: cvUnit(0, 'rem'),
+                    pagination: {
+                        el: '.home-pricing-pagi',
+                        bulletClass: 'home-pricing-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
+                    },
+                    breakpoints: {
+                        768: {
+                            slidesPerView: 'auto',
+                        }
+                    },
+                    on: {
+                        slideChange: (swiper) => {
+                            let indexActive = swiper.activeIndex;
+                            $('.home-pricing-content').each((_, item) => {
+                                $(item).find('.home-pricing-content-item').removeClass('active');
+                                $(item).find('.home-pricing-content-item').eq(indexActive).addClass('active');
+                            });
+                        }
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'home-resource-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.home-resource-cms').addClass('swiper');
+                $('.home-resource-list').addClass('swiper-wrapper');
+                $('.home-resource-item').addClass('swiper-slide');
+                const swiper = new Swiper('.home-resource-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.home-resource-pagi',
+                        bulletClass: 'home-resource-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
                     },
                 });
             }
