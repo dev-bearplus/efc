@@ -246,6 +246,23 @@ const script = () => {
         }
         requestAnimationFrame(this.update.bind(this));
     }
+    updateHtml () {
+        $('[data-cursor="bg"]').each((idx, el) => {
+            let bg = '--cl-' + ($(el).attr('data-bg')  || 'white')
+            $(el).find('.txt, .heading').css({
+                'position': 'relative',
+                'z-index': '2'
+            })
+            $(el).find('.ic-embed:not(.ic-arr-main):not(.ic-arr-clone)').css({
+                'position': 'relative',
+                'z-index': '2'
+            })
+            let btnDot = $(document.createElement('div')).addClass('bg-dot');
+            let btnDotInner = $(document.createElement('div')).addClass('bg-dot-inner').css('background-color', `var(${bg})`);
+            btnDot.append(btnDotInner)
+            $(el).append(btnDot)
+        })
+    }
     updatePosition() {
         this.targetX = pointer.x;
         this.targetY = pointer.y;
@@ -318,41 +335,64 @@ const script = () => {
         if ($("[data-cursor]:hover").length) {
         switch (type) {
             case "hidden":
-            $(".cursor").addClass("on-hover-hidden");
-            break;
-            case "arrow":
-            $(".cursor").addClass("on-hover-arrow");
-            break;
-            case "drag":
-            $(".cursor").addClass("on-hover-drag");
-            break;
-            case "txtLink":
-            $(".cursor-inner").addClass("on-hover-sm");
-            let targetEl;
-            if (
-                $("[data-cursor]:hover").attr("data-cursor-txtLink") == "parent"
-            ) {
-                targetEl = $("[data-cursor]:hover").parent();
-            } else if (
-                $("[data-cursor]:hover").attr("data-cursor-txtLink") == "child"
-            ) {
-                targetEl = $("[data-cursor]:hover").find(
-                "[data-cursor-txtLink-child]"
-                );
-            } else {
-                targetEl = $("[data-cursor]:hover");
-            }
+                $(".cursor").addClass("on-hover-hidden");
+                break;
+            case 'bg':
+                $('.cursor').addClass('on-hover-hidden');
+                let targetBg;
+                targetBg = $('[data-cursor="bg"]:hover')
+                this.targetX = targetBg.get(0).getBoundingClientRect().left + targetBg.get(0).getBoundingClientRect().width / 2;
+                this.targetY = targetBg.get(0).getBoundingClientRect().top + targetBg.get(0).getBoundingClientRect().height / 2;
+                let bgDotX, bgDotY;
+                if (!gotBtnSize) {
+                    if ($('[data-cursor]:hover').hasClass('home-ser-item-btn')) {
+                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width + cvUnit(130, 'rem'), '--cursor-height': targetBg.get(0).getBoundingClientRect().height + cvUnit(130, 'rem')})
+                    } else if ($('[data-cursor]:hover').hasClass('sm-menu')) {  
+                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width * 1.6, '--cursor-height': targetBg.get(0).getBoundingClientRect().height * 1.3})
+                    } else {
+                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width*1.4, '--cursor-height': targetBg.get(0).getBoundingClientRect().height*1.4})
+                    }
 
-            let targetGap = cvUnit(8, 'rem');
-            this.targetX =
-            targetEl.get(0).getBoundingClientRect().left;
-            $('[data-cursor]:hover .txt').css('transform', `translateX(${targetGap + $(".cursor-inner.on-hover-sm").width()}px)`)
-            this.targetY =
-                targetEl.get(0).getBoundingClientRect().top +
-                targetEl.get(0).getBoundingClientRect().height / 2;
-            break;
+                    bgDotX = (pointer.x - targetBg.get(0).getBoundingClientRect().left)
+                    bgDotY = (pointer.y - targetBg.get(0).getBoundingClientRect().top)
+                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .09)
+                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .09)
+                    gotBtnSize = true
+                } else {
+                    bgDotX = xGetter('[data-cursor]:hover .bg-dot')
+                    bgDotY = yGetter('[data-cursor]:hover .bg-dot')
+                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .09)
+                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .09)
+                }
+
+                break;
+            case "txtLink":
+                $(".cursor-inner").addClass("on-hover-sm");
+                let targetEl;
+                if (
+                    $("[data-cursor]:hover").attr("data-cursor-txtLink") == "parent"
+                ) {
+                    targetEl = $("[data-cursor]:hover").parent();
+                } else if (
+                    $("[data-cursor]:hover").attr("data-cursor-txtLink") == "child"
+                ) {
+                    targetEl = $("[data-cursor]:hover").find(
+                    "[data-cursor-txtLink-child]"
+                    );
+                } else {
+                    targetEl = $("[data-cursor]:hover");
+                }
+
+                let targetGap = cvUnit(8, 'rem');
+                this.targetX =
+                targetEl.get(0).getBoundingClientRect().left;
+                $('[data-cursor]:hover .txt').css('transform', `translateX(${targetGap + $(".cursor-inner.on-hover-sm").width()}px)`)
+                this.targetY =
+                    targetEl.get(0).getBoundingClientRect().top +
+                    targetEl.get(0).getBoundingClientRect().height / 2;
+                break;
             default:
-            break;
+                break;
         }
         } else {
         gotBtnSize = false;
@@ -360,8 +400,6 @@ const script = () => {
     }
     reset() {
         $(".cursor").removeClass("on-hover-hidden");
-        $(".cursor").removeClass("on-hover-arrow");
-        $(".cursor").removeClass("on-hover-drag");
         $('[data-cursor] .txt').css('transform', 'translateX(0px)')
     }
     }
@@ -750,6 +788,7 @@ const script = () => {
     const pageConfig = {
         home: HomePage
     };
+    cursor.updateHtml();
     cursor.init();
     const registry = {};
     registry[pageName]?.destroy();
