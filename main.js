@@ -622,22 +622,35 @@ const script = () => {
             }
         }
         interact() {
-            $(this.el).find('.header-toggle').on('click', (e)=>{
-                e.preventDefault();
-                $(e.currentTarget).toggleClass('active');
-                $(this.el).find('.header-menu').toggleClass('active');
-            });
-            $(window).on('click', (e) => {
-                if (!$(e.target).closest('.header-toggle').length && !$(e.target).closest('.header-menu').length) {
-                   $(this.el).find('.header-toggle').removeClass('active');
-                   $(this.el).find('.header-menu').removeClass('active');
-                }
-            });
-            $('.header-menu-item.parent').on('click', (e)=>{
-                e.preventDefault();
-                $(e.currentTarget).closest('.header-menu-item-wrap').toggleClass('active');
-                $(e.currentTarget).closest('.header-menu-item-wrap').find('.header-menu-sub-wrap').slideToggle();
-            });
+            if(viewport.w <= 991) {
+                $(this.el).find('.header-toggle').on('click', (e)=>{
+                    e.preventDefault();
+                    $(e.currentTarget).toggleClass('active');
+                    $(this.el).find('.header-menu').toggleClass('active');
+                });
+                $(window).on('click', (e) => {
+                    if (!$(e.target).closest('.header-toggle').length && !$(e.target).closest('.header-menu').length) {
+                    $(this.el).find('.header-toggle').removeClass('active');
+                    $(this.el).find('.header-menu').removeClass('active');
+                    }
+                });
+                $('.header-menu-item-wrap.parent').on('click','.header-menu-item', (e)=>{
+                    e.preventDefault();
+                    $(e.currentTarget).closest('.header-menu-item-wrap').toggleClass('active');
+                    $(e.currentTarget).closest('.header-menu-item-wrap').find('.header-menu-sub-wrap').slideToggle();
+                });
+                $('.header-lang').on('click', (e)=>{
+                    e.preventDefault();
+                    $(e.currentTarget).closest('.header-lang-wrap').find('.header-lang-dropdown').toggleClass('active');
+                    $(e.currentTarget).toggleClass('active');
+                });
+                $(window).on('click', (e) => {
+                    if (!$(e.target).closest('.header-lang-wrap').length) {
+                        $(e.currentTarget).removeClass('active');
+                        $(this.el).find('.header-lang-dropdown').removeClass('active');
+                    }
+                });
+            }
         }
     }
     const header = new Header();
