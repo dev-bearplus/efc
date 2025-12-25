@@ -591,6 +591,7 @@ const script = () => {
         constructor() {
             this.el = null;
             this.isOpen = false;
+            this.listDependent = [];
         }
         init(data) {
             this.el = document.querySelector('.header');
@@ -601,6 +602,27 @@ const script = () => {
         updateOnScroll(inst) {
             this.toggleHide(inst);
             this.toggleScroll(inst);
+            this.onHideDependent(inst);
+        }
+        onHideDependent() {
+            let heightHeader = $(this.el).outerHeight();
+            if(!$(this.el).hasClass('on-hide')) {
+               this.listDependent.forEach((item) => {
+                  $(item).css('top', heightHeader);
+               });
+            } else {
+               this.listDependent.forEach((item) => {
+                  $(item).css('top', 0);
+               });
+            }
+        }
+        registerDependent(dependentEl) {
+        this.listDependent.push(dependentEl);
+        }
+        unregisterDependent(dependentEl) {
+        if (this.listDependent.includes(dependentEl)) {
+            this.listDependent = this.listDependent.filter((item) => item !== dependentEl);
+        }
         }
         toggleScroll(inst) {
             if (inst.scroll > cvUnit(44, 'rem')) $(this.el).addClass("on-scroll");
@@ -829,6 +851,80 @@ const script = () => {
             }
         },
     }
+    const FaqPage = {
+        'faq-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'faq-main-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                header.registerDependent('.faq-main-tab-inner');
+                this.initContent();
+
+            }
+            initContent() {
+                $('.faq-main-view-item-title h2').each((idx, item) => {
+                    $(item).attr('data-title', 'toch-' + idx);
+                })
+                $('.faq-main-category-item').each((idx, item) => {
+                    $(item).attr('data-title', 'toch-' + idx);
+                })
+            }
+            animationScrub() {
+            }
+            interact() {
+                const $contentHeaders = $('.faq-main-view-item-title h2');
+                $('.faq-main-category-item').on('click', (e) => {
+                    e.preventDefault();
+                    const SCROLL_OFFSET = -100;
+                    const dataTitle = $(e.currentTarget).attr('data-title');
+                    const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
+                    smoothScroll.scrollTo(content, {
+                        offset: SCROLL_OFFSET,
+                        duration: 1,
+                    });
+                });
+                smoothScroll.lenis.on('scroll', () => {
+                    this.itemContentActiveCheck($contentHeaders);
+                 });
+            }
+            itemContentActiveCheck(el) {
+                for (let i = 0; i < $(el).length; i++) {
+                    let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+                    if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
+                        $('.faq-main-category-item').removeClass('active');
+                        $('.faq-main-category-item').eq(i).addClass('active');
+                    }
+                    }
+              }
+            destroy() {
+                super.destroy();
+            }
+        }
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -868,7 +964,8 @@ const script = () => {
     }
     const pageName = $('.main-inner').attr('data-namespace');
     const pageConfig = {
-        home: HomePage
+        home: HomePage,
+        faq: FaqPage
     };
     cursor.updateHtml();
     cursor.init();
