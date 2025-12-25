@@ -881,7 +881,12 @@ const script = () => {
                 };
             }
             animationReveal() {
-                header.registerDependent('.faq-main-tab-inner');
+                // header.registerDependent('.faq-main-tab-inner');
+                let topInit = (viewport.h - $('.faq-main-tab-inner').outerHeight())/2;
+                if($('.faq-main-tab-main').outerHeight() > $('.faq-main-tab-inner').outerHeight()) {
+                    $('.faq-main-tab-inner').attr('data-lenis-prevent', 'true');
+                 }
+                $('.faq-main-tab-inner').css('top', topInit + 'px');
                 this.initContent();
 
             }
