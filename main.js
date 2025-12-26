@@ -898,21 +898,48 @@ const script = () => {
             checkScrollTo() {
                 // get parameter from url
                 let urlParams = new URLSearchParams(window.location.search);
-                let scrollTo = urlParams.get('id');
-                if(scrollTo) {  
-                    if(!$(`#${scrollTo}`).length) {
+                let id = urlParams.get('id');
+                let category = urlParams.get('category');
+                if(id) {  
+                    if(!$(`#${id}`).length) {
                         return;
                     }
-                    if (!$(`#${scrollTo}`).find('.faq-main-item-head').hasClass('active')) {
-                        $(`#${scrollTo}`).find('.faq-main-item-head').trigger('click')
+                    if (!$(`#${id}`).find('.faq-main-item-head').hasClass('active')) {
+                        $(`#${id}`).find('.faq-main-item-head').trigger('click')
                     }
-                    let scrollOffset = (viewport.h - $(`#${scrollTo}`).outerHeight() )/ 2;
-                    smoothScroll.scrollTo(`#${scrollTo}`, {offset: -scrollOffset})
+                    let scrollOffset = (viewport.h - $(`#${id}`).outerHeight() )/ 2;
+                    smoothScroll.scrollTo(`#${id}`, {offset: -scrollOffset});
+                    return
+                }
+                if(category) {
+                    $('.faq-main-category-item').removeClass('active');
+                    $(`.faq-main-category-item[data-category-slug="${category}"]`).addClass('active');
+                    let dataTitle = $(`.faq-main-category-item[data-category-slug="${category}"]`).attr('data-title');
+                    let offset = -100;
+                    const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
+                    smoothScroll.scrollTo(content, {
+                        offset: offset,
+                        duration: 1,
+                    });
+                    return;
                 }
             }
-            getUrl(id) {
+            getUrl(id='', category='') {
                 let url = new URL(window.location.href);
-                url.searchParams.set('id', id);
+                if(id) {
+                    url.searchParams.set('id', id);
+                }
+                else {
+                    url.searchParams.delete('id');
+                }
+                if(category) {
+                    url.searchParams.set('category', category);
+                }
+                else {
+                    let categoryTitle = $(`#${id}`).closest('.faq-main-view-item').find('.faq-main-view-item-title .heading').attr('data-title');
+                    let categorySlug = $(`.faq-main-category-item[data-title="${categoryTitle}"]`).attr('data-category-slug');
+                    url.searchParams.set('category', categorySlug);
+                }
                 return url.toString();
             }
             initContent() {
@@ -1040,6 +1067,8 @@ const script = () => {
                         offset: SCROLL_OFFSET,
                         duration: 1,
                     });
+                    let slug = $(e.currentTarget).attr('data-category-slug');
+                    window.history.pushState({}, '', this.getUrl('', slug));
                 });
                 smoothScroll.lenis.on('scroll', () => {
                     this.itemContentActiveCheck($contentHeaders);
@@ -1055,7 +1084,8 @@ const script = () => {
                         $(e.currentTarget).removeClass('active');
                         $(e.currentTarget).closest('.faq-main-item').find('.faq-main-item-content').slideUp();
                     }
-                    window.history.pushState({}, '', this.getUrl($(e.currentTarget).closest('.faq-main-item-inner').attr('id')));
+                    let id = $(e.currentTarget).closest('.faq-main-item-inner').attr('id');
+                    window.history.pushState({}, '', this.getUrl(id));
                  })
                  $('.faq-main-item-relates-item-link').on('click', (e) => {
                     e.preventDefault();
