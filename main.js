@@ -919,8 +919,10 @@ const script = () => {
                 $('.faq-main-view-item-title h2').each((idx, item) => {
                     $(item).attr('data-title', 'toch-' + idx);
                 })
-                $('.faq-main-category-item').each((idx, item) => {
-                    $(item).attr('data-title', 'toch-' + idx);
+                $('.faq-main-category-cms').each((idx, itemCate) => {
+                    $(itemCate).find('.faq-main-category-item').each((idx, item) => {
+                        $(item).attr('data-title', 'toch-' + idx);
+                    })
                 })
             }
             updateUICateNew() {
@@ -1024,6 +1026,13 @@ const script = () => {
                 const $contentHeaders = $('.faq-main-view-item-title h2');
                 $('.faq-main-category-item').on('click', (e) => {
                     e.preventDefault();
+                    if(viewport.w <= 991) {
+                        $('.faq-main-category-sticky-ic .embed-ic').html($(e.currentTarget).find('.faq-main-category-item-ic .w-embed').html());
+                        $('.faq-main-category-sticky-title .txt').text($(e.currentTarget).find('.faq-main-category-item-title .txt').text());
+                        $('.faq-main-category-sticky-inner').removeClass('active');
+                    }
+                    $('.faq-main-category-item').removeClass('active');
+                    $(e.currentTarget).addClass('active');
                     const SCROLL_OFFSET = -100;
                     const dataTitle = $(e.currentTarget).attr('data-title');
                     const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
@@ -1065,12 +1074,13 @@ const script = () => {
             itemContentActiveCheck(el) {
                 for (let i = 0; i < $(el).length; i++) {
                     let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+                    let dataTitle = $(el).eq(i).attr('data-title');
                     if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
                         $('.faq-main-category-item').removeClass('active');
-                        $('.faq-main-category-item').eq(i).addClass('active');
+                        $(`.faq-main-category-item[data-title="${dataTitle}"]`).addClass('active');
                     }
-                    }
-              }
+                }
+            }
             destroy() {
                 super.destroy();
             }
