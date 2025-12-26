@@ -1108,6 +1108,11 @@ const script = () => {
                     if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
                         $('.faq-main-category-item').removeClass('active');
                         $(`.faq-main-category-item[data-title="${dataTitle}"]`).addClass('active');
+                        if(viewport.w <= 991) {
+                            $('.faq-main-category-sticky-ic .embed-ic').html($(`.faq-main-category-item[data-title="${dataTitle}"]`).find('.faq-main-category-item-ic .w-embed').html());
+                            $('.faq-main-category-sticky-title .txt').text($(`.faq-main-category-item[data-title="${dataTitle}"]`).find('.faq-main-category-item-title .txt').eq(0).text());
+                            $('.faq-main-category-sticky-inner').removeClass('active');
+                        }
                     }
                 }
             }
