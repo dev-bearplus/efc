@@ -876,7 +876,6 @@ const script = () => {
                 super();
                 this.onTrigger = () => {
                     this.animationReveal();
-                    this.animationScrub();
                     this.interact();
                     this.checkScrollTo();
                 };
@@ -971,8 +970,10 @@ const script = () => {
                 let faqs = $('.faq-hero-form-dropdown-item');
                 let input = $('#faq-search');
                 let dropdown = $('.faq-hero-form-dropdown');
+                let itemDropdown = $('.faq-hero-form-dropdown-item');
                 let form = $('#form-faq-search');
                 form.attr('action','')
+                let index = -1;
     
                 form.on('submit', function(e) {
                     e.preventDefault();
@@ -980,9 +981,7 @@ const script = () => {
                 })
                 input.on('keyup change', function(e) {
                     e.preventDefault();
-                    if (e.keyCode == '13') {
-                        return false;
-                    }
+                    itemDropdown.removeClass('active');
                     let value = $(this).val()
                     let compValue = value.toLowerCase().trim().replaceAll(' ','').replaceAll('-','');
     
@@ -999,7 +998,50 @@ const script = () => {
                         const newQues = faqs.eq(e).find('.fs-16').text().replace(maskedText, "<span class='hl'>$1</span>")
                         faqs.eq(e).find('.fs-16').html(newQues)
                     })
+                    let $itemsActive = dropdown.find('.faq-hero-form-dropdown-item:not(.hidden)');
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            index = (index + 1) % $itemsActive.length;
+                            setActive();
+                            break;
     
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            index = (index - 1 + $itemsActive.length) % $itemsActive.length;
+                            setActive();
+                            break;
+    
+                        case 'Enter':
+                            console.log(index);
+                            if (index >= 0) {
+                                e.preventDefault();
+                                selectItem($itemsActive.eq(index));
+                                dropdown.removeClass('open');
+                            }
+                            break;
+    
+                        case 'Escape':
+                            closeDropdown();
+                            break;
+                    }
+                    function closeDropdown() {
+                        dropdown.removeClass('open');
+                    }
+                    function setActive() {
+                        $itemsActive.removeClass('active');
+                        $itemsActive.eq(index).addClass('active');
+                        // Scroll item vào view khi điều hướng bằng phím mũi tên
+                        if (index >= 0 && $itemsActive.length > 0) {
+                            const activeItem = $itemsActive.eq(index)[0];
+                            if (activeItem) {
+                                activeItem.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'nearest'
+                                });
+                            }
+                        }
+                    }
                     if (dropdown.find('.faq-hero-form-dropdown-inner').height() == 0) {
                         dropdown.find('.faq-hero-form-dropdown-empty').slideDown();
                     } else {
@@ -1033,7 +1075,69 @@ const script = () => {
                 })
                 $('.faq-hero-form-dropdown-item').on('click',(e) => {
                     e.preventDefault();
-                    let faqId = $(e.currentTarget).attr('data-scrollto');
+                    selectItem(e.currentTarget);
+                })
+                function selectItem(item) {
+                    let faqId = $(item).attr('data-scrollto');
+                    dropdown.removeClass('open')
+                    
+                    if (!$(`#${faqId}`).find('.faq-main-item-head').hasClass('active')) {
+                        $(`#${faqId}`).find('.faq-main-item-head').trigger('click')
+                    }
+                    let scrollOffset = (viewport.h - $(`#${faqId}`).outerHeight() )/ 2;
+                    smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset})
+                    window.history.pushState({}, '', this.getUrl(faqId));
+                }
+            }
+            interactDropdown() {
+                const $input = $('#faq-search');
+                const $dropdown = $('.faq-hero-form-dropdown');
+                const $items = $dropdown.find('.faq-hero-form-dropdown-item');
+                let index = -1;
+
+                // Mở dropdown khi focus / gõ
+                $input.on('focus input', function () {
+                    $dropdown.addClass('open');
+                });
+
+                // Keydown
+                $input.on('keydown', function (e) {
+                    if (!$dropdown.hasClass('open')) return;
+
+                    switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        index = (index + 1) % $items.length;
+                        setActive();
+                        break;
+
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        index = (index - 1 + $items.length) % $items.length;
+                        setActive();
+                        break;
+
+                    case 'Enter':
+                        if (index >= 0) {
+                        e.preventDefault();
+                        selectItem($items.eq(index));
+                        }
+                        break;
+
+                    case 'Escape':
+                        closeDropdown();
+                        break;
+                    }
+                });
+                function closeDropdown() {
+                    $dropdown.removeClass('open');
+                }
+                function setActive() {
+                    $items.removeClass('active');
+                    $items.eq(index).addClass('active');
+                }
+                function selectItem(item) {
+                    let faqId = $(item).attr('data-scrollto');
                     dropdown.removeClass('open')
                     // scroll to the faq item center screen 
                     if (!$(`#${faqId}`).find('.faq-main-item-head').hasClass('active')) {
@@ -1042,9 +1146,7 @@ const script = () => {
                     let scrollOffset = (viewport.h - $(`#${faqId}`).outerHeight() )/ 2;
                     smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset})
                     window.history.pushState({}, '', this.getUrl(faqId));
-                })
-            }
-            animationScrub() {
+                }
             }
             interact() {
                 if(viewport.w <= 991) {
