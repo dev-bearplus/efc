@@ -874,354 +874,471 @@ const script = () => {
         'faq-main-wrap': class extends TriggerSetup {
             constructor() {
                 super();
+                // Cache DOM elements
+                this.$els = {};
+                this.searchIndex = -1;
+                this.searchTimeout = null;
+                this.SCROLL_OFFSET = -100;
+                this.DEBOUNCE_DELAY = 150;
+                
                 this.onTrigger = () => {
+                    this.cacheElements();
                     this.animationReveal();
                     this.interact();
                     this.checkScrollTo();
                 };
             }
+            
+            cacheElements() {
+                this.$els = {
+                    tabInner: $('.faq-main-tab-inner'),
+                    tabMain: $('.faq-main-tab-main'),
+                    categorySticky: $('.faq-main-category-sticky'),
+                    categoryStickyInner: $('.faq-main-category-sticky-inner'),
+                    categoryStickyIc: $('.faq-main-category-sticky-ic .embed-ic'),
+                    categoryStickyTitle: $('.faq-main-category-sticky-title .txt'),
+                    categoryItems: $('.faq-main-category-item'),
+                    viewItemTitles: $('.faq-main-view-item-title h2'),
+                    searchInput: $('#faq-search'),
+                    searchForm: $('#form-faq-search'),
+                    searchDropdown: $('.faq-hero-form-dropdown'),
+                    dropdownInner: $('.faq-hero-form-dropdown-inner'),
+                    dropdownEmpty: $('.faq-hero-form-dropdown-empty'),
+                    itemHeads: $('.faq-main-item-head'),
+                    relatesLinks: $('.faq-main-item-relates-item-link')
+                };
+            }
+            
             animationReveal() {
                 this.updateUICateNew();
                 if(viewport.w <= 991) {
-                    header.registerDependent($('.faq-main-category-sticky'));
+                    header.registerDependent(this.$els.categorySticky);
                 }
-                let topInit = (viewport.h - $('.faq-main-tab-inner').outerHeight())/2;
-                if($('.faq-main-tab-main').outerHeight() > $('.faq-main-tab-inner').outerHeight()) {
-                    $('.faq-main-tab-inner').attr('data-lenis-prevent', 'true');
-                 }
-                $('.faq-main-tab-inner').css('top', topInit + 'px');
+                const topInit = (viewport.h - this.$els.tabInner.outerHeight()) / 2;
+                if(this.$els.tabMain.outerHeight() > this.$els.tabInner.outerHeight()) {
+                    this.$els.tabInner.attr('data-lenis-prevent', 'true');
+                }
+                this.$els.tabInner.css('top', topInit + 'px');
                 this.initContent();
                 this.searchFaqOnType();
-
             }
+            
             checkScrollTo() {
-                // get parameter from url
-                let urlParams = new URLSearchParams(window.location.search);
-                let id = urlParams.get('id');
-                let category = urlParams.get('category');
-                if(id) {  
-                    if(!$(`#${id}`).length) {
-                        return;
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                const category = urlParams.get('category');
+                
+                if(id) {
+                    const $target = $(`#${id}`);
+                    if(!$target.length) return;
+                    
+                    const $head = $target.find('.faq-main-item-head');
+                    if (!$head.hasClass('active')) {
+                        $head.trigger('click');
                     }
-                    if (!$(`#${id}`).find('.faq-main-item-head').hasClass('active')) {
-                        $(`#${id}`).find('.faq-main-item-head').trigger('click')
-                    }
-                    let scrollOffset = (viewport.h - $(`#${id}`).outerHeight() )/ 2;
-                    smoothScroll.scrollTo(`#${id}`, {offset: -scrollOffset});
-                    return
-                }
-                if(category) {
-                    $('.faq-main-category-item').removeClass('active');
-                    $(`.faq-main-category-item[data-category-slug="${category}"]`).addClass('active');
-                    let dataTitle = $(`.faq-main-category-item[data-category-slug="${category}"]`).attr('data-title');
-                    let offset = -100;
-                    const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
-                    smoothScroll.scrollTo(content, {
-                        offset: offset,
-                        duration: 1,
-                    });
+                    this.scrollToFaq(id);
                     return;
                 }
+                
+                if(category) {
+                    const $categoryItem = $(`.faq-main-category-item[data-category-slug="${category}"]`);
+                    this.$els.categoryItems.removeClass('active');
+                    $categoryItem.addClass('active');
+                    
+                    const dataTitle = $categoryItem.attr('data-title');
+                    const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
+                    if(content) {
+                        smoothScroll.scrollTo(content, {
+                            offset: this.SCROLL_OFFSET,
+                            duration: 1,
+                        });
+                    }
+                }
             }
-            getUrl(id='', category='') {
-                let url = new URL(window.location.href);
+            
+            scrollToFaq(faqId) {
+                const $target = $(`#${faqId}`);
+                if(!$target.length) return;
+                
+                const scrollOffset = (viewport.h - $target.outerHeight()) / 2;
+                smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset});
+            }
+            
+            getUrl(id = '', category = '') {
+                const url = new URL(window.location.href);
+                
                 if(id) {
                     url.searchParams.set('id', id);
-                }
-                else {
+                    if(!category) {
+                        const $target = $(`#${id}`);
+                        if($target.length) {
+                            const categoryTitle = $target.closest('.faq-main-view-item')
+                                .find('.faq-main-view-item-title .heading')
+                                .attr('data-title');
+                            if(categoryTitle) {
+                                const categorySlug = $(`.faq-main-category-item[data-title="${categoryTitle}"]`)
+                                    .attr('data-category-slug');
+                                if(categorySlug) {
+                                    url.searchParams.set('category', categorySlug);
+                                }
+                            }
+                        }
+                    }
+                } else {
                     url.searchParams.delete('id');
                 }
+                
                 if(category) {
                     url.searchParams.set('category', category);
                 }
-                else {
-                    let categoryTitle = $(`#${id}`).closest('.faq-main-view-item').find('.faq-main-view-item-title .heading').attr('data-title');
-                    let categorySlug = $(`.faq-main-category-item[data-title="${categoryTitle}"]`).attr('data-category-slug');
-                    url.searchParams.set('category', categorySlug);
-                }
+                
                 return url.toString();
             }
+            
             initContent() {
-                $('.faq-main-view-item-title h2').each((idx, item) => {
-                    $(item).attr('data-title', 'toch-' + idx);
-                })
+                // Batch DOM updates
+                this.$els.viewItemTitles.each((idx, item) => {
+                    item.setAttribute('data-title', 'toch-' + idx);
+                });
+                
                 $('.faq-main-category-cms').each((idx, itemCate) => {
                     $(itemCate).find('.faq-main-category-item').each((idx, item) => {
-                        $(item).attr('data-title', 'toch-' + idx);
-                    })
-                })
+                        item.setAttribute('data-title', 'toch-' + idx);
+                    });
+                });
             }
+            
             updateUICateNew() {
-                const itemSearch = $('.faq-hero-form-dropdown-item').eq(0).clone();
-                const listSearch = $('.faq-hero-form-dropdown-inner');
-                listSearch.html('')
+                const $firstItem = $('.faq-hero-form-dropdown-item').eq(0);
+                if(!$firstItem.length) return;
+                
+                const itemTemplate = $firstItem.clone();
+                const fragment = document.createDocumentFragment();
+                
                 $('.faq-main-view-item').each((idx, faq) => {
                     $(faq).find('.faq-main-item').each((idx, item) => {
-                        let newItemSearch  = itemSearch.clone();
-                        let dataScroll = $(item).find('.faq-main-item-inner').attr('id');
-                        let title = $(item).find('.faq-main-item-title .txt').text();
-                        newItemSearch.attr('data-scrollto', dataScroll);
-                        newItemSearch.find('.fs-16').text(title);
-                        listSearch.append(newItemSearch);
-                    })
-                })
+                        const $item = $(item);
+                        const newItem = itemTemplate.clone();
+                        const dataScroll = $item.find('.faq-main-item-inner').attr('id');
+                        const title = $item.find('.faq-main-item-title .txt').text();
+                        
+                        newItem.attr('data-scrollto', dataScroll);
+                        newItem.find('.fs-16').text(title);
+                        fragment.appendChild(newItem[0]);
+                    });
+                });
+                
+                this.$els.dropdownInner.empty().append(fragment);
             }
-            searchFaqOnType() {
-                let faqs = $('.faq-hero-form-dropdown-item');
-                let input = $('#faq-search');
-                let dropdown = $('.faq-hero-form-dropdown');
-                let itemDropdown = $('.faq-hero-form-dropdown-item');
-                let form = $('#form-faq-search');
-                form.attr('action','')
-                let index = -1;
-    
-                form.on('submit', function(e) {
-                    e.preventDefault();
-                    return false;
-                })
-                input.on('keyup change', function(e) {
-                    e.preventDefault();
-                    itemDropdown.removeClass('active');
-                    let value = $(this).val()
-                    let compValue = value.toLowerCase().trim().replaceAll(' ','').replaceAll('-','');
-    
-                    faqs.each((e) => {
-                        let ques = faqs.eq(e).find('.fs-16').text()
-                        let compQues = ques.toLowerCase().trim().replaceAll(' ','').replaceAll('-','');
-                        if (compQues.includes(compValue)) {
-                            faqs.eq(e).removeClass('hidden');
-                        } else {
-                            faqs.eq(e).addClass('hidden');
-                        }
-    
-                        let maskedText = new RegExp("(" + value + ")","gi");
-                        const newQues = faqs.eq(e).find('.fs-16').text().replace(maskedText, "<span class='hl'>$1</span>")
-                        faqs.eq(e).find('.fs-16').html(newQues)
-                    })
-                    let $itemsActive = dropdown.find('.faq-hero-form-dropdown-item:not(.hidden)');
-                    switch (e.key) {
-                        case 'ArrowDown':
-                            e.preventDefault();
-                            index = (index + 1) % $itemsActive.length;
-                            setActive();
-                            break;
-    
-                        case 'ArrowUp':
-                            e.preventDefault();
-                            index = (index - 1 + $itemsActive.length) % $itemsActive.length;
-                            setActive();
-                            break;
-    
-                        case 'Enter':
-                            console.log(index);
-                            if (index >= 0) {
-                                e.preventDefault();
-                                selectItem($itemsActive.eq(index));
-                                dropdown.removeClass('open');
-                            }
-                            break;
-    
-                        case 'Escape':
-                            closeDropdown();
-                            break;
-                    }
-                    function closeDropdown() {
-                        dropdown.removeClass('open');
-                    }
-                    function setActive() {
-                        $itemsActive.removeClass('active');
-                        $itemsActive.eq(index).addClass('active');
-                        // Scroll item vào view khi điều hướng bằng phím mũi tên
-                        if (index >= 0 && $itemsActive.length > 0) {
-                            const activeItem = $itemsActive.eq(index)[0];
-                            if (activeItem) {
-                                activeItem.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'nearest'
-                                });
-                            }
-                        }
-                    }
-                    if (dropdown.find('.faq-hero-form-dropdown-inner').height() == 0) {
-                        dropdown.find('.faq-hero-form-dropdown-empty').slideDown();
-                    } else {
-                        dropdown.find('.faq-hero-form-dropdown-empty').slideUp();
-                    }
-                    if($('.faq-hero-form-dropdown-inner').outerHeight() > $('.faq-hero-form-dropdown').outerHeight()) {
-                        $('.faq-hero-form-dropdown').attr('data-lenis-prevent', 'true');
-                    }
-                    else {
-                        $('.faq-hero-form-dropdown').removeAttr('data-lenis-prevent');
-                    }
-    
-                    if (input.val() != '') {
-                        dropdown.addClass('open');
-                    } else {
-                        dropdown.removeClass('open');
-                    }
-                })
-                input.on('focus', function(e) {
-                    if($('.faq-main-category-sticky-inner').hasClass('active')) {
-                        $('.faq-main-category-sticky-inner').removeClass('active');
-                    }
-                    if (input.val() != '') {
-                        dropdown.addClass('open');
-                    }
-                })
-                input.on('blur', function(e) {
-                    if (!dropdown.is(':hover')) {
-                        dropdown.removeClass('open')
-                    }
-                })
-                $('.faq-hero-form-dropdown-item').on('click',(e) => {
-                    e.preventDefault();
-                    selectItem(e.currentTarget);
-                })
-                function selectItem(item) {
-                    let faqId = $(item).attr('data-scrollto');
-                    dropdown.removeClass('open')
+            
+            debounce(func, delay) {
+                return (...args) => {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+            
+            filterSearchResults(value) {
+                if(!value) return;
+                
+                const compValue = value.toLowerCase().replace(/[\s-]/g, '');
+                const regex = new RegExp("(" + value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
+                const $items = $('.faq-hero-form-dropdown-item');
+                
+                $items.each((idx, el) => {
+                    const $el = $(el);
+                    const $textEl = $el.find('.fs-16');
+                    const originalText = $textEl.text();
+                    const compText = originalText.toLowerCase().replace(/[\s-]/g, '');
                     
-                    if (!$(`#${faqId}`).find('.faq-main-item-head').hasClass('active')) {
-                        $(`#${faqId}`).find('.faq-main-item-head').trigger('click')
+                    if (compText.includes(compValue)) {
+                        $el.removeClass('hidden');
+                        const highlightedText = originalText.replace(regex, "<span class='hl'>$1</span>");
+                        $textEl.html(highlightedText);
+                    } else {
+                        $el.addClass('hidden');
                     }
-                    let scrollOffset = (viewport.h - $(`#${faqId}`).outerHeight() )/ 2;
-                    smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset})
-                    window.history.pushState({}, '', this.getUrl(faqId));
+                });
+                
+                this.updateDropdownUI();
+            }
+            
+            updateDropdownUI() {
+                const innerHeight = this.$els.dropdownInner.height();
+                const dropdownHeight = this.$els.searchDropdown.outerHeight();
+                
+                if (innerHeight === 0) {
+                    this.$els.dropdownEmpty.slideDown();
+                } else {
+                    this.$els.dropdownEmpty.slideUp();
+                }
+                
+                if(innerHeight > dropdownHeight) {
+                    this.$els.searchDropdown.attr('data-lenis-prevent', 'true');
+                } else {
+                    this.$els.searchDropdown.removeAttr('data-lenis-prevent');
                 }
             }
-            interactDropdown() {
-                const $input = $('#faq-search');
-                const $dropdown = $('.faq-hero-form-dropdown');
-                const $items = $dropdown.find('.faq-hero-form-dropdown-item');
-                let index = -1;
-
-                // Mở dropdown khi focus / gõ
-                $input.on('focus input', function () {
-                    $dropdown.addClass('open');
-                });
-
-                // Keydown
-                $input.on('keydown', function (e) {
-                    if (!$dropdown.hasClass('open')) return;
-
-                    switch (e.key) {
+            
+            handleSearchKeyboard(e, $itemsActive) {
+                switch (e.key) {
                     case 'ArrowDown':
                         e.preventDefault();
-                        index = (index + 1) % $items.length;
-                        setActive();
+                        this.searchIndex = (this.searchIndex + 1) % $itemsActive.length;
+                        this.setActiveSearchItem($itemsActive);
                         break;
-
+                    
                     case 'ArrowUp':
                         e.preventDefault();
-                        index = (index - 1 + $items.length) % $items.length;
-                        setActive();
+                        this.searchIndex = (this.searchIndex - 1 + $itemsActive.length) % $itemsActive.length;
+                        this.setActiveSearchItem($itemsActive);
                         break;
-
+                    
                     case 'Enter':
-                        if (index >= 0) {
                         e.preventDefault();
-                        selectItem($items.eq(index));
+                        // Nếu chưa chọn item nào (searchIndex = -1), auto-select item đầu tiên
+                        if (this.searchIndex < 0 && $itemsActive.length > 0) {
+                            this.searchIndex = 0;
+                        }
+                        // Select item nếu có item được chọn
+                        if (this.searchIndex >= 0 && $itemsActive.length > 0) {
+                            this.selectSearchItem($itemsActive.eq(this.searchIndex));
                         }
                         break;
-
+                    
                     case 'Escape':
-                        closeDropdown();
+                        this.$els.searchDropdown.removeClass('open');
                         break;
-                    }
-                });
-                function closeDropdown() {
-                    $dropdown.removeClass('open');
-                }
-                function setActive() {
-                    $items.removeClass('active');
-                    $items.eq(index).addClass('active');
-                }
-                function selectItem(item) {
-                    let faqId = $(item).attr('data-scrollto');
-                    dropdown.removeClass('open')
-                    // scroll to the faq item center screen 
-                    if (!$(`#${faqId}`).find('.faq-main-item-head').hasClass('active')) {
-                        $(`#${faqId}`).find('.faq-main-item-head').trigger('click')
-                    }
-                    let scrollOffset = (viewport.h - $(`#${faqId}`).outerHeight() )/ 2;
-                    smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset})
-                    window.history.pushState({}, '', this.getUrl(faqId));
                 }
             }
+            
+            setActiveSearchItem($items) {
+                $items.removeClass('active');
+                if(this.searchIndex >= 0 && this.searchIndex < $items.length) {
+                    const $activeItem = $items.eq(this.searchIndex);
+                    $activeItem.addClass('active');
+                    
+                    const activeEl = $activeItem[0];
+                    if (activeEl) {
+                        activeEl.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest'
+                        });
+                    }
+                }
+            }
+            
+            selectSearchItem($item) {
+                const faqId = $item.attr('data-scrollto');
+                if(!faqId) return;
+                
+                this.$els.searchDropdown.removeClass('open');
+                
+                const $target = $(`#${faqId}`);
+                if(!$target.length) return;
+                
+                const $head = $target.find('.faq-main-item-head');
+                if (!$head.hasClass('active')) {
+                    $head.trigger('click');
+                }
+                
+                this.scrollToFaq(faqId);
+                window.history.pushState({}, '', this.getUrl(faqId));
+            }
+            
+            searchFaqOnType() {
+                this.$els.searchForm.attr('action', '').on('submit', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                const debouncedFilter = this.debounce((value) => {
+                    this.filterSearchResults(value);
+                }, this.DEBOUNCE_DELAY);
+                
+                this.$els.searchInput.on('keyup', (e) => {
+                    e.preventDefault();
+                    const value = this.$els.searchInput.val();
+                    
+                    // Chỉ handle keyboard navigation cho các phím điều hướng và Enter
+                    if(['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
+                        const $itemsActive = this.$els.searchDropdown.find('.faq-hero-form-dropdown-item:not(.hidden)');
+                        this.handleSearchKeyboard(e, $itemsActive);
+                    } else {
+                        // User đang gõ text → reset search index và filter
+                        $('.faq-hero-form-dropdown-item').removeClass('active');
+                        this.searchIndex = -1;
+                        debouncedFilter(value);
+                    }
+                    
+                    // Toggle dropdown
+                    if (value !== '') {
+                        this.$els.searchDropdown.addClass('open');
+                    } else {
+                        this.$els.searchDropdown.removeClass('open');
+                    }
+                });
+                
+                // Handle input changes (paste, etc.) - không reset searchIndex
+                this.$els.searchInput.on('input', (e) => {
+                    const value = this.$els.searchInput.val();
+                    $('.faq-hero-form-dropdown-item').removeClass('active');
+                    this.searchIndex = -1;
+                    debouncedFilter(value);
+                    
+                    // Toggle dropdown
+                    if (value !== '') {
+                        this.$els.searchDropdown.addClass('open');
+                    } else {
+                        this.$els.searchDropdown.removeClass('open');
+                    }
+                });
+                
+                this.$els.searchInput.on('focus', () => {
+                    this.$els.categoryStickyInner.removeClass('active');
+                    if (this.$els.searchInput.val() !== '') {
+                        this.$els.searchDropdown.addClass('open');
+                    }
+                });
+                
+                this.$els.searchInput.on('blur', () => {
+                    if (!this.$els.searchDropdown.is(':hover')) {
+                        this.$els.searchDropdown.removeClass('open');
+                    }
+                });
+                
+                // Use event delegation
+                this.$els.searchDropdown.on('click', '.faq-hero-form-dropdown-item', (e) => {
+                    e.preventDefault();
+                    this.selectSearchItem($(e.currentTarget));
+                });
+            }
+            
+            updateMobileCategoryUI($currentTarget) {
+                if(viewport.w > 991) return;
+                
+                const $itemIc = $currentTarget.find('.faq-main-category-item-ic .w-embed');
+                const $itemTitle = $currentTarget.find('.faq-main-category-item-title .txt');
+                
+                this.$els.categoryStickyIc.html($itemIc.html());
+                this.$els.categoryStickyTitle.text($itemTitle.text());
+                this.$els.categoryStickyInner.removeClass('active');
+            }
+            
             interact() {
                 if(viewport.w <= 991) {
-                    $('.faq-main-category-sticky-inner').on('click', (e) => {
+                    this.$els.categoryStickyInner.on('click', (e) => {
                         e.preventDefault();
                         $(e.currentTarget).toggleClass('active');
                     });
                 }
-                const $contentHeaders = $('.faq-main-view-item-title h2');
-                $('.faq-main-category-item').on('click', (e) => {
+                
+                this.$els.categoryItems.on('click', (e) => {
                     e.preventDefault();
-                    if(viewport.w <= 991) {
-                        $('.faq-main-category-sticky-ic .embed-ic').html($(e.currentTarget).find('.faq-main-category-item-ic .w-embed').html());
-                        $('.faq-main-category-sticky-title .txt').text($(e.currentTarget).find('.faq-main-category-item-title .txt').text());
-                        $('.faq-main-category-sticky-inner').removeClass('active');
-                    }
-                    $('.faq-main-category-item').removeClass('active');
-                    $(e.currentTarget).addClass('active');
-                    const SCROLL_OFFSET = -100;
-                    const dataTitle = $(e.currentTarget).attr('data-title');
+                    const $current = $(e.currentTarget);
+                    
+                    this.updateMobileCategoryUI($current);
+                    this.$els.categoryItems.removeClass('active');
+                    $current.addClass('active');
+                    
+                    const dataTitle = $current.attr('data-title');
                     const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
-                    smoothScroll.scrollTo(content, {
-                        offset: SCROLL_OFFSET,
-                        duration: 1,
-                    });
-                    let slug = $(e.currentTarget).attr('data-category-slug');
+                    
+                    if(content) {
+                        smoothScroll.scrollTo(content, {
+                            offset: this.SCROLL_OFFSET,
+                            duration: 1,
+                        });
+                    }
+                    
+                    const slug = $current.attr('data-category-slug');
                     window.history.pushState({}, '', this.getUrl('', slug));
                 });
+                
+                // Throttled scroll handler
+                let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    this.itemContentActiveCheck($contentHeaders);
-                 });
-                 $('.faq-main-item-head').on('click', (e) => {
-                    e.preventDefault();
-                    if (!$(e.currentTarget).hasClass('active')) {
-                        $('.faq-main-item-head').removeClass('active');
-                        $('.faq-main-item-head').closest('.faq-main-item').find('.faq-main-item-content').slideUp();
-                        $(e.currentTarget).addClass('active');
-                        $(e.currentTarget).closest('.faq-main-item').find('.faq-main-item-content').slideDown();
-                    } else {
-                        $(e.currentTarget).removeClass('active');
-                        $(e.currentTarget).closest('.faq-main-item').find('.faq-main-item-content').slideUp();
+                    if(!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            this.itemContentActiveCheck();
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
                     }
-                    let id = $(e.currentTarget).closest('.faq-main-item-inner').attr('id');
+                });
+                
+                this.$els.itemHeads.on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const $item = $current.closest('.faq-main-item');
+                    const $content = $item.find('.faq-main-item-content');
+                    
+                    if (!$current.hasClass('active')) {
+                        this.$els.itemHeads.removeClass('active');
+                        $('.faq-main-item-content').slideUp();
+                        $current.addClass('active');
+                        $content.slideDown();
+                    } else {
+                        $current.removeClass('active');
+                        $content.slideUp();
+                    }
+                    
+                    const id = $current.closest('.faq-main-item-inner').attr('id');
                     window.history.pushState({}, '', this.getUrl(id));
-                 })
-                 $('.faq-main-item-relates-item-link').on('click', (e) => {
+                });
+                
+                this.$els.relatesLinks.on('click', (e) => {
                     e.preventDefault();
                     const scrollTo = $(e.currentTarget).attr('data-scrollto');
-                    if (!$(`#${scrollTo}`).find('.faq-main-item-head').hasClass('active')) {
-                        $(`#${scrollTo}`).find('.faq-main-item-head').trigger('click')
+                    
+                    const $target = $(`#${scrollTo}`);
+                    if(!$target.length) return;
+                    
+                    const $head = $target.find('.faq-main-item-head');
+                    if (!$head.hasClass('active')) {
+                        $head.trigger('click');
                     }
-                    let scrollOffset = (viewport.h - $(`#${scrollTo}`).outerHeight() )/ 2;
-                    smoothScroll.scrollTo(`#${scrollTo}`, {
-                        offset: -scrollOffset,
-                        duration: 1,
-                    });
+                    
+                    this.scrollToFaq(scrollTo);
                     window.history.pushState({}, '', this.getUrl(scrollTo));
-                 })
+                });
             }
-            itemContentActiveCheck(el) {
-                for (let i = 0; i < $(el).length; i++) {
-                    let top = $(el).eq(i).get(0).getBoundingClientRect().top;
-                    let dataTitle = $(el).eq(i).attr('data-title');
-                    if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
-                        $('.faq-main-category-item').removeClass('active');
-                        $(`.faq-main-category-item[data-title="${dataTitle}"]`).addClass('active');
-                        if(viewport.w <= 991) {
-                            $('.faq-main-category-sticky-ic .embed-ic').html($(`.faq-main-category-item[data-title="${dataTitle}"]`).find('.faq-main-category-item-ic .w-embed').html());
-                            $('.faq-main-category-sticky-title .txt').text($(`.faq-main-category-item[data-title="${dataTitle}"]`).find('.faq-main-category-item-title .txt').eq(0).text());
-                            $('.faq-main-category-sticky-inner').removeClass('active');
+            
+            itemContentActiveCheck() {
+                const viewportHeight = $(window).height();
+                const halfHeight = viewportHeight / 2;
+                
+                this.$els.viewItemTitles.each((i, el) => {
+                    const rect = el.getBoundingClientRect();
+                    const dataTitle = el.getAttribute('data-title');
+                    
+                    if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
+                        const $categoryItem = $(`.faq-main-category-item[data-title="${dataTitle}"]`);
+                        
+                        this.$els.categoryItems.removeClass('active');
+                        $categoryItem.addClass('active');
+                        
+                        if(viewport.w <= 991 && $categoryItem.length) {
+                            this.updateMobileCategoryUI($categoryItem);
                         }
                     }
-                }
+                });
             }
+            
             destroy() {
+                // Cleanup event handlers
+                if(this.$els.searchInput) {
+                    this.$els.searchInput.off();
+                    this.$els.searchForm.off();
+                    this.$els.searchDropdown.off();
+                }
+                if(this.$els.categoryItems) {
+                    this.$els.categoryItems.off();
+                    this.$els.categoryStickyInner.off();
+                    this.$els.itemHeads.off();
+                    this.$els.relatesLinks.off();
+                }
+                clearTimeout(this.searchTimeout);
                 super.destroy();
             }
         }
