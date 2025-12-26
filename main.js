@@ -878,17 +878,39 @@ const script = () => {
                     this.animationReveal();
                     this.animationScrub();
                     this.interact();
+                    this.checkScrollTo();
                 };
             }
             animationReveal() {
-                // header.registerDependent('.faq-main-tab-inner');
+                this.updateUICateNew();
                 let topInit = (viewport.h - $('.faq-main-tab-inner').outerHeight())/2;
                 if($('.faq-main-tab-main').outerHeight() > $('.faq-main-tab-inner').outerHeight()) {
                     $('.faq-main-tab-inner').attr('data-lenis-prevent', 'true');
                  }
                 $('.faq-main-tab-inner').css('top', topInit + 'px');
                 this.initContent();
+                this.searchFaqOnType();
 
+            }
+            checkScrollTo() {
+                // get parameter from url
+                let urlParams = new URLSearchParams(window.location.search);
+                let scrollTo = urlParams.get('id');
+                if(scrollTo) {  
+                    if(!$(`#${scrollTo}`).length) {
+                        return;
+                    }
+                    if (!$(`#${scrollTo}`).find('.faq-main-item-head').hasClass('active')) {
+                        $(`#${scrollTo}`).find('.faq-main-item-head').trigger('click')
+                    }
+                    let scrollOffset = (viewport.h - $(`#${scrollTo}`).outerHeight() )/ 2;
+                    smoothScroll.scrollTo(`#${scrollTo}`, {offset: -scrollOffset})
+                }
+            }
+            getUrl(id) {
+                let url = new URL(window.location.href);
+                url.searchParams.set('id', id);
+                return url.toString();
             }
             initContent() {
                 $('.faq-main-view-item-title h2').each((idx, item) => {
@@ -896,6 +918,89 @@ const script = () => {
                 })
                 $('.faq-main-category-item').each((idx, item) => {
                     $(item).attr('data-title', 'toch-' + idx);
+                })
+            }
+            updateUICateNew() {
+                const itemSearch = $('.faq-hero-form-dropdown-item').eq(0).clone();
+                const listSearch = $('.faq-hero-form-dropdown-inner');
+                listSearch.html('')
+                $('.faq-main-view-item').each((idx, faq) => {
+                    $(faq).find('.faq-main-item').each((idx, item) => {
+                        let newItemSearch  = itemSearch.clone();
+                        let dataScroll = $(item).find('.faq-main-item-inner').attr('id');
+                        let title = $(item).find('.faq-main-item-title .txt').text();
+                        newItemSearch.attr('data-scrollto', dataScroll);
+                        newItemSearch.find('.fs-16').text(title);
+                        listSearch.append(newItemSearch);
+                    })
+                })
+            }
+            searchFaqOnType() {
+                let faqs = $('.faq-hero-form-dropdown-item');
+                let input = $('#faq-search');
+                let dropdown = $('.faq-hero-form-dropdown');
+                let form = $('#form-faq-search');
+                form.attr('action','')
+    
+                form.on('submit', function(e) {
+                    e.preventDefault();
+                    return false;
+                })
+                input.on('keyup change', function(e) {
+                    e.preventDefault();
+                    if (e.keyCode == '13') {
+                        return false;
+                    }
+                    let value = $(this).val()
+                    let compValue = value.toLowerCase().trim().replaceAll(' ','').replaceAll('-','');
+    
+                    faqs.each((e) => {
+                        let ques = faqs.eq(e).find('.fs-16').text()
+                        let compQues = ques.toLowerCase().trim().replaceAll(' ','').replaceAll('-','');
+                        if (compQues.includes(compValue)) {
+                            faqs.eq(e).removeClass('hidden');
+                        } else {
+                            faqs.eq(e).addClass('hidden');
+                        }
+    
+                        let maskedText = new RegExp("(" + value + ")","gi");
+                        const newQues = faqs.eq(e).find('.fs-16').text().replace(maskedText, "<span class='hl'>$1</span>")
+                        faqs.eq(e).find('.fs-16').html(newQues)
+                    })
+    
+                    if (dropdown.find('.faq-hero-form-dropdown-inner').height() == 0) {
+                        dropdown.find('.faq-hero-form-dropdown-empty').slideDown();
+                    } else {
+                        dropdown.find('.faq-hero-form-dropdown-empty').slideUp();
+                    }
+    
+                    if (input.val() != '') {
+                        dropdown.addClass('open');
+                    } else {
+                        dropdown.removeClass('open');
+                    }
+                })
+                input.on('focus', function(e) {
+                    if (input.val() != '') {
+                        dropdown.addClass('open');
+                    }
+                })
+                input.on('blur', function(e) {
+                    if (!dropdown.is(':hover')) {
+                        dropdown.removeClass('open')
+                    }
+                })
+                $('.faq-hero-form-dropdown-item').on('click',(e) => {
+                    e.preventDefault();
+                    let faqId = $(e.currentTarget).attr('data-scrollto');
+                    dropdown.removeClass('open')
+                    // scroll to the faq item center screen 
+                    if (!$(`#${faqId}`).find('.faq-main-item-head').hasClass('active')) {
+                        $(`#${faqId}`).find('.faq-main-item-head').trigger('click')
+                    }
+                    let scrollOffset = (viewport.h - $(`#${faqId}`).outerHeight() )/ 2;
+                    smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset})
+                    window.history.pushState({}, '', this.getUrl(faqId));
                 })
             }
             animationScrub() {
@@ -915,6 +1020,32 @@ const script = () => {
                 smoothScroll.lenis.on('scroll', () => {
                     this.itemContentActiveCheck($contentHeaders);
                  });
+                 $('.faq-main-item-head').on('click', (e) => {
+                    e.preventDefault();
+                    if (!$(e.currentTarget).hasClass('active')) {
+                        $('.faq-main-item-head').removeClass('active');
+                        $('.faq-main-item-head').closest('.faq-main-item').find('.faq-main-item-content').slideUp();
+                        $(e.currentTarget).addClass('active');
+                        $(e.currentTarget).closest('.faq-main-item').find('.faq-main-item-content').slideDown();
+                    } else {
+                        $(e.currentTarget).removeClass('active');
+                        $(e.currentTarget).closest('.faq-main-item').find('.faq-main-item-content').slideUp();
+                    }
+                    window.history.pushState({}, '', this.getUrl($(e.currentTarget).closest('.faq-main-item-inner').attr('id')));
+                 })
+                 $('.faq-main-item-relates-item-link').on('click', (e) => {
+                    e.preventDefault();
+                    const scrollTo = $(e.currentTarget).attr('data-scrollto');
+                    if (!$(`#${scrollTo}`).find('.faq-main-item-head').hasClass('active')) {
+                        $(`#${scrollTo}`).find('.faq-main-item-head').trigger('click')
+                    }
+                    let scrollOffset = (viewport.h - $(`#${scrollTo}`).outerHeight() )/ 2;
+                    smoothScroll.scrollTo(`#${scrollTo}`, {
+                        offset: -scrollOffset,
+                        duration: 1,
+                    });
+                    window.history.pushState({}, '', this.getUrl(scrollTo));
+                 })
             }
             itemContentActiveCheck(el) {
                 for (let i = 0; i < $(el).length; i++) {
