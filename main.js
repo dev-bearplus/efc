@@ -1082,6 +1082,7 @@ const script = () => {
             
             handleSearchKeyboard(e, $itemsActive) {
                 switch (e.key) {
+                    case 'Tab':
                     case 'ArrowDown':
                         e.preventDefault();
                         this.searchIndex = (this.searchIndex + 1) % $itemsActive.length;
@@ -1120,6 +1121,7 @@ const script = () => {
                     
                     const activeEl = $activeItem[0];
                     if (activeEl) {
+                        // scroll cộng thêm .4rem
                         activeEl.scrollIntoView({
                             behavior: 'smooth',
                             block: 'nearest'
@@ -1132,8 +1134,6 @@ const script = () => {
                 const faqId = $item.attr('data-scrollto');
                 if(!faqId) return;
                 
-                this.$els.searchDropdown.removeClass('open');
-                
                 const $target = $(`#${faqId}`);
                 if(!$target.length) return;
                 
@@ -1144,6 +1144,9 @@ const script = () => {
                 
                 this.scrollToFaq(faqId);
                 window.history.pushState({}, '', this.getUrl(faqId));
+                setTimeout(() => {
+                    this.$els.searchDropdown.removeClass('open');
+                }, 100);
             }
             
             searchFaqOnType() {
@@ -1161,7 +1164,7 @@ const script = () => {
                     const value = this.$els.searchInput.val();
                     
                     // Chỉ handle keyboard navigation cho các phím điều hướng và Enter
-                    if(['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
+                    if(['Tab', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
                         const $itemsActive = this.$els.searchDropdown.find('.faq-hero-form-dropdown-item:not(.hidden)');
                         this.handleSearchKeyboard(e, $itemsActive);
                     } else {
