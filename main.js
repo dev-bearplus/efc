@@ -1019,6 +1019,9 @@ const script = () => {
                     }
                 })
                 input.on('focus', function(e) {
+                    if($('.faq-main-category-sticky-inner').hasClass('active')) {
+                        $('.faq-main-category-sticky-inner').removeClass('active');
+                    }
                     if (input.val() != '') {
                         dropdown.addClass('open');
                     }
