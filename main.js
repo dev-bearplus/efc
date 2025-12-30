@@ -586,7 +586,53 @@ const script = () => {
             }
         }
     }
-
+    const formSubmitEvent = (function () {
+        const init = ({
+           onlyWorkOnThisFormName,
+           onSuccess,
+           onFail
+        }) => {
+           let inputSubmit = $(`#${getIDFormName(onlyWorkOnThisFormName)} button[type="submit"] .heading`);
+  
+           $(document).on('ajaxSend', function (event, xhr, settings) {
+              if (settings.url.includes("https://webflow.com/api/v1/form/")) {
+                    inputSubmit?.text('Please wait...');
+              }
+           });
+           $(document).on('ajaxComplete', function (event, xhr, settings) {
+              if (settings.url.includes("https://webflow.com/api/v1/form/")) {
+                    const isSuccessful = xhr.status === 200
+                    const isWorkOnAllForm = onlyWorkOnThisFormName == undefined
+                    const isCorrectForm = !isWorkOnAllForm && settings.data.includes(getSanitizedFormName(onlyWorkOnThisFormName));
+  
+                    if (isWorkOnAllForm) {
+                       if (isSuccessful) {
+                          onSuccess?.()
+                          inputSubmit?.text('Submit');
+                       } else {
+                          onFail?.()
+                       }
+                    } else if (isCorrectForm) {
+                       if (isSuccessful) {
+                          onSuccess?.()
+                          inputSubmit?.text('Submit');
+                       } else {
+                          onFail?.()
+                       }
+                    }
+              }
+           });
+        }
+        function getIDFormName(name) {
+           return name.toLowerCase().replaceAll(" ", "-");
+        }
+        function getSanitizedFormName(name) {
+           return name.replaceAll(" ", "+")
+        }
+        return {
+           init
+        }
+     })();
     class Header {
         constructor() {
             this.el = null;
@@ -1346,6 +1392,227 @@ const script = () => {
             }
         }
     }
+    const SchedulePage = {
+        'schedule-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                
+            }
+            animationScrub() {
+            }
+            interact() {
+                const onSuccessForm = (form) => {
+                    console.log('success');
+                }
+                formSubmitEvent.init({
+                    onlyWorkOnThisFormName: "Schedule a demo",
+                    onSuccess: () => onSuccessForm("#schedule-a-demo"),
+                 });
+                $('input[type="checkbox"]').on('change', (e) => {
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-option-item');
+                   if($current.is(':checked')) {
+                    $parent.find('.schedule-hero-form-option-input-wrap').slideDown();
+                   } else {
+                    $parent.find('.schedule-hero-form-option-input-wrap').slideUp();
+                   }
+                });
+                $('.schedule-hero-form-input').on('blur', (e) => {
+                    console.log('blur');
+                    const $value = $(e.currentTarget).val();
+                    const $parent = $(e.currentTarget).closest('.schedule-hero-form-input-gr').length ? $(e.currentTarget).closest('.schedule-hero-form-input-gr') : $(e.currentTarget).closest('.schedule-hero-form-option-input-inner');
+                    if($value) {
+                        $parent.addClass('filled');
+                    } else {
+                        $parent.removeClass('filled');
+                    }
+                });
+                $('.schedule-hero-form-select-inner').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    $('.schedule-hero-form-select-dropdown').removeClass('active');
+                    $('.schedule-hero-form-select-wrap').removeClass('open');
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    $parent.find('.schedule-hero-form-select-dropdown').addClass('active');
+                    $parent.addClass('open');
+                });
+                $(document).on('click', (e) => {
+                    if(!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
+                        $('.schedule-hero-form-select-dropdown').removeClass('active');
+                        $('.schedule-hero-form-select-wrap').removeClass('open');
+                    }
+                });
+                $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const text = $current.find('.txt').text();
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    if(!$parent.hasClass('filled')) {
+                        $parent.addClass('filled');
+                    }
+                    $parent.removeClass('open')
+                    $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
+                    $parent.find('.schedule-hero-form-select-inner .txt').text(text);
+                    $parent.find('.schedule-hero-form-select-inner input').val(text);
+                    $parent.find('.schedule-hero-form-select-dropdown-item').removeClass('active');
+                    $('.schedule-hero-form-select-dropdown-item').removeClass('active');
+                    $current.addClass('active');
+                });
+                $('.schedule-hero-form-submit').on('click', (e) => {
+                    console.log('click');
+                    if(this.checkFormValid()) {
+                        console.log('valid');
+                    } else {
+                        e.preventDefault();
+                        console.log('invalid');
+                    }
+                });
+                $('button[type="submit"]').on("pointerenter", function () {
+                    if ($(this).prop("disabled")) {
+                       $(this).prop("disabled", false);
+                    }
+                 });
+            }
+            checkEmailValid(emailValue) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(emailRegex.test(emailValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkPhoneValid(phoneValue) {
+                // nếu có dấu + thì cũng oke, chỉnh lại phoneRegex
+                const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/;
+                if(phoneRegex.test(phoneValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkFormValid() {
+                const messageEmail = "Invalid format email";
+                const messagePhone = "Invalid format phone";
+                const fisrtName = $('input[name="First-Name"]');
+                const lastName = $('input[name="Last-Name"]');
+                const email = $('input[name="Email"]');
+                const phone = $('input[name="Phone"]');
+                const schoolName = $('input[name="School-Name"]');
+                const contactRadio = $('input[name="contact"]');
+                const contactRadioChecked = contactRadio.filter(':checked');
+                const systemCheckbox = $('input[name="system"]');
+                const systemChecked = systemCheckbox.filter(':checked');
+                const country = $('input[name="Country"]');
+                const size = $('input[name="Size"]');
+                const challenge = $('input[name="Challenge"]');
+                console.log(contactRadioChecked);
+                let isValid = true;
+                if(!country.val()) {
+                    country.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    country.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!size.val()) {
+                    size.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    size.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!challenge.val()) {
+                    challenge.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(systemChecked.length == 0) {
+                    systemCheckbox.closest('.schedule-hero-form-option-wrap').addClass('error');
+                    isValid = false;
+                }
+                else {
+
+                    systemCheckbox.closest('.schedule-hero-form-option-wrap').removeClass('error');
+                    systemChecked.each((i, el) => {
+                        const inputDetail = $(el).closest('.schedule-hero-form-option-item').find('.schedule-hero-form-option-input-inner input');
+                        if(!inputDetail.val()) {
+                            inputDetail.closest('.schedule-hero-form-option-input-inner').addClass('error');
+                            isValid = false;
+                        }
+                        else {
+                            inputDetail.closest('.schedule-hero-form-option-input-inner').removeClass('error');
+                        }
+                    });
+                }
+                if(contactRadioChecked.length !== 1) {
+                    contactRadio.closest('.schedule-hero-form-option-wrap').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    contactRadio.closest('.schedule-hero-form-option-wrap').removeClass('error');
+                }
+                if(!fisrtName.val()) {
+                    fisrtName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    fisrtName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!lastName.val()) {
+                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!email.val()) {
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkEmailValid(email.val())) {
+                    email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    email.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!phone.val()) {
+                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkPhoneValid(phone.val())) {
+                    phone.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messagePhone);
+                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    phone.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!schoolName.val()) {
+                    schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                console.log(isValid);
+                return isValid;
+            }
+            destroy() {
+                super.destroy();
+            }
+        }
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -1386,7 +1653,8 @@ const script = () => {
     const pageName = $('.main-inner').attr('data-namespace');
     const pageConfig = {
         home: HomePage,
-        faq: FaqPage
+        faq: FaqPage,
+        schedule: SchedulePage
     };
     cursor.updateHtml();
     cursor.init();
