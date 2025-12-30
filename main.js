@@ -1454,9 +1454,9 @@ const script = () => {
                     const $current = $(e.currentTarget);
                     const text = $current.find('.txt').text();
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
-                    if(!$parent.hasClass('filled')) {
-                        $parent.addClass('filled');
-                    }
+                    if(!$current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
+                    } 
                     $parent.removeClass('open')
                     $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
                     $parent.find('.schedule-hero-form-select-inner .txt').text(text);
@@ -1498,8 +1498,8 @@ const script = () => {
                 }
             }
             checkFormValid() {
-                const messageEmail = "Invalid format email";
-                const messagePhone = "Invalid format phone";
+                const messageEmail = "Invalid email";
+                const messagePhone = "invalid phone number";
                 const fisrtName = $('input[name="First-Name"]');
                 const lastName = $('input[name="Last-Name"]');
                 const email = $('input[name="Email"]');
