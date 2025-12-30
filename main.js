@@ -3,7 +3,42 @@ const script = () => {
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
+    const reinitializeWebflow = (data) => {
+		if (!window.Webflow) return;
 
+		try {
+			window.Webflow.destroy();
+			window.Webflow.ready();
+			const ix2 = window.Webflow.require("ix2");
+			if (ix2 && typeof ix2.init === "function") {
+				ix2.init();
+			}
+			const forms = window.Webflow.require("forms");
+			if (forms && typeof forms.ready === "function") {
+				forms.ready();
+			}
+			["slider", "tabs", "dropdown", "navbar"].forEach((module) => {
+				try {
+					const mod = window.Webflow.require(module);
+					if (mod && typeof mod.ready === "function") {
+						mod.ready();
+					}
+				} catch (e) {}
+			});
+			if (window.Webflow.redraw) {
+				window.Webflow.redraw.up();
+         }
+
+         if (data) {
+            let parser = new DOMParser();
+            let dom = parser.parseFromString(data.next.html, "text/html");
+            let webflowPageId = $(dom).find("html").attr("data-wf-page");
+            $("html").attr("data-wf-page", webflowPageId);
+         }
+		} catch (e) {
+			console.warn("Webflow reinit failed:", e);
+		}
+   };
     const cvUnit = (val, unit) => {
         let result;
         switch (true) {
@@ -1408,77 +1443,110 @@ const script = () => {
             animationScrub() {
             }
             interact() {
+                const $formSuccess = $('.schedule-form-success');
+                const $inputGr = $('.schedule-hero-form-input-gr');
+                const $selectWrap = $('.schedule-hero-form-select-wrap');
+                const $selectDropdown = $('.schedule-hero-form-select-dropdown');
+                
+                const formReset = (form) => {
+                    $(form)[0].reset();
+                    reinitializeWebflow();
+                    $('.schedule-hero-form-option-input-wrap').slideUp();
+                    $inputGr.removeClass('active');
+                    $('.input:not(.input-hidden)').closest('.schedule-hero-form-input-gr').removeClass('filled');
+                    $selectWrap.removeClass('filled open');
+                    $('.schedule-hero-form-select-inner .txt').text('Select');
+                }
+                
                 const onSuccessForm = (form) => {
                     console.log('success');
+                    $formSuccess.addClass('active');
+                    formReset(form);
+                    setTimeout(() => {
+                        $formSuccess.removeClass('active');
+                    }, 5000);
                 }
+                
+                $('.schedule-form-success-btn').on('click', (e) => {
+                    e.preventDefault();
+                    $formSuccess.removeClass('active');
+                });
+                
                 formSubmitEvent.init({
                     onlyWorkOnThisFormName: "Schedule a demo",
-                    onSuccess: () => onSuccessForm("#schedule-a-demo"),
-                 });
+                    onSuccess: () => onSuccessForm("#schedule-a-demo form"),
+                });
+                
                 $('input[type="checkbox"]').on('change', (e) => {
                     const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.schedule-hero-form-option-item');
-                   if($current.is(':checked')) {
-                    $parent.find('.schedule-hero-form-option-input-wrap').slideDown();
-                   } else {
-                    $parent.find('.schedule-hero-form-option-input-wrap').slideUp();
-                   }
+                    const $inputWrap = $current.closest('.schedule-hero-form-option-item')
+                        .find('.schedule-hero-form-option-input-wrap');
+                    $inputWrap[$current.is(':checked') ? 'slideDown' : 'slideUp']();
                 });
+                
+                $('.schedule-hero-form-input').on('focus', (e) => {
+                    $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
+                });
+                
                 $('.schedule-hero-form-input').on('blur', (e) => {
-                    console.log('blur');
-                    const $value = $(e.currentTarget).val();
-                    const $parent = $(e.currentTarget).closest('.schedule-hero-form-input-gr').length ? $(e.currentTarget).closest('.schedule-hero-form-input-gr') : $(e.currentTarget).closest('.schedule-hero-form-option-input-inner');
-                    if($value) {
-                        $parent.addClass('filled');
-                    } else {
-                        $parent.removeClass('filled');
-                    }
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
+                        ? $current.closest('.schedule-hero-form-input-gr') 
+                        : $current.closest('.schedule-hero-form-option-input-inner');
+                    
+                    $parent.removeClass('active')
+                        .toggleClass('filled', !!$current.val());
                 });
+                
                 $('.schedule-hero-form-select-inner').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
-                    $('.schedule-hero-form-select-dropdown').removeClass('active');
-                    $('.schedule-hero-form-select-wrap').removeClass('open');
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
-                    $parent.find('.schedule-hero-form-select-dropdown').addClass('active');
-                    $parent.addClass('open');
+                    const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
+                    
+                    $selectWrap.not($parent).removeClass('open');
+                    $selectDropdown.not($dropdown).removeClass('active');
+                    
+                    $current.closest('.schedule-hero-form-input-gr').toggleClass('active');
+                    $parent.toggleClass('active open');
+                    $dropdown.toggleClass('active');
                 });
+                
                 $(document).on('click', (e) => {
-                    if(!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
-                        $('.schedule-hero-form-select-dropdown').removeClass('active');
-                        $('.schedule-hero-form-select-wrap').removeClass('open');
+                    if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
+                        $selectDropdown.removeClass('active');
+                        $selectWrap.removeClass('open');
+                        $inputGr.removeClass('active');
                     }
                 });
+                
                 $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const text = $current.find('.txt').text();
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
-                    if(!$current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
-                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
-                    } 
-                    $parent.removeClass('open')
+                    const $selectInner = $parent.find('.schedule-hero-form-select-inner');
+                    
+                    $inputGr.removeClass('active');
+                    $parent.addClass('filled').removeClass('open');
                     $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
-                    $parent.find('.schedule-hero-form-select-inner .txt').text(text);
-                    $parent.find('.schedule-hero-form-select-inner input').val(text);
-                    $parent.find('.schedule-hero-form-select-dropdown-item').removeClass('active');
+                    $selectInner.find('.txt').text(text);
+                    $selectInner.find('input').val(text);
+                    
                     $('.schedule-hero-form-select-dropdown-item').removeClass('active');
                     $current.addClass('active');
                 });
+                
                 $('.schedule-hero-form-submit').on('click', (e) => {
-                    console.log('click');
-                    if(this.checkFormValid()) {
-                        console.log('valid');
-                    } else {
+                    if (!this.checkFormValid()) {
                         e.preventDefault();
-                        console.log('invalid');
+                        console.log('Form invalid');
                     }
                 });
+                
                 $('button[type="submit"]').on("pointerenter", function () {
-                    if ($(this).prop("disabled")) {
-                       $(this).prop("disabled", false);
-                    }
-                 });
+                    $(this).prop("disabled", false);
+                });
             }
             checkEmailValid(emailValue) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
