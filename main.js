@@ -1611,7 +1611,38 @@ const script = () => {
             destroy() {
                 super.destroy();
             }
-        }
+        },
+        'schedule-benefit-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                }
+            }
+            animationReveal() {
+                console.log('test', viewport.w);
+                if(viewport.w < 768) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.schedule-benefit-cms').addClass('swiper');
+                $('.schedule-benefit-item').addClass('swiper-slide');
+                $('.schedule-benefit-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.schedule-benefit-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.schedule-benefit-pagi',
+                        bulletClass: 'schedule-benefit-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
     }
     class PageManager {
         constructor(page) {
