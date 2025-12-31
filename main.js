@@ -1722,6 +1722,272 @@ const script = () => {
             }
         },
     }
+    const ContactPage = {
+        'contact-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                
+            }
+            animationScrub() {
+            }
+            interact() {
+                const $formSuccess = $('.schedule-form-success');
+                const $inputGr = $('.schedule-hero-form-input-gr');
+                const $selectWrap = $('.schedule-hero-form-select-wrap');
+                const $selectDropdown = $('.schedule-hero-form-select-dropdown');
+                
+                const formReset = (form) => {
+                    $(form)[0].reset();
+                    reinitializeWebflow();
+                    $('.schedule-hero-form-option-input-wrap').slideUp();
+                    $inputGr.removeClass('active');
+                    $('.input:not(.input-hidden)').closest('.schedule-hero-form-input-gr').removeClass('filled');
+                    $selectWrap.removeClass('filled open');
+                    $('.schedule-hero-form-select-inner .txt').text('Select');
+                }
+                
+                const onSuccessForm = (form) => {
+                    console.log('success');
+                    $formSuccess.addClass('active');
+                    formReset(form);
+                    setTimeout(() => {
+                        $formSuccess.removeClass('active');
+                    }, 5000);
+                }
+                
+                $('.schedule-form-success-btn').on('click', (e) => {
+                    e.preventDefault();
+                    $formSuccess.removeClass('active');
+                });
+                
+                formSubmitEvent.init({
+                    onlyWorkOnThisFormName: "Contact Form",
+                    onSuccess: () => onSuccessForm("#contact-form form"),
+                });
+                
+                $('input[type="checkbox"]').on('change', (e) => {
+                    const $current = $(e.currentTarget);
+                    const $inputWrap = $current.closest('.schedule-hero-form-option-item')
+                        .find('.schedule-hero-form-option-input-wrap');
+                    $inputWrap[$current.is(':checked') ? 'slideDown' : 'slideUp']();
+                });
+                
+                $('.schedule-hero-form-input').on('focus', (e) => {
+                    $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
+                });
+                
+                $('.schedule-hero-form-input').on('blur', (e) => {
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
+                        ? $current.closest('.schedule-hero-form-input-gr') 
+                        : $current.closest('.schedule-hero-form-option-input-inner');
+                    
+                    $parent.removeClass('active')
+                        .toggleClass('filled', !!$current.val());
+                });
+                
+                $('.schedule-hero-form-select-inner').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
+                    
+                    $selectWrap.not($parent).removeClass('open');
+                    $selectDropdown.not($dropdown).removeClass('active');
+                    
+                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+                        $current.closest('.schedule-hero-form-input-gr').removeClass('active');
+                    }
+                    else {
+                        $('.schedule-hero-form-input-gr').removeClass('active');
+                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
+                    }
+                    $parent.toggleClass('active open');
+                    $dropdown.toggleClass('active');
+                });
+                
+                $(document).on('click', (e) => {
+                    if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
+                        $selectWrap.removeClass('open');
+                        if($(e.target).closest('.schedule-hero-form-input').length) {
+                            // i want to remove all class active for $inputGr but  the one that is closest to the target add class active
+                            $inputGr.removeClass('active');
+                            $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
+                        }
+                        $selectDropdown.removeClass('active');
+                    }
+                });
+                
+                $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const text = $current.find('.txt').text();
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    const $selectInner = $parent.find('.schedule-hero-form-select-inner');
+                    
+                    $inputGr.removeClass('active');
+                    $parent.addClass('filled').removeClass('open');
+                    $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
+                    $selectInner.find('.txt').text(text);
+                    $selectInner.find('input').val(text);
+                    
+                    $('.schedule-hero-form-select-dropdown-item').removeClass('active');
+                    $current.addClass('active');
+                });
+                
+                $('.schedule-hero-form-submit').on('click', (e) => {
+                    if (!this.checkFormValid()) {
+                        e.preventDefault();
+                        console.log('Form invalid');
+                    }
+                });
+                
+                $('button[type="submit"]').on("pointerenter", function () {
+                    $(this).prop("disabled", false);
+                });
+            }
+            checkEmailValid(emailValue) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(emailRegex.test(emailValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkPhoneValid(phoneValue) {
+                // tôi k muốn check độ dài
+
+                const phoneRegex =  /^[\+]?[0-9\s\-\.\(\)]+$/;
+                if(phoneRegex.test(phoneValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkFormValid() {
+                const messageEmail = "Invalid email";
+                const messagePhone = "invalid phone number";
+                const fisrtName = $('input[name="First-Name"]');
+                const lastName = $('input[name="Last-Name"]');
+                const email = $('input[name="Email"]');
+                const phone = $('input[name="Phone"]');
+                const schoolName = $('input[name="School-Name"]');
+                const country = $('input[name="Country"]');
+                const message = $('textarea[name="Message"]');
+                const challenge = $('input[name="Challenge"]');
+                let isValid = true;
+                if(!challenge.val()) {
+                    challenge.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!country.val()) {
+                    country.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    country.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!fisrtName.val()) {
+                    fisrtName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    fisrtName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!message.val()) {
+                    message.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    message.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!lastName.val()) {
+                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!email.val()) {
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkEmailValid(email.val())) {
+                    email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    email.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!phone.val()) {
+                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkPhoneValid(phone.val())) {
+                    phone.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messagePhone);
+                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    phone.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!schoolName.val()) {
+                    schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                console.log(isValid);
+                return isValid;
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'contact-benefit-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                }
+            }
+            animationReveal() {
+                console.log('test', viewport.w);
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.contact-benefit-cms').addClass('swiper');
+                $('.contact-benefit-item').addClass('swiper-slide');
+                $('.contact-benefit-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.contact-benefit-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.contact-benefit-pagi',
+                        bulletClass: 'contact-benefit-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -1763,7 +2029,8 @@ const script = () => {
     const pageConfig = {
         home: HomePage,
         faq: FaqPage,
-        schedule: SchedulePage
+        schedule: SchedulePage,
+        contact: ContactPage
     };
     cursor.updateHtml();
     cursor.init();
