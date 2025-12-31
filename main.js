@@ -1522,9 +1522,11 @@ const script = () => {
                     if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
                         $selectWrap.removeClass('open');
                         if($(e.target).closest('.schedule-hero-form-input').length) {
-                            // i want to remove all class active for $inputGr but  the one that is closest to the target add class active
                             $inputGr.removeClass('active');
                             $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
+                        }
+                        else {
+                            $inputGr.removeClass('active');
                         }
                         $selectDropdown.removeClass('active');
                     }
@@ -1820,6 +1822,9 @@ const script = () => {
                             // i want to remove all class active for $inputGr but  the one that is closest to the target add class active
                             $inputGr.removeClass('active');
                             $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
+                        }
+                        else {
+                            $inputGr.removeClass('active');
                         }
                         $selectDropdown.removeClass('active');
                     }
