@@ -1874,12 +1874,9 @@ const script = () => {
             checkFormValid() {
                 const messageEmail = "Invalid email";
                 const messagePhone = "invalid phone number";
-                const fisrtName = $('input[name="First-Name"]');
-                const lastName = $('input[name="Last-Name"]');
                 const email = $('input[name="Email"]');
                 const phone = $('input[name="Phone"]');
                 const schoolName = $('input[name="School-Name"]');
-                const country = $('input[name="Country"]');
                 const message = $('textarea[name="Message"]');
                 const challenge = $('input[name="Challenge"]');
                 let isValid = true;
@@ -1890,33 +1887,12 @@ const script = () => {
                 else {
                     challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!country.val()) {
-                    country.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    country.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!fisrtName.val()) {
-                    fisrtName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    fisrtName.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
                 if(!message.val()) {
                     message.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     message.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!lastName.val()) {
-                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
                 if(!email.val()) {
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
@@ -2032,8 +2008,10 @@ const script = () => {
         schedule: SchedulePage,
         contact: ContactPage
     };
-    cursor.updateHtml();
-    cursor.init();
+    if(!isTouchDevice() && viewport.w >= 992) {
+        cursor.updateHtml();
+        cursor.init();
+    }
     const registry = {};
     registry[pageName]?.destroy();
 
