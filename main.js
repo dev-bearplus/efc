@@ -1507,16 +1507,26 @@ const script = () => {
                     $selectWrap.not($parent).removeClass('open');
                     $selectDropdown.not($dropdown).removeClass('active');
                     
-                    $current.closest('.schedule-hero-form-input-gr').toggleClass('active');
+                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+                        $current.closest('.schedule-hero-form-input-gr').removeClass('active');
+                    }
+                    else {
+                        $('.schedule-hero-form-input-gr').removeClass('active');
+                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
+                    }
                     $parent.toggleClass('active open');
                     $dropdown.toggleClass('active');
                 });
                 
                 $(document).on('click', (e) => {
                     if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
-                        $selectDropdown.removeClass('active');
                         $selectWrap.removeClass('open');
-                        $inputGr.removeClass('active');
+                        if($(e.target).closest('.schedule-hero-form-input').length) {
+                            // i want to remove all class active for $inputGr but  the one that is closest to the target add class active
+                            $inputGr.removeClass('active');
+                            $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
+                        }
+                        $selectDropdown.removeClass('active');
                     }
                 });
                 
