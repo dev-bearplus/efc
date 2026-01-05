@@ -1819,7 +1819,6 @@ const script = () => {
                     if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
                         $selectWrap.removeClass('open');
                         if($(e.target).closest('.schedule-hero-form-input').length) {
-                            // i want to remove all class active for $inputGr but  the one that is closest to the target add class active
                             $inputGr.removeClass('active');
                             $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
                         }
@@ -1969,6 +1968,188 @@ const script = () => {
             }
         },
     }
+    const GrowthPage = {
+        'growth-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-hero-category-wrap').addClass('swiper');
+                $('.growth-hero-category-item').addClass('swiper-slide');
+                $('.growth-hero-category').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-hero-category-wrap', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(4, 'rem')
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'growth-articles-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-articles-cms').addClass('swiper');
+                $('.growth-articles-item').addClass('swiper-slide');
+                $('.growth-articles-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-articles-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    pagination: {
+                        el: '.growth-articles-pagi',
+                        bulletClass: 'growth-articles-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'growth-guide-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-guide-cms').addClass('swiper');
+                $('.growth-guide-item').addClass('swiper-slide');
+                $('.growth-guide-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-guide-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    pagination: {
+                        el: '.growth-guide-pagi',
+                        bulletClass: 'growth-guide-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'growth-training-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-training-cms').addClass('swiper');
+                $('.growth-training-item').addClass('swiper-slide');
+                $('.growth-training-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-training-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    pagination: {
+                        el: '.growth-training-pagi',
+                        bulletClass: 'growth-training-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'growth-topic-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-topic-cms').addClass('swiper');
+                $('.growth-topic-item').addClass('swiper-slide');
+                $('.growth-topic-list').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-topic-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    pagination: {
+                        el: '.growth-topic-pagi',
+                        bulletClass: 'growth-topic-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -2011,7 +2192,8 @@ const script = () => {
         home: HomePage,
         faq: FaqPage,
         schedule: SchedulePage,
-        contact: ContactPage
+        contact: ContactPage,
+        growth: GrowthPage
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
