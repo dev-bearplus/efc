@@ -2175,6 +2175,7 @@ const script = () => {
                 this.onTrigger = () => {
                     this.animationReveal();
                     this.interact();
+
                 };
             }
             animationReveal() {
@@ -2277,10 +2278,20 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
+                    if(viewport.w >= 992) {
+                        this.progressBarItem();
+                    }
+                    else {
+                        this.initSwiper();
+                    }
                     this.animationReveal();
+                    this.interact();
                 };
             }
             animationReveal() {
+                
+            }
+            progressBarItem() {
                 activeItem(['.stories-work-card-item'], 0);
                 const items = gsap.utils.toArray('.stories-work-item');
                 if (items.length === 0) return;
@@ -2316,7 +2327,6 @@ const script = () => {
                     $(item).on('click', () => {
                         
                         activeItem(['.stories-work-card-item', '.stories-work-item'], index);
-                        
                         this.timeline.pause();
                         this.timeline.seek(`item-${index}`);
                         items.forEach((el, idx) => {
@@ -2329,6 +2339,24 @@ const script = () => {
                         this.timeline.play();
                     });
                 });
+            }
+            initSwiper() {
+                $('.stories-work-item-content-wrap').each((_, item) => {
+                    let swiper = new Swiper($(item).get(0), {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem')
+                    });
+                });
+            }
+            interact() {
+                if(viewport.w < 992) {
+                    $('.stories-work-item-title-wrap').on('click', function(e) {
+                        e.preventDefault();
+                        let index = $(this).index();
+                        $(this).closest('.stories-work-item').toggleClass('active');
+                        $(this).closest('.stories-work-item').find('.stories-work-item-content-wrap').slideToggle();
+                    });
+                }
             }
             destroy() {
                 if (this.timeline) {
