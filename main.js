@@ -64,6 +64,11 @@ const script = () => {
 		},
     }
     const device = { desktop: 991, tablet: 767, mobile: 479 }
+    function activeItem(elArr, index) {
+        elArr.forEach((el, idx) => {
+            $(el).removeClass('active').eq(index).addClass('active')
+        })
+    }
     const pointer = {
         x: $(window).width() / 2,
         y: $(window).height() / 2,
@@ -2150,6 +2155,189 @@ const script = () => {
             }
         },
     }
+    const StoriesPage = {
+        'home-trust-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                 let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
+                 marquee.setup();
+                 marquee.play();
+            }
+        },
+        'stories-people-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);  
+                const items = gsap.utils.toArray('.stories-people-thumb-item');
+                if (items.length === 0) return;
+                
+                // Tạo timeline với repeat vô hạn
+                const tl = gsap.timeline({ repeat: -1 });
+                
+                items.forEach((item, index) => {
+                    // Thêm label để dễ seek đến vị trí này
+                    tl.addLabel(`item-${index}`);
+                    
+                    tl.add(() => {
+                        // Add class active cho item hiện tại
+                        items.forEach(el => el.classList.remove('active'));
+                        activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], index);
+                        if (this.swiperContent && this.swiperContent.activeIndex !== index) {
+                            this.isManualSlide = false;
+                            this.swiperContent.slideTo(index);
+                        }
+                    })
+                    .to(item, {
+                        '--progress': 100,
+                        duration: 8, // Thời gian chạy từ 0-100 (có thể điều chỉnh)
+                        ease: 'linear',
+                        onStart: () => {
+                            gsap.set(item, { '--progress': 0 });
+                        },
+                        onComplete: () => {
+                            // Remove class active và reset --progress về 0
+                            item.classList.remove('active');
+                            $('.stories-people-bg-item').eq(index).removeClass('active');
+                            gsap.set(item, { '--progress': 0 });
+                        }
+                    });
+                });
+                
+                this.timeline = tl;
+                
+                // Khởi tạo Swiper và lắng nghe sự kiện slideChange
+                this.swiperContent = new Swiper('.stories-people-cms', {
+                    slidesPerView: 1,
+                    effect: "fade",
+                    navigation: {
+                        nextEl: '.stories-people-cms-control-item.item-next',
+                        prevEl: '.stories-people-cms-control-item.item-prev',
+                    },
+                    fadeEffect: {
+                        crossFade: true,
+                    },
+                    on: {
+                        slideChange: (swiper) => {
+                            // Ngay lập tức lấy index của slide active
+                            const activeIndex = swiper.activeIndex;
+                            
+                            // Reset tất cả --progress về 0
+                            items.forEach((item, idx) => {
+                                gsap.set(item, { '--progress': 0 });
+                                item.classList.remove('active');
+                                $('.stories-people-bg-item').eq(idx).removeClass('active');
+                            });
+                            
+                            // Set active cho item tương ứng
+                            activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], activeIndex);
+                            
+                            // Pause và seek timeline đến vị trí item tương ứng
+                            this.timeline.pause();
+                            this.timeline.seek(`item-${activeIndex}`);
+                            this.timeline.play();
+                        }
+                    }
+                });
+            }
+            interact() {
+                $('.stories-people-item-btn').on('click', (e) => {
+                    e.preventDefault();
+                    let link = $(e.target).closest('.stories-people-item-btn').attr('href');
+                    console.log(link);
+                    $('.popup-video-iframe').attr('src', link);
+                    $('.popup-video').addClass('active');
+                });
+                $('.popup-video-close').on('click', () => {
+                    $('.popup-video-iframe').attr('src', '');
+                    $('.popup-video').removeClass('active');
+                });
+            }
+            destroy() {
+                if (this.timeline) {
+                    this.timeline.kill();
+                }
+                if (this.swiperContent) {
+                    this.swiperContent.destroy();
+                }
+                super.destroy();
+            }
+        },
+        'stories-work-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                activeItem(['.stories-work-card-item'], 0);
+                const items = gsap.utils.toArray('.stories-work-item');
+                if (items.length === 0) return;
+                
+                const tl = gsap.timeline({ repeat: -1 });
+                
+                items.forEach((item, index) => {
+                    const progressBar = item.querySelector('.stories-work-item-line-progress');
+                    if (!progressBar) return;
+                    
+                    tl.addLabel(`item-${index}`);
+                    
+                    tl.add(() => {
+                        activeItem(['.stories-work-card-item', '.stories-work-item'], index);
+                    })
+                    .fromTo(progressBar, 
+                        { transform: 'translateX(-100%)' },
+                        { 
+                            transform: 'translateX(0%)',
+                            duration: 5,
+                            ease: 'linear',
+                            onComplete: () => {
+                                gsap.set(progressBar, { transform: 'translateX(-100%)' });
+                                item.classList.remove('active');
+                            }
+                        }
+                    );
+                });
+                
+                this.timeline = tl;
+                
+                items.forEach((item, index) => {
+                    $(item).on('click', () => {
+                        
+                        activeItem(['.stories-work-card-item', '.stories-work-item'], index);
+                        
+                        this.timeline.pause();
+                        this.timeline.seek(`item-${index}`);
+                        items.forEach((el, idx) => {
+                            const bar = el.querySelector('.stories-work-item-line-progress');
+                            if (bar) {
+                                gsap.set(bar, { transform: 'translateX(-100%)' });
+                            }
+                            el.classList.remove('active');
+                        });
+                        this.timeline.play();
+                    });
+                });
+            }
+            destroy() {
+                if (this.timeline) {
+                    this.timeline.kill();
+                }
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -2193,7 +2381,8 @@ const script = () => {
         faq: FaqPage,
         schedule: SchedulePage,
         contact: ContactPage,
-        growth: GrowthPage
+        growth: GrowthPage,
+        stories: StoriesPage
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
