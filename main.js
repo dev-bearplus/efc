@@ -2230,32 +2230,47 @@ const script = () => {
                     },
                     on: {
                         slideChange: (swiper) => {
-                            // Ngay lập tức lấy index của slide active
                             const activeIndex = swiper.activeIndex;
                             
-                            // Reset tất cả --progress về 0
                             items.forEach((item, idx) => {
                                 gsap.set(item, { '--progress': 0 });
                                 item.classList.remove('active');
                                 $('.stories-people-bg-item').eq(idx).removeClass('active');
                             });
                             
-                            // Set active cho item tương ứng
                             activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], activeIndex);
                             
-                            // Pause và seek timeline đến vị trí item tương ứng
                             this.timeline.pause();
                             this.timeline.seek(`item-${activeIndex}`);
                             this.timeline.play();
                         }
                     }
                 });
+                
+                items.forEach((item, index) => {
+                    $(item).on('click', () => {
+                        items.forEach((el, idx) => {
+                            gsap.set(el, { '--progress': 0 });
+                            el.classList.remove('active');
+                            $('.stories-people-bg-item').eq(idx).removeClass('active');
+                        });
+                        
+                        activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], index);
+                        
+                        if (this.swiperContent) {
+                            this.swiperContent.slideTo(index);
+                        }
+                        
+                        this.timeline.pause();
+                        this.timeline.seek(`item-${index}`);
+                        this.timeline.play();
+                    });
+                });
             }
             interact() {
                 $('.stories-people-item-btn').on('click', (e) => {
                     e.preventDefault();
                     let link = $(e.target).closest('.stories-people-item-btn').attr('href');
-                    console.log(link);
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
                 });
