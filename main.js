@@ -2389,7 +2389,14 @@ const script = () => {
                 const items = gsap.utils.toArray('.stories-work-item');
                 if (items.length === 0) return;
                 
-                const tl = gsap.timeline({ repeat: -1 });
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.stories-work',
+                        start: 'top top+=65%',
+                        once: true,
+                    },
+                    repeat: -1,
+                });
                 $('.stories-work-card-item').each((_, item) => {
                     let itemTitle = SplitText.create($(item).find('.stories-work-card-item-title .heading'), { type: "words", mask: "lines", wordsClass: 'word-item' })
                     let itemSub = SplitText.create($(item).find('.stories-work-card-item-sub .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
@@ -2400,7 +2407,6 @@ const script = () => {
                     gsap.set(itemDesc.words, { opacity: 0, yPercent: 100 });
                     gsap.set(itemImg, { opacity: 0, scale: 1.2 });
                 });
-                this.animItemCard(0);
                 items.forEach((item, index) => {
                     const progressBar = item.querySelector('.stories-work-item-line-progress');
                     if (!progressBar) return;
@@ -2430,6 +2436,8 @@ const script = () => {
                     $(item).on('click', () => {
                         this.timeline.pause();
                         
+                        
+                        this.timeline.seek(`item-${index}`);
                         items.forEach((el, idx) => {
                             const bar = el.querySelector('.stories-work-item-line-progress');
                             if (bar) {
@@ -2437,8 +2445,6 @@ const script = () => {
                             }
                             el.classList.remove('active');
                         });
-                        
-                        this.timeline.seek(`item-${index}`);
                         this.timeline.play();
                     });
                 });
@@ -2452,8 +2458,8 @@ const script = () => {
                     let itemSub = itemInnerEl.find('.stories-work-card-item-sub .txt .word-item');
                     let itemDesc = itemInnerEl.find('.stories-work-card-item-desc .txt .word-item');
                     gsap.to(itemTitle, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02 });
-                    gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02});
-                    gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02});
+                    gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.015});
+                    gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.01});
                     gsap.to(itemImg, { opacity: 1, scale: 1, duration: 1.2 });
                 })
                 activeItem(['.stories-work-card-item', '.stories-work-item'], index);
@@ -2463,10 +2469,12 @@ const script = () => {
                 let itemDescLast = lastItem.find('.stories-work-card-item-desc .txt .word-item');
                 let itemImgLast = lastItem.find('.stories-work-card-item-img img');
                 if(this.firstLoading) {
-                    gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
+                    setTimeout(() => {
+                        gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
+                        gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
+                        gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
+                        gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
+                    }, 1000);
                 }
                 this.firstLoading = true;
                 this.lastActiveIndex = index;
