@@ -1,5 +1,5 @@
 const script = () => {
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, SplitText);
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
@@ -2155,6 +2155,75 @@ const script = () => {
             }
         },
     }
+    const GrowthCategoryPage = {
+        'growth-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }   
+            initSwiper() {
+                $('.growth-hero-category-wrap').addClass('swiper');
+                $('.growth-hero-category-item').addClass('swiper-slide');
+                $('.growth-hero-category').addClass('swiper-wrapper');
+                let swiper = new Swiper('.growth-hero-category-wrap', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(4, 'rem')
+                });
+            }
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'tp-articles-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                
+            }
+            interact() {
+                $('.tp-articles-sort-inner').on('click', function(e) {
+                    e.preventDefault();
+                    $(this).closest('.tp-articles-sort-main').toggleClass('active');
+
+                });
+                $('.tp-articles-sort-dropdown-item').on('click', function(e) {
+                    e.preventDefault();
+                    let text = $(this).find('.txt').text();
+                    $('.tp-articles-sort-dropdown-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.tp-articles-sort-inner').find('.txt').text(text);
+                    $('.tp-articles-sort-main').removeClass('active');
+                });
+                $(document).on('click', function(e) {
+                    if(!$(e.target).closest('.tp-articles-sort-main').length) {
+                        $('.tp-articles-sort-main').removeClass('active');
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        }
+    }
     const StoriesPage = {
         'home-trust-wrap': class extends TriggerSetup {
             constructor() {
@@ -2184,7 +2253,13 @@ const script = () => {
                 if (items.length === 0) return;
                 
                 // Tạo timeline với repeat vô hạn
-                const tl = gsap.timeline({ repeat: -1 });
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.stories-people',
+                        start: 'top top+=75%',
+                        once: true,
+                    },
+                    repeat: -1 });
                 
                 items.forEach((item, index) => {
                     // Thêm label để dễ seek đến vị trí này
@@ -2273,10 +2348,12 @@ const script = () => {
                     let link = $(e.target).closest('.stories-people-item-btn').attr('href');
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
+                    smoothScroll.stop();
                 });
                 $('.popup-video-close').on('click', () => {
                     $('.popup-video-iframe').attr('src', '');
                     $('.popup-video').removeClass('active');
+                    smoothScroll.start();
                 });
             }
             destroy() {
@@ -2302,17 +2379,28 @@ const script = () => {
                     this.animationReveal();
                     this.interact();
                 };
+                this.lastActiveIndex = 0;
+                this.firstLoading = false;
             }
             animationReveal() {
                 
             }
             progressBarItem() {
-                activeItem(['.stories-work-card-item'], 0);
                 const items = gsap.utils.toArray('.stories-work-item');
                 if (items.length === 0) return;
                 
                 const tl = gsap.timeline({ repeat: -1 });
-                
+                $('.stories-work-card-item').each((_, item) => {
+                    let itemTitle = SplitText.create($(item).find('.stories-work-card-item-title .heading'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+                    let itemSub = SplitText.create($(item).find('.stories-work-card-item-sub .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+                    let itemDesc = SplitText.create($(item).find('.stories-work-card-item-desc .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+                    let itemImg = $(item).find('.stories-work-card-item-img img');
+                    gsap.set(itemTitle.words, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemSub.words, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemDesc.words, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemImg, { opacity: 0, scale: 1.2 });
+                });
+                this.animItemCard(0);
                 items.forEach((item, index) => {
                     const progressBar = item.querySelector('.stories-work-item-line-progress');
                     if (!progressBar) return;
@@ -2320,7 +2408,7 @@ const script = () => {
                     tl.addLabel(`item-${index}`);
                     
                     tl.add(() => {
-                        activeItem(['.stories-work-card-item', '.stories-work-item'], index);
+                        this.animItemCard(index);
                     })
                     .fromTo(progressBar, 
                         { transform: 'translateX(-100%)' },
@@ -2340,10 +2428,8 @@ const script = () => {
                 
                 items.forEach((item, index) => {
                     $(item).on('click', () => {
-                        
-                        activeItem(['.stories-work-card-item', '.stories-work-item'], index);
                         this.timeline.pause();
-                        this.timeline.seek(`item-${index}`);
+                        
                         items.forEach((el, idx) => {
                             const bar = el.querySelector('.stories-work-item-line-progress');
                             if (bar) {
@@ -2351,10 +2437,41 @@ const script = () => {
                             }
                             el.classList.remove('active');
                         });
+                        
+                        this.timeline.seek(`item-${index}`);
                         this.timeline.play();
                     });
                 });
             }
+            animItemCard(index) {
+                let item = $('.stories-work-card-item').eq(index);
+                $(item).find('.stories-work-card-item-inner').each((_, itemInner) => {
+                    let itemInnerEl = $(itemInner);
+                    let itemTitle = itemInnerEl.find('.stories-work-card-item-title .heading .word-item');
+                    let itemImg = itemInnerEl.find('.stories-work-card-item-img img');
+                    let itemSub = itemInnerEl.find('.stories-work-card-item-sub .txt .word-item');
+                    let itemDesc = itemInnerEl.find('.stories-work-card-item-desc .txt .word-item');
+                    gsap.to(itemTitle, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02 });
+                    gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02});
+                    gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02});
+                    gsap.to(itemImg, { opacity: 1, scale: 1, duration: 1.2 });
+                })
+                activeItem(['.stories-work-card-item', '.stories-work-item'], index);
+                let lastItem = $('.stories-work-card-item').eq(this.lastActiveIndex);
+                let itemTitleLast = lastItem.find('.stories-work-card-item-title .heading .word-item');
+                let itemSubLast = lastItem.find('.stories-work-card-item-sub .txt .word-item');
+                let itemDescLast = lastItem.find('.stories-work-card-item-desc .txt .word-item');
+                let itemImgLast = lastItem.find('.stories-work-card-item-img img');
+                if(this.firstLoading) {
+                    gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
+                    gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
+                }
+                this.firstLoading = true;
+                this.lastActiveIndex = index;
+
+            } 
             initSwiper() {
                 $('.stories-work-item-content-wrap').each((_, item) => {
                     let swiper = new Swiper($(item).get(0), {
@@ -2425,7 +2542,8 @@ const script = () => {
         schedule: SchedulePage,
         contact: ContactPage,
         growth: GrowthPage,
-        stories: StoriesPage
+        stories: StoriesPage,
+        growthCategory: GrowthCategoryPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
