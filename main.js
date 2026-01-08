@@ -833,7 +833,7 @@ const script = () => {
             interact() {
             }
             initSwiper() {
-                $('.home-pricing-head-cms').addClass('swiper');
+                $('.pricing-plan-cms').addClass('swiper');
                 $('.home-pricing-head-list').addClass('swiper-wrapper');
                 $('.home-pricing-head-item').addClass('swiper-slide');
                 const swiper = new Swiper('.home-pricing-head-cms', {
@@ -2000,7 +2000,19 @@ const script = () => {
                 });
             }
             interact() {
-
+                $('.growth-hero-form-inner').on('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    let value = $(this).find('.growth-hero-input').val();
+                    if(!value) {
+                        return false;
+                    }
+                    else {
+                        let href ='/result?search=' + value;
+                        window.location.href = href;
+                    }
+                });
             }
             destroy() {
                 super.destroy();
@@ -2182,7 +2194,19 @@ const script = () => {
                 });
             }
             interact() {
-
+                $('.growth-hero-form-inner').on('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    let value = $(this).find('.growth-hero-input').val();
+                    if(!value) {
+                        return false;
+                    }
+                    else {
+                        let href ='/result?search=' + value;
+                        window.location.href = href;
+                    }
+                });
             }
             destroy() {
                 super.destroy();
@@ -2492,16 +2516,158 @@ const script = () => {
                 if(viewport.w < 992) {
                     $('.stories-work-item-title-wrap').on('click', function(e) {
                         e.preventDefault();
-                        let index = $(this).index();
                         $(this).closest('.stories-work-item').toggleClass('active');
                         $(this).closest('.stories-work-item').find('.stories-work-item-content-wrap').slideToggle();
                     });
+                    $('.stories-work-item-title-wrap').eq(0).click();
                 }
             }
             destroy() {
                 if (this.timeline) {
                     this.timeline.kill();
                 }
+                super.destroy();
+            }
+        },
+    }
+    const PricingPage = {
+        'home-pricing-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            initSwiper() {
+                $('.home-pricing-head-cms').addClass('swiper');
+                $('.home-pricing-head-list').addClass('swiper-wrapper');
+                $('.home-pricing-head-item').addClass('swiper-slide');
+                const swiper = new Swiper('.home-pricing-head-cms', {
+                    slidesPerView: 1,
+                    spaceBetween: cvUnit(0, 'rem'),
+                    pagination: {
+                        el: '.home-pricing-pagi',
+                        bulletClass: 'home-pricing-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
+                    },
+                    breakpoints: {
+                        768: {
+                            slidesPerView: 'auto',
+                        }
+                    },
+                    on: {
+                        slideChange: (swiper) => {
+                            let indexActive = swiper.activeIndex;
+                            $('.home-pricing-content').each((_, item) => {
+                                $(item).find('.home-pricing-content-item').removeClass('active');
+                                $(item).find('.home-pricing-content-item').eq(indexActive).addClass('active');
+                            });
+                        }
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'pricing-plan-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 768) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                console.log('initSwiper222');
+                $('.pricing-plan-cms').addClass('swiper');
+                $('.pricing-plan-list').addClass('swiper-wrapper');
+                $('.pricing-plan-item').addClass('swiper-slide');
+                const swiper = new Swiper('.pricing-plan-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.pricing-plan-pagi',
+                        bulletClass: 'pricing-plan-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
+    const ResultPage = {
+        'growth-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                let search = window.location.search;
+                let searchParams = new URLSearchParams(search);
+                let searchValue = searchParams.get('search');
+                console.log(searchValue);
+                $('.growth-hero-input').val(searchValue);
+                this.searchValue(searchValue);
+            }
+            searchValue(value) {
+                let items = $('[data-title]');
+                $('.result-loading').fadeIn();
+                $('.result-main-wrap').fadeOut();
+                let isMatch = false;
+                let countMatch = 0;
+                items.each((_, item) => {
+                    let itemTitle = $(item).attr('data-title');
+                    isMatch = itemTitle.includes(value);
+                    if(isMatch) {
+                        $(item).addClass('active').show();
+                        countMatch++;
+                    }
+                    else {
+                        $(item).removeClass('active').hide();
+                    }
+                });
+                if(countMatch > 0) {
+                    $('.result-loading').fadeOut();
+                    $('.result-main-wrap').fadeIn();
+                    $('.result-loading-inner').removeClass('hide');
+                    $('.result-loading-empty').addClass('hide');
+                }
+                else {
+                    $('.result-loading-inner').addClass('hide');
+                    $('.result-loading-empty').removeClass('hide');
+                }
+            }
+            interact() {
+                $('.growth-hero-form-inner').on('submit', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    let value = $(this).find('.growth-hero-input').val();
+                    this.searchValue(value);
+                });
+            }
+            destroy() {
                 super.destroy();
             }
         },
@@ -2552,6 +2718,8 @@ const script = () => {
         growth: GrowthPage,
         stories: StoriesPage,
         growthCategory: GrowthCategoryPage,
+        pricing: PricingPage,
+        result: ResultPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
