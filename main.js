@@ -2638,7 +2638,7 @@ const script = () => {
                 let countMatch = 0;
                 items.each((_, item) => {
                     let itemTitle = $(item).attr('data-title');
-                    isMatch = itemTitle.includes(value);
+                    isMatch = itemTitle.toLowerCase().includes(value.toLowerCase());
                     if(isMatch) {
                         $(item).addClass('active').show();
                         countMatch++;
@@ -2647,6 +2647,16 @@ const script = () => {
                         $(item).removeClass('active').hide();
                     }
                 });
+                $('.result-section').each((_, item) => {   
+                    let lengthActiveItem = $(item).find('[data-title].active').length;
+
+                    if(lengthActiveItem == 0){
+                        $(item).closest('.web-component').hide();
+                    }
+                    else {
+                        $(item).closest('.web-component').show();
+                    }
+                })
                 if(countMatch > 0) {
                     $('.result-loading').fadeOut();
                     $('.result-main-wrap').fadeIn();
@@ -2664,6 +2674,7 @@ const script = () => {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     let value = $(this).find('.growth-hero-input').val();
+                    console.log(value);
                     this.searchValue(value);
                 });
             }
