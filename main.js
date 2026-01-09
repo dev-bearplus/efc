@@ -2229,18 +2229,46 @@ const script = () => {
                     $(this).closest('.tp-articles-sort-main').toggleClass('active');
 
                 });
-                $('.tp-articles-sort-dropdown-item').on('click', function(e) {
+                $('.tp-articles-sort-dropdown-item').on('click', (e) =>{
                     e.preventDefault();
-                    let text = $(this).find('.txt').text();
+                    let text = $(e.target).closest('.tp-articles-sort-dropdown-item')   .find('.txt').text();
                     $('.tp-articles-sort-dropdown-item').removeClass('active');
-                    $(this).addClass('active');
+                    $(e.target).addClass('active');
                     $('.tp-articles-sort-inner').find('.txt').text(text);
                     $('.tp-articles-sort-main').removeClass('active');
+                    let type = $(e.target).closest('.tp-articles-sort-dropdown-item').attr('data-type');
+                    this.sortItem(type);
                 });
                 $(document).on('click', function(e) {
                     if(!$(e.target).closest('.tp-articles-sort-main').length) {
                         $('.tp-articles-sort-main').removeClass('active');
                     }
+                });
+            }
+            sortItem(type) {
+                console.log(type);
+                let items = $('[data-title][data-date]').toArray();
+                let container = $(items[0]).parent();
+                
+                if(type === 'name') {
+                    // Sort theo title từ a-z
+                    items.sort((a, b) => {
+                        let titleA = $(a).attr('data-title').toLowerCase();
+                        let titleB = $(b).attr('data-title').toLowerCase();
+                        return titleA.localeCompare(titleB);
+                    });
+                } else if(type === 'date') {
+                    // Sort theo date mới nhất đến cũ nhất
+                    items.sort((a, b) => {
+                        let dateA = new Date($(a).attr('data-date'));
+                        let dateB = new Date($(b).attr('data-date'));
+                        return dateB - dateA; // Mới nhất trước
+                    });
+                }
+                
+                // Sắp xếp lại vị trí trong DOM
+                items.forEach(item => {
+                    container.append(item);
                 });
             }
             destroy() {
@@ -2659,9 +2687,11 @@ const script = () => {
                 })
                 if(countMatch > 0) {
                     $('.result-loading').fadeOut();
-                    $('.result-main-wrap').fadeIn();
-                    $('.result-loading-inner').removeClass('hide');
-                    $('.result-loading-empty').addClass('hide');
+                    setTimeout(() => {
+                        $('.result-main-wrap').fadeIn();
+                        $('.result-loading-inner').removeClass('hide');
+                        $('.result-loading-empty').addClass('hide');
+                    }, 210);
                 }
                 else {
                     $('.result-loading-inner').addClass('hide');
