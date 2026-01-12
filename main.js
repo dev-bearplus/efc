@@ -190,6 +190,39 @@ const script = () => {
             scrollTop()
         }
     };
+    const shareLink = () => {
+        const currentUrl = window.location.href;
+        const pageTitle = document.title;
+        
+        // Share Facebook
+        $('[data-share="facebook"]').on('click', function(e) {
+            e.preventDefault();
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+        });
+        
+        // Share LinkedIn
+        $('[data-share="linkedin"]').on('click', function(e) {
+            e.preventDefault();
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        });
+        
+        // Copy Link
+        $('[data-share="copy"]').on('click', function(e) {
+            e.preventDefault();
+            navigator.clipboard.writeText(currentUrl).then(() => {
+                // Hiển thị thông báo đã copy
+                let $btn = $(this).find('.copy-tooltip');
+                $btn.addClass('active');
+                setTimeout(() => {
+                    $btn.removeClass('active');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    }
     const isTouchDevice = () => {
         return (
           "ontouchstart" in window ||
@@ -2713,6 +2746,518 @@ const script = () => {
             }
         },
     }
+    const EventDetailPage = {
+        'dt-event-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.initContent();
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            interact() {
+                $('.dt-event-hero-tab-title-item').on('click', function(e) {
+                    e.preventDefault();
+                    let dataTitle = $(this).attr('data-title');
+                    $('.dt-event-hero-tab-title-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.dt-event-hero-content h2').each((i, el) => {
+                        let elDataTitle = $(el).attr('data-title');
+                        if(elDataTitle == dataTitle) {
+                            $(el).addClass('active');
+                        }
+                    })
+                    smoothScroll.scrollTo(`.dt-event-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: -200
+                    });
+
+                });
+                let scrollTicking = false;
+                smoothScroll.lenis.on('scroll', () => {
+                    if(!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            this.itemContentActiveCheck();
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
+                    }
+                });
+                shareLink();
+            }
+            initContent() {
+                $('[href="/section-recording-link"]').each((i, el) => {
+                    let href = $(el).text().split(',');
+                    console.log(href);
+                    href.forEach((item, index) => {
+                        //create iframe width src by href
+                        let iframe = $(document.createElement('iframe')).attr('src', item).css({
+                            'width': '100%',
+                            'aspect-ratio': '16/9'
+                        });
+                        // append next to el
+                        $(el).after(iframe);
+                    });
+                    $(el).remove();
+                });
+                let tableItem = $('.dt-event-hero-tab-title-item').eq(0).clone();
+                $('.dt-event-hero-tab-title').empty();
+                $('.dt-event-hero-content h2').each((i, el) => {
+                    $(el).attr('data-title', `toch-${i}`);
+                    let tableItemClone = tableItem.clone();
+                    if(i == 0) {
+                        tableItemClone.addClass('active');
+                    }
+                    let cleanText = $(el).text();
+                    tableItemClone.find('.txt').text(cleanText);
+                    tableItemClone.attr('data-title', `toch-${i}`);
+                    $('.dt-event-hero-tab-title').append(tableItemClone);
+                })
+                let topCenter = (viewport.h - $('.dt-event-hero-tab-inner').height()) / 2;
+                $('.dt-event-hero-tab-inner').css('top', topCenter);
+            }
+            itemContentActiveCheck() {
+                const viewportHeight = $(window).height();
+                const halfHeight = viewportHeight / 2;
+                
+                $('.dt-event-hero-content h2').each((i, el) => {
+                    const rect = el.getBoundingClientRect();
+                    const dataTitle = el.getAttribute('data-title');
+                    
+                    if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
+                        const $tableItem = $(`.dt-event-hero-tab-title-item[data-title="${dataTitle}"]`);
+                        
+                        $('.dt-event-hero-tab-title-item').removeClass('active');
+                        $tableItem.addClass('active');
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
+    const VideoDetailPage = {
+        'dt-video-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.initContent();
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    header.registerDependent('.dt-video-hero-tab-wrap.only-tb');
+                }
+            }
+            interact() {
+                if(viewport.w < 992) {
+                    $('.dt-video-hero-tab-inner.only-tb ').on('click', function(e) {
+                        e.preventDefault();
+                        $(this).toggleClass('active');
+                    });
+                }
+                $('.dt-video-hero-tab-title-item').on('click', function(e) {
+                    e.preventDefault();
+                    let dataTitle = $(this).attr('data-title');
+                    $('.dt-video-hero-tab-title-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.dt-video-hero-content h2').each((i, el) => {
+                        let elDataTitle = $(el).attr('data-title');
+                        if(elDataTitle == dataTitle) {
+                            $(el).addClass('active');
+                        }
+                        if(viewport.w < 992) {
+                            $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
+                            $(this).addClass('active');
+                            $('.dt-video-hero-tab-inner:not(.mode-dk)').removeClass('active');
+                        }
+                    })
+                    smoothScroll.scrollTo(`.dt-video-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: -200
+                    });
+
+                });
+                let scrollTicking = false;
+                smoothScroll.lenis.on('scroll', () => {
+                    if(!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            this.itemContentActiveCheck();
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
+                    }
+                });
+                shareLink();
+            }
+            initContent() {
+                let tableItem = $('.dt-video-hero-tab-title-item').eq(0).clone();
+                $('.dt-video-hero-tab-title').empty();
+                $('.dt-video-hero-content h2').each((i, el) => {
+                    $(el).attr('data-title', `toch-${i}`);
+                    let tableItemClone = tableItem.clone();
+                    if(i == 0) {
+                        tableItemClone.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
+                        }
+                    }
+                    let cleanText = $(el).text();
+                    tableItemClone.find('.txt').text(cleanText);
+                    tableItemClone.attr('data-title', `toch-${i}`);
+                    $('.dt-video-hero-tab-title').append(tableItemClone);
+                })
+                let topCenter = (viewport.h - $('.dt-video-hero-tab-inner').height()) / 2;
+                $('.dt-video-hero-tab-inner').css('top', topCenter);
+            }
+            
+            itemContentActiveCheck() {
+                const viewportHeight = $(window).height();
+                const halfHeight = viewportHeight / 2;
+                
+                $('.dt-video-hero-content h2').each((i, el) => {
+                    const rect = el.getBoundingClientRect();
+                    const dataTitle = el.getAttribute('data-title');
+                    
+                    if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
+                        const $tableItem = $(`.dt-video-hero-tab-title-item[data-title="${dataTitle}"]`);
+                        
+                        $('.dt-video-hero-tab-title-item').removeClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
+
+                        }
+                        $tableItem.addClass('active');
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'dt-video-related-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                };
+            }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.dt-video-related-cms').addClass('swiper');
+                $('.dt-video-related-list').addClass('swiper-wrapper');
+                $('.dt-video-related-item').addClass('swiper-slide');
+                const swiper = new Swiper(".dt-video-related-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.dt-video-related-pagi',
+                        bulletClass: 'dt-video-related-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
+    const GuideDetailPage = {
+        'dt-guide-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.initContent();
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    header.registerDependent('.dt-guide-hero-tab-wrap.only-tb')
+                }
+            }
+            interact() {
+                if(viewport.w < 992) {
+                    $('.dt-guide-hero-tab-inner:not(.mode-dk)').on('click', function(e) {
+                        e.preventDefault();
+                        $(this).toggleClass('active');
+                    })
+                }
+                $('.dt-guide-hero-tab-title-item').on('click', function(e) {
+                    e.preventDefault();
+                    let dataTitle = $(this).attr('data-title');
+                    $('.dt-guide-hero-tab-title-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.dt-guide-hero-content h2').each((i, el) => {
+                        let elDataTitle = $(el).attr('data-title');
+                        if(elDataTitle == dataTitle) {
+                            $(el).addClass('active');
+                        }
+                    })
+                    if(viewport.w < 992) {
+                        $('.dt-guide-hero-tab-inner:not(.mode-dk)').removeClass('active');
+                        $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(this).text());
+
+                        $(this).addClass('active');
+
+                    }
+                    smoothScroll.scrollTo(`.dt-guide-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: -200
+                    });
+
+                });
+                let scrollTicking = false;
+                smoothScroll.lenis.on('scroll', () => {
+                    if(!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            this.itemContentActiveCheck();
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
+                    }
+                });
+                shareLink();
+                $('.dt-guide-hero-form-input').on('focus', (e) => {
+                    $(e.currentTarget).closest('.dt-guide-hero-form-input-gr').addClass('active');
+                });
+                
+                $('.dt-guide-hero-form-input').on('blur', (e) => {
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.dt-guide-hero-form-input-gr').length 
+                        ? $current.closest('.dt-guide-hero-form-input-gr') 
+                        : $current.closest('.dt-guide-hero-form-option-input-inner');
+                    
+                    $parent.removeClass('active')
+                        .toggleClass('filled', !!$current.val());
+                });
+                const $formSuccess = $('.dt-guide-form-success');
+                const $inputGr = $('.dt-guide-hero-form-input-gr');
+                
+                const formReset = (form) => {
+                    $(form)[0].reset();
+                    reinitializeWebflow();
+                    $('.dt-guide-hero-form-option-input-wrap').slideUp();
+                    $inputGr.removeClass('active');
+                    $('.input:not(.input-hidden)').closest('.dt-guide-hero-form-input-gr').removeClass('filled');
+                    $('.dt-guide-hero-form-select-inner .txt').text('Select');
+                }
+                
+                const onSuccessForm = (form) => {
+                    console.log('success');
+                    $formSuccess.addClass('active');
+                    formReset(form);
+                    setTimeout(() => {
+                        $formSuccess.removeClass('active');
+                    }, 5000);
+                }
+                
+                $('.dt-guide-form-success-btn').on('click', (e) => {
+                    e.preventDefault();
+                    $formSuccess.removeClass('active');
+                });
+                
+                formSubmitEvent.init({
+                    onlyWorkOnThisFormName: "Download Free Guide",
+                    onSuccess: () => onSuccessForm("#download-free-guide"),
+                });
+                $('.dt-guide-hero-form-submit').on('click', (e) => {
+                    if (!this.checkFormValid()) {
+                        e.preventDefault();
+                        console.log('Form invalid');
+                    }
+                });
+            }
+            checkEmailValid(emailValue) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(emailRegex.test(emailValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkFormValid() {
+                const fullName = $('input[name="Full-Name"]');
+                const email = $('input[name="Email"]');
+                const messageEmail = "Invalid email";
+                let isValid = true;
+                if(!fullName.val()) {
+                    fullName.closest('.dt-guide-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    fullName.closest('.dt-guide-hero-form-input-gr').removeClass('error');
+                }
+                if(!email.val()) {
+                    email.closest('.dt-guide-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkEmailValid(email.val())) {
+                    email.closest('.dt-guide-hero-form-input-gr').find('.dt-guide-hero-form-valid .txt').text(messageEmail);
+                    email.closest('.dt-guide-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    email.closest('.dt-guide-hero-form-input-gr').removeClass('error');
+                }
+                return isValid;
+            }
+            initContent() {
+                let tableItem = $('.dt-guide-hero-tab-title-item').eq(0).clone();
+                $('.dt-guide-hero-tab-title').empty();
+                $('.dt-guide-hero-content h2').each((i, el) => {
+                    $(el).attr('data-title', `toch-${i}`);
+                    let tableItemClone = tableItem.clone();
+                    if(i == 0) {
+                        tableItemClone.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
+                        }
+                    }
+                    let cleanText = $(el).text();
+                    tableItemClone.find('.txt').text(cleanText);
+                    tableItemClone.attr('data-title', `toch-${i}`);
+                    $('.dt-guide-hero-tab-title').append(tableItemClone);
+                    let topCenter = (viewport.h - $('.dt-guide-hero-tab-inner').height()) / 2;
+                    $('.dt-guide-hero-tab-inner').css('top', topCenter);
+                })
+            }
+            itemContentActiveCheck() {
+                const viewportHeight = $(window).height();
+                const halfHeight = viewportHeight / 2;
+                
+                $('.dt-guide-hero-content h2').each((i, el) => {
+                    const rect = el.getBoundingClientRect();
+                    const dataTitle = el.getAttribute('data-title');
+                    
+                    if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
+                        const $tableItem = $(`.dt-guide-hero-tab-title-item[data-title="${dataTitle}"]`);
+                        
+                        $('.dt-guide-hero-tab-title-item').removeClass('active');
+                        $tableItem.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
+
+                        }
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'dt-guide-related-wrap': class extends TriggerSetup {
+                constructor() {
+                    super();
+                    this.onTrigger = () => {
+                        if(viewport.w < 992) {
+                            this.initSwiper();
+                        }
+                    };
+                }
+                initSwiper() {
+                    console.log('initSwiper');
+                    $('.dt-guide-related-cms').addClass('swiper');
+                    $('.dt-guide-related-list').addClass('swiper-wrapper');
+                    $('.dt-guide-related-item').addClass('swiper-slide');
+
+                    const swiper = new Swiper(".dt-guide-related-cms", {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(16, 'rem'),
+                        pagination: {
+                            el: '.dt-guide-related-pagi',
+                            bulletClass: 'dt-guide-related-pagi-item',
+                            bulletActiveClass: 'active'
+                        }
+                    })
+                }
+            }
+    }
+    const ArticleDetailPage = {
+        'dt-article-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.initContent();
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            interact() {
+                $('.dt-article-hero-tab-title-item').on('click', function(e) {
+                    e.preventDefault();
+                    let dataTitle = $(this).attr('data-title');
+                    $('.dt-article-hero-tab-title-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.dt-article-hero-content h2').each((i, el) => {
+                        let elDataTitle = $(el).attr('data-title');
+                        if(elDataTitle == dataTitle) {
+                            $(el).addClass('active');
+                        }
+                    })
+                    smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: -200
+                    });
+
+                });
+                let scrollTicking = false;
+                smoothScroll.lenis.on('scroll', () => {
+                    if(!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            this.itemContentActiveCheck();
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
+                    }
+                });
+                shareLink();
+            }
+            initContent() {
+                let tableItem = $('.dt-article-hero-tab-title-item').eq(0).clone();
+                $('.dt-article-hero-tab-title').empty();
+                $('.dt-article-hero-content h2').each((i, el) => {
+                    $(el).attr('data-title', `toch-${i}`);
+                    let tableItemClone = tableItem.clone();
+                    if(i == 0) {
+                        tableItemClone.addClass('active');
+                    }
+                    let cleanText = $(el).text();
+                    tableItemClone.find('.txt').text(cleanText);
+                    tableItemClone.attr('data-title', `toch-${i}`);
+                    $('.dt-article-hero-tab-title').append(tableItemClone);
+                    let topCenter = (viewport.h - $('.dt-article-hero-tab-inner').height()) / 2;
+                    $('.dt-article-hero-tab-inner').css('top', topCenter);
+                })
+            }
+            itemContentActiveCheck() {
+                const viewportHeight = $(window).height();
+                const halfHeight = viewportHeight / 2;
+                
+                $('.dt-article-hero-content h2').each((i, el) => {
+                    const rect = el.getBoundingClientRect();
+                    const dataTitle = el.getAttribute('data-title');
+                    
+                    if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
+                        const $tableItem = $(`.dt-article-hero-tab-title-item[data-title="${dataTitle}"]`);
+                        
+                        $('.dt-article-hero-tab-title-item').removeClass('active');
+                        $tableItem.addClass('active');
+                    }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -2761,6 +3306,10 @@ const script = () => {
         growthCategory: GrowthCategoryPage,
         pricing: PricingPage,
         result: ResultPage,
+        eventDetail: EventDetailPage,
+        videoDetail: VideoDetailPage,
+        guideDetail: GuideDetailPage,
+        articleDetail: ArticleDetailPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
