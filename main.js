@@ -2017,7 +2017,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if(viewport.w < 767) {
                     this.initSwiper();
                 }
             }
