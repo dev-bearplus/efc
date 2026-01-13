@@ -2464,145 +2464,216 @@ const script = () => {
                 super.destroy();
             }
         },
-        'stories-work-wrap': class extends TriggerSetup {
+        'stories-support-wrap': class extends TriggerSetup {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w >= 992) {
-                        this.progressBarItem();
-                    }
-                    else {
-                        this.initSwiper();
-                    }
                     this.animationReveal();
+                    this.animationScrub();
                     this.interact();
                 };
-                this.lastActiveIndex = 0;
-                this.firstLoading = false;
             }
             animationReveal() {
-                
-            }
-            progressBarItem() {
-                const items = gsap.utils.toArray('.stories-work-item');
-                if (items.length === 0) return;
-                
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '.stories-work',
-                        start: 'top top+=65%',
-                        once: true,
+                let swiper = new Swiper('.stories-support-cms.swiper', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.stories-support-control-item.item-next',
+                        prevEl: '.stories-support-control-item.item-prev',
                     },
-                    repeat: -1,
-                });
-                $('.stories-work-card-item').each((_, item) => {
-                    let itemTitle = SplitText.create($(item).find('.stories-work-card-item-title .heading'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-                    let itemSub = SplitText.create($(item).find('.stories-work-card-item-sub .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-                    let itemDesc = SplitText.create($(item).find('.stories-work-card-item-desc .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-                    let itemImg = $(item).find('.stories-work-card-item-img img');
-                    gsap.set(itemTitle.words, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemSub.words, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemDesc.words, { opacity: 0, yPercent: 100 });
-                    gsap.set(itemImg, { opacity: 0, scale: 1.2 });
-                });
-                items.forEach((item, index) => {
-                    const progressBar = item.querySelector('.stories-work-item-line-progress');
-                    if (!progressBar) return;
-                    
-                    tl.addLabel(`item-${index}`);
-                    
-                    tl.add(() => {
-                        this.animItemCard(index);
-                    })
-                    .fromTo(progressBar, 
-                        { transform: 'translateX(-100%)' },
-                        { 
-                            transform: 'translateX(0%)',
-                            duration: 5,
-                            ease: 'linear',
-                            onComplete: () => {
-                                gsap.set(progressBar, { transform: 'translateX(-100%)' });
-                                item.classList.remove('active');
-                            }
+                    pagination: {
+                        el: '.stories-support-pagi',
+                        bulletClass: 'stories-support-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                    breakpoints: {
+                        991: {
+                            slidesPerView: 2,
                         }
-                    );
-                });
-                
-                this.timeline = tl;
-                
-                items.forEach((item, index) => {
-                    $(item).on('click', () => {
-                        this.timeline.pause();
-                        
-                        
-                        this.timeline.seek(`item-${index}`);
-                        items.forEach((el, idx) => {
-                            const bar = el.querySelector('.stories-work-item-line-progress');
-                            if (bar) {
-                                gsap.set(bar, { transform: 'translateX(-100%)' });
-                            }
-                            el.classList.remove('active');
-                        });
-                        this.timeline.play();
-                    });
+                    },
                 });
             }
-            animItemCard(index) {
-                let item = $('.stories-work-card-item').eq(index);
-                $(item).find('.stories-work-card-item-inner').each((_, itemInner) => {
-                    let itemInnerEl = $(itemInner);
-                    let itemTitle = itemInnerEl.find('.stories-work-card-item-title .heading .word-item');
-                    let itemImg = itemInnerEl.find('.stories-work-card-item-img img');
-                    let itemSub = itemInnerEl.find('.stories-work-card-item-sub .txt .word-item');
-                    let itemDesc = itemInnerEl.find('.stories-work-card-item-desc .txt .word-item');
-                    gsap.to(itemTitle, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02 });
-                    gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.015});
-                    gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.01});
-                    gsap.to(itemImg, { opacity: 1, scale: 1, duration: 1.2 });
-                })
-                activeItem(['.stories-work-card-item', '.stories-work-item'], index);
-                let lastItem = $('.stories-work-card-item').eq(this.lastActiveIndex);
-                let itemTitleLast = lastItem.find('.stories-work-card-item-title .heading .word-item');
-                let itemSubLast = lastItem.find('.stories-work-card-item-sub .txt .word-item');
-                let itemDescLast = lastItem.find('.stories-work-card-item-desc .txt .word-item');
-                let itemImgLast = lastItem.find('.stories-work-card-item-img img');
-                if(this.firstLoading) {
-                    setTimeout(() => {
-                        gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
-                        gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
-                        gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
-                        gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
-                    }, 1000);
-                }
-                this.firstLoading = true;
-                this.lastActiveIndex = index;
-
-            } 
-            initSwiper() {
-                $('.stories-work-item-content-wrap').each((_, item) => {
-                    let swiper = new Swiper($(item).get(0), {
-                        slidesPerView: 'auto',
-                        spaceBetween: cvUnit(20, 'rem')
-                    });
-                });
+            animationScrub() {
             }
             interact() {
-                if(viewport.w < 992) {
-                    $('.stories-work-item-title-wrap').on('click', function(e) {
-                        e.preventDefault();
-                        $(this).closest('.stories-work-item').toggleClass('active');
-                        $(this).closest('.stories-work-item').find('.stories-work-item-content-wrap').slideToggle();
-                    });
-                    $('.stories-work-item-title-wrap').eq(0).click();
-                }
             }
             destroy() {
-                if (this.timeline) {
-                    this.timeline.kill();
-                }
                 super.destroy();
             }
         },
+        'stories-fb-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                let swiper = new Swiper('.stories-fb-cms.swiper', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.stories-fb-control-item.item-next',
+                        prevEl: '.stories-fb-control-item.item-prev',
+                    },
+                    pagination: {
+                        el: '.stories-fb-pagi',
+                        bulletClass: 'stories-fb-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      }
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        // 'stories-work-wrap': class extends TriggerSetup {
+        //     constructor() {
+        //         super();
+        //         this.onTrigger = () => {
+        //             if(viewport.w >= 992) {
+        //                 this.progressBarItem();
+        //             }
+        //             else {
+        //                 this.initSwiper();
+        //             }
+        //             this.animationReveal();
+        //             this.interact();
+        //         };
+        //         this.lastActiveIndex = 0;
+        //         this.firstLoading = false;
+        //     }
+        //     animationReveal() {
+                
+        //     }
+        //     progressBarItem() {
+        //         const items = gsap.utils.toArray('.stories-work-item');
+        //         if (items.length === 0) return;
+                
+        //         const tl = gsap.timeline({
+        //             scrollTrigger: {
+        //                 trigger: '.stories-work',
+        //                 start: 'top top+=65%',
+        //                 once: true,
+        //             },
+        //             repeat: -1,
+        //         });
+        //         $('.stories-work-card-item').each((_, item) => {
+        //             let itemTitle = SplitText.create($(item).find('.stories-work-card-item-title .heading'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+        //             let itemSub = SplitText.create($(item).find('.stories-work-card-item-sub .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+        //             let itemDesc = SplitText.create($(item).find('.stories-work-card-item-desc .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
+        //             let itemImg = $(item).find('.stories-work-card-item-img img');
+        //             gsap.set(itemTitle.words, { opacity: 0, yPercent: 100 });
+        //             gsap.set(itemSub.words, { opacity: 0, yPercent: 100 });
+        //             gsap.set(itemDesc.words, { opacity: 0, yPercent: 100 });
+        //             gsap.set(itemImg, { opacity: 0, scale: 1.2 });
+        //         });
+        //         items.forEach((item, index) => {
+        //             const progressBar = item.querySelector('.stories-work-item-line-progress');
+        //             if (!progressBar) return;
+                    
+        //             tl.addLabel(`item-${index}`);
+                    
+        //             tl.add(() => {
+        //                 this.animItemCard(index);
+        //             })
+        //             .fromTo(progressBar, 
+        //                 { transform: 'translateX(-100%)' },
+        //                 { 
+        //                     transform: 'translateX(0%)',
+        //                     duration: 5,
+        //                     ease: 'linear',
+        //                     onComplete: () => {
+        //                         gsap.set(progressBar, { transform: 'translateX(-100%)' });
+        //                         item.classList.remove('active');
+        //                     }
+        //                 }
+        //             );
+        //         });
+                
+        //         this.timeline = tl;
+                
+        //         items.forEach((item, index) => {
+        //             $(item).on('click', () => {
+        //                 this.timeline.pause();
+                        
+                        
+        //                 this.timeline.seek(`item-${index}`);
+        //                 items.forEach((el, idx) => {
+        //                     const bar = el.querySelector('.stories-work-item-line-progress');
+        //                     if (bar) {
+        //                         gsap.set(bar, { transform: 'translateX(-100%)' });
+        //                     }
+        //                     el.classList.remove('active');
+        //                 });
+        //                 this.timeline.play();
+        //             });
+        //         });
+        //     }
+        //     animItemCard(index) {
+        //         let item = $('.stories-work-card-item').eq(index);
+        //         $(item).find('.stories-work-card-item-inner').each((_, itemInner) => {
+        //             let itemInnerEl = $(itemInner);
+        //             let itemTitle = itemInnerEl.find('.stories-work-card-item-title .heading .word-item');
+        //             let itemImg = itemInnerEl.find('.stories-work-card-item-img img');
+        //             let itemSub = itemInnerEl.find('.stories-work-card-item-sub .txt .word-item');
+        //             let itemDesc = itemInnerEl.find('.stories-work-card-item-desc .txt .word-item');
+        //             gsap.to(itemTitle, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02 });
+        //             gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.015});
+        //             gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.01});
+        //             gsap.to(itemImg, { opacity: 1, scale: 1, duration: 1.2 });
+        //         })
+        //         activeItem(['.stories-work-card-item', '.stories-work-item'], index);
+        //         let lastItem = $('.stories-work-card-item').eq(this.lastActiveIndex);
+        //         let itemTitleLast = lastItem.find('.stories-work-card-item-title .heading .word-item');
+        //         let itemSubLast = lastItem.find('.stories-work-card-item-sub .txt .word-item');
+        //         let itemDescLast = lastItem.find('.stories-work-card-item-desc .txt .word-item');
+        //         let itemImgLast = lastItem.find('.stories-work-card-item-img img');
+        //         if(this.firstLoading) {
+        //             setTimeout(() => {
+        //                 gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
+        //                 gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
+        //                 gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
+        //                 gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
+        //             }, 1000);
+        //         }
+        //         this.firstLoading = true;
+        //         this.lastActiveIndex = index;
+
+        //     } 
+        //     initSwiper() {
+        //         $('.stories-work-item-content-wrap').each((_, item) => {
+        //             let swiper = new Swiper($(item).get(0), {
+        //                 slidesPerView: 'auto',
+        //                 spaceBetween: cvUnit(20, 'rem')
+        //             });
+        //         });
+        //     }
+        //     interact() {
+        //         if(viewport.w < 992) {
+        //             $('.stories-work-item-title-wrap').on('click', function(e) {
+        //                 e.preventDefault();
+        //                 $(this).closest('.stories-work-item').toggleClass('active');
+        //                 $(this).closest('.stories-work-item').find('.stories-work-item-content-wrap').slideToggle();
+        //             });
+        //             $('.stories-work-item-title-wrap').eq(0).click();
+        //         }
+        //     }
+        //     destroy() {
+        //         if (this.timeline) {
+        //             this.timeline.kill();
+        //         }
+        //         super.destroy();
+        //     }
+        // },
     }
     const PricingPage = {
         'home-pricing-wrap': class extends TriggerSetup {
@@ -3322,9 +3393,18 @@ const script = () => {
             }
             initSwiper() {
                 console.log('initSwiper');
-                $('.dt-article-related-cms').addClass('swiper');
-                $('.dt-article-related-list').addClass('swiper-wrapper');
-                $('.dt-article-related-item').addClass('swiper-slide');
+                $('.dt-articles-cms').addClass('swiper');
+                $('.dt-articles-list').addClass('swiper-wrapper');
+                $('.dt-articles-item').addClass('swiper-slide');
+                let swiper = new Swiper(".dt-articles-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.dt-articles-pagi',
+                        bulletClass: 'dt-articles-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
             }
         }
     }
