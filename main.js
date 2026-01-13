@@ -2046,17 +2046,27 @@ const script = () => {
                         window.location.href = href;
                     }
                 });
-
-                // Toggle active class on sticky search when scrolling past hero
                 $(window).on('scroll', () => {
                     let heroBottom = $('.growth-hero').offset().top + $('.growth-hero').outerHeight();
                     let scrollTop = $(window).scrollTop();
+                    let stickySearch = $('.growth-hub-search-sticky');
+                    let footer = $('.footer');
                     
                     if(scrollTop > heroBottom) {
                         console.log('active');
-                        $('.growth-hub-search-sticky').addClass('active');
+                        stickySearch.addClass('active');
                     } else {
-                        $('.growth-hub-search-sticky').removeClass('active');
+                        stickySearch.removeClass('active');
+                    }
+                    
+                    // Remove class active when bottom chạm .footer
+                    if(footer.length && stickySearch.length) {
+                        let footerTop = footer.offset().top;
+                        let stickyBottom = scrollTop + viewport.h;
+                        
+                        if(stickyBottom >= footerTop) {
+                            stickySearch.removeClass('active');
+                        }
                     }
                 });
             }
@@ -2240,6 +2250,29 @@ const script = () => {
                 });
             }
             interact() {
+                $(window).on('scroll', () => {
+                    let heroBottom = $('.growth-hero').offset().top + $('.growth-hero').outerHeight();
+                    let scrollTop = $(window).scrollTop();
+                    let stickySearch = $('.growth-hub-search-sticky');
+                    let footer = $('.footer');
+                    
+                    if(scrollTop > heroBottom) {
+                        console.log('active');
+                        stickySearch.addClass('active');
+                    } else {
+                        stickySearch.removeClass('active');
+                    }
+                    
+                    // Remove class active when bottom chạm .footer
+                    if(footer.length && stickySearch.length) {
+                        let footerTop = footer.offset().top;
+                        let stickyBottom = scrollTop + viewport.h;
+                        
+                        if(stickyBottom >= footerTop) {
+                            stickySearch.removeClass('active');
+                        }
+                    }
+                });
                 $('.growth-hero-form-inner').on('submit', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
