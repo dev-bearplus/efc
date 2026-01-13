@@ -2046,6 +2046,19 @@ const script = () => {
                         window.location.href = href;
                     }
                 });
+
+                // Toggle active class on sticky search when scrolling past hero
+                $(window).on('scroll', () => {
+                    let heroBottom = $('.growth-hero').offset().top + $('.growth-hero').outerHeight();
+                    let scrollTop = $(window).scrollTop();
+                    
+                    if(scrollTop > heroBottom) {
+                        console.log('active');
+                        $('.growth-hub-search-sticky').addClass('active');
+                    } else {
+                        $('.growth-hub-search-sticky').removeClass('active');
+                    }
+                });
             }
             destroy() {
                 super.destroy();
