@@ -2804,9 +2804,14 @@ const script = () => {
                 let search = window.location.search;
                 let searchParams = new URLSearchParams(search);
                 let searchValue = searchParams.get('search');
-                console.log(searchValue);
-                $('.growth-hero-input').val(searchValue);
-                this.searchValue(searchValue);
+                let categoryValue = searchParams.get('category');
+                if(searchValue) {
+                    $('.growth-hero-input').val(searchValue);
+                    this.searchValue(searchValue);
+                }
+                else if (categoryValue) {
+                    this.searchCategory(categoryValue);
+                }
             }
             searchValue(value) {
                 let items = $('[data-title]');
@@ -2817,6 +2822,51 @@ const script = () => {
                 items.each((_, item) => {
                     let itemTitle = $(item).attr('data-title');
                     isMatch = itemTitle.toLowerCase().includes(value.toLowerCase());
+                    if(isMatch) {
+                        $(item).addClass('active').show();
+                        countMatch++;
+                    }
+                    else {
+                        $(item).removeClass('active').hide();
+                    }
+                });
+                $('.result-section').each((_, item) => {   
+                    let lengthActiveItem = $(item).find('[data-title].active').length;
+
+                    if(lengthActiveItem == 0){
+                        $(item).closest('.web-component').hide();
+                    }
+                    else {
+                        $(item).closest('.web-component').show();
+                    }
+                })
+                if(countMatch > 0) {
+                    $('.result-loading').fadeOut();
+                    setTimeout(() => {
+                        $('.result-main-wrap').fadeIn();
+                        $('.result-loading-inner').removeClass('hide');
+                        $('.result-loading-empty').addClass('hide');
+                    }, 210);
+                }
+                else {
+                    $('.result-loading-inner').addClass('hide');
+                    $('.result-loading-empty').removeClass('hide');
+                }
+            }
+            searchCategory(value) {
+                let items = $('[data-title]');
+                $('.result-loading').fadeIn();
+                $('.result-main-wrap').fadeOut();
+                let isMatch = false;
+                let countMatch = 0;
+                items.each((_, item) => {
+                    let itemCategory = $(item).attr('data-category');
+                    // Nếu không có data-category thì ẩn luôn
+                    if(!itemCategory) {
+                        $(item).removeClass('active').hide();
+                        return;
+                    }
+                    isMatch = itemCategory.toLowerCase().includes(value.toLowerCase());
                     if(isMatch) {
                         $(item).addClass('active').show();
                         countMatch++;
