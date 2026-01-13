@@ -2757,8 +2757,15 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if(viewport.w < 992) {
+                    header.registerDependent('.dt-event-hero-tab-wrap.only-tb');
+                }
             }
             interact() {
+                $('.dt-event-hero-tab-inner.only-tb').on('click', function(e) {
+                    e.preventDefault();
+                    $(this).toggleClass('active');
+                });
                 $('.dt-event-hero-tab-title-item').on('click', function(e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
@@ -2770,8 +2777,13 @@ const script = () => {
                             $(el).addClass('active');
                         }
                     })
-                    smoothScroll.scrollTo(`.dt-event-hero-content h2[data-title="${dataTitle}"]`, {
-                        offset: -200
+                    if(viewport.w < 992) {
+                        $('.dt-event-hero-tab-inner.only-tb').removeClass('active');
+                        $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(this).find('.txt').text());
+                    }
+                    let offset = viewport.h / 2*-1;
+                    smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: offset
                     });
 
                 });
@@ -2809,6 +2821,9 @@ const script = () => {
                     let tableItemClone = tableItem.clone();
                     if(i == 0) {
                         tableItemClone.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
+                        }
                     }
                     let cleanText = $(el).text();
                     tableItemClone.find('.txt').text(cleanText);
@@ -2828,7 +2843,10 @@ const script = () => {
                     
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $tableItem = $(`.dt-event-hero-tab-title-item[data-title="${dataTitle}"]`);
-                        
+                        if(viewport.w < 992) {
+                            $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
+                            
+                        }
                         $('.dt-event-hero-tab-title-item').removeClass('active');
                         $tableItem.addClass('active');
                     }
@@ -2877,8 +2895,9 @@ const script = () => {
                             $('.dt-video-hero-tab-inner:not(.mode-dk)').removeClass('active');
                         }
                     })
-                    smoothScroll.scrollTo(`.dt-video-hero-content h2[data-title="${dataTitle}"]`, {
-                        offset: -200
+                    let offset = viewport.h / 2*-1;
+                    smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: offset
                     });
 
                 });
@@ -3008,8 +3027,9 @@ const script = () => {
                         $(this).addClass('active');
 
                     }
-                    smoothScroll.scrollTo(`.dt-guide-hero-content h2[data-title="${dataTitle}"]`, {
-                        offset: -200
+                    let offset = viewport.h / 2*-1;
+                    smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
+                        offset: offset
                     });
 
                 });
@@ -3190,8 +3210,17 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if(viewport.w < 992) {
+                    header.registerDependent('.dt-article-hero-tab-wrap.only-tb');
+                }
             }
             interact() {
+                if(viewport.w < 992) {
+                    $('.dt-article-hero-tab-inner.only-tb').on('click', function(e) {
+                        e.preventDefault();
+                        $(this).toggleClass('active');
+                    })
+                }
                 $('.dt-article-hero-tab-title-item').on('click', function(e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
@@ -3203,8 +3232,14 @@ const script = () => {
                             $(el).addClass('active');
                         }
                     })
+                    if(viewport.w < 992) {
+                        $('.dt-article-hero-tab-inner.only-tb').removeClass('active');
+                        $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(this).find('.txt').text());
+                    }
+                    // i want to get offset center viewport height
+                    let offset = viewport.h / 2*-1;
                     smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
-                        offset: -200
+                        offset: offset
                     });
 
                 });
@@ -3228,6 +3263,9 @@ const script = () => {
                     let tableItemClone = tableItem.clone();
                     if(i == 0) {
                         tableItemClone.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(el).text());
+                        }
                     }
                     let cleanText = $(el).text();
                     tableItemClone.find('.txt').text(cleanText);
@@ -3250,6 +3288,9 @@ const script = () => {
                         
                         $('.dt-article-hero-tab-title-item').removeClass('active');
                         $tableItem.addClass('active');
+                        if(viewport.w < 992) {
+                            $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(el).text());
+                        }
                     }
                 });
             }
@@ -3257,6 +3298,22 @@ const script = () => {
                 super.destroy();
             }
         },
+        'dt-article-related-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                };
+            }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.dt-article-related-cms').addClass('swiper');
+                $('.dt-article-related-list').addClass('swiper-wrapper');
+                $('.dt-article-related-item').addClass('swiper-slide');
+            }
+        }
     }
     class PageManager {
         constructor(page) {
@@ -3322,4 +3379,4 @@ const script = () => {
     refreshOnBreakpoint();
     scrollTop(() => pageConfig[pageName] && (registry[pageName] = new PageManager(pageConfig[pageName])));
 }
-window.onload = script
+window.onload = script;
