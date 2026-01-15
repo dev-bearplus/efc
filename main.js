@@ -814,6 +814,9 @@ const script = () => {
                 if(this.items.length > 0 && viewport.w > 992) {
                     this.autoPlay();
                 }
+                if(viewport.w <= 992) {
+                    this.toggleItem(0);
+                }
             }
             autoPlay() {
                 if(this.interval) {
@@ -871,7 +874,6 @@ const script = () => {
                         this.autoPlay();
                     }
                     else {
-                        console.log(clickedIndex);
                         this.toggleItem(clickedIndex);
                     }
                 });
