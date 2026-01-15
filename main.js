@@ -798,6 +798,103 @@ const script = () => {
     header.init();
 
     const HomePage = {
+        'home-product-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.currentIndex = 0;
+                this.interval = null;
+                this.duration = 5000;
+                this.items = $('.home-product-item');
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(this.items.length > 0 && viewport.w > 992) {
+                    this.autoPlay();
+                }
+            }
+            autoPlay() {
+                if(this.interval) {
+                    clearInterval(this.interval);
+                }
+                
+                this.activateItem(this.currentIndex);
+                
+                this.interval = setInterval(() => {
+                    this.currentIndex = (this.currentIndex + 1) % this.items.length;
+                    this.activateItem(this.currentIndex);
+                }, this.duration);
+            }
+            activateItem(index) {
+                gsap.killTweensOf('.home-product-item-line-progress');
+                
+                this.items.removeClass('active');
+                $('.home-product-img-item').removeClass('active');
+                
+                gsap.set('.home-product-item-line-progress', { x: '-101%' });
+                
+                $(this.items[index]).addClass('active');
+                
+                $('.home-product-img-item').eq(index).addClass('active');
+                
+                let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
+                gsap.fromTo(progressBar[0], 
+                    { x: '-101%' },
+                    { 
+                        x: '0%',
+                        duration: this.duration / 1000,
+                        ease: 'none'
+                    }
+                );
+            }
+            toggleItem(index) {
+                console.log(this.items[index]);
+                if($(this.items[index]).hasClass('active')) {
+                    $(this.items[index]).removeClass('active');
+                    $(this.items[index]).find('.home-product-item-content').slideUp();
+                }
+                else {
+                    $(this.items).removeClass('active');
+                    $(this.items[index]).addClass('active');
+                    $('.home-product-item-content').slideUp();
+                    $(this.items[index]).find('.home-product-item-content').slideDown();
+                }
+            }
+            interact() {
+                console.log(this.items);
+                this.items.on('click', (e) => {
+                    let clickedIndex = this.items.index($(e.currentTarget));
+                    if(viewport.w > 992) {
+                        this.currentIndex = clickedIndex;
+                        this.autoPlay();
+                    }
+                    else {
+                        console.log(clickedIndex);
+                        this.toggleItem(clickedIndex);
+                    }
+                });
+                $('.home-product-img-item-cta-link').on('click', (e) => {
+                    e.preventDefault();
+                    let href = $(e.currentTarget).attr('href');
+                    $(".popup-video-inner iframe").attr('src', href);
+                    $(".popup-video").addClass('active');
+                });
+                $('.popup-video-close').on('click', (e) => {
+                    e.preventDefault();
+                    $(".popup-video").removeClass('active');
+                    $(".popup-video-inner iframe").attr('src', '');
+                });
+
+            }
+            destroy() {
+                if(this.interval) {
+                    clearInterval(this.interval);
+                }
+                super.destroy();
+            }
+        },
         'home-trust-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -2861,7 +2958,6 @@ const script = () => {
                 let countMatch = 0;
                 items.each((_, item) => {
                     let itemCategory = $(item).attr('data-category');
-                    // Nếu không có data-category thì ẩn luôn
                     if(!itemCategory) {
                         $(item).removeClass('active').hide();
                         return;
