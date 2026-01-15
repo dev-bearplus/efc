@@ -841,7 +841,8 @@ const script = () => {
                 $(this.items[index]).addClass('active');
                 
                 $('.home-product-img-item').eq(index).addClass('active');
-                
+                $('.home-product-item-content').slideUp();
+                 $(this.items[index]).find('.home-product-item-content').slideDown();
                 let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
                 gsap.fromTo(progressBar[0], 
                     { x: '-101%' },
@@ -866,16 +867,16 @@ const script = () => {
                 }
             }
             interact() {
-                console.log(this.items);
-                this.items.on('click', (e) => {
-                    let clickedIndex = this.items.index($(e.currentTarget));
-                    if(viewport.w > 992) {
-                        this.currentIndex = clickedIndex;
-                        this.autoPlay();
-                    }
-                    else {
-                        this.toggleItem(clickedIndex);
-                    }
+                this.items.each((index, item) => {
+                    $(item).find('.home-product-item-head').on('click', (e) => {
+                        if(viewport.w > 992) {
+                            this.currentIndex = index;
+                            this.autoPlay();
+                        }
+                        else {
+                            this.toggleItem(index);
+                        }
+                    });
                 });
                 $('.home-product-img-item-cta-link').on('click', (e) => {
                     e.preventDefault();
