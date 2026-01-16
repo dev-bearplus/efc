@@ -3590,6 +3590,211 @@ const script = () => {
             }
         }
     }
+    const AboutPage = {
+        'about-story-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            interact() {
+                $('.about-story-faq-item-head').on('click', function(e) {
+                    e.preventDefault();
+                    if($(this).closest('.about-story-faq-item').hasClass('active')) {
+                        $(this).closest('.about-story-faq-item').removeClass('active');
+                        $(this).closest('.about-story-faq-item').find('.about-story-faq-item-content').slideUp();
+                    } else {
+                        $('.about-story-faq-item').removeClass('active');
+                        $(this).closest('.about-story-faq-item').addClass('active');
+                        $('.about-story-faq-item-content').slideUp();
+                        $(this).closest('.about-story-faq-item').find('.about-story-faq-item-content').slideDown();
+                    }
+
+                });
+                $('.about-story-faq-item-head').eq(0).trigger('click');
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'stories-support-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                let swiper = new Swiper('.stories-support-cms.swiper', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.stories-support-control-item.item-next',
+                        prevEl: '.stories-support-control-item.item-prev',
+                    },
+                    pagination: {
+                        el: '.stories-support-pagi',
+                        bulletClass: 'stories-support-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                    breakpoints: {
+                        991: {
+                            slidesPerView: 2,
+                        }
+                    },
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'about-approach-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            interact() {
+                if(viewport.w < 992) {
+                    $('.about-approach-item-title-wrap').on('click', function(e) {
+                        e.preventDefault();
+                        if($(this).closest('.about-approach-item').hasClass('active')) {
+                            $(this).closest('.about-approach-item').removeClass('active');
+                            $(this).closest('.about-approach-item').find('.about-approach-item-img-main').slideUp();
+                        } else {
+                            $('.about-approach-item').removeClass('active');
+                            $(this).closest('.about-approach-item').addClass('active');
+                            $('.about-approach-item-img-main').slideUp();
+                            $(this).closest('.about-approach-item').find('.about-approach-item-img-main').slideDown();
+                        }
+                    });
+                    $('.about-approach-item-title-wrap').eq(0).trigger('click');
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'about-team-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.about-team-cms').addClass('swiper');
+                $('.about-team-list').addClass('swiper-wrapper');
+                $('.about-team-item').addClass('swiper-slide');
+                let swiper = new Swiper(".about-team-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.about-team-pagi',
+                        bulletClass: 'about-team-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+        },
+        'about-mission-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                this.tlStickFade = gsap.timeline({
+                    scrollTrigger: {
+                       trigger: $('.about-mission-title').get(0),
+                       start: 'center bottom+=10%',
+                       end: `center top+=40%`,
+                       scrub: true,
+                    }
+                 });
+                 let title = new SplitText( $('.about-mission-title .txt').get(0), {type: 'chars,words, lines'});
+                 this.tlStickFade.fromTo(title.chars, {color: '#ffffff4d'}, { color: '#fff', stagger: 0.03 })
+            }
+            interact() {
+            }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.about-mission-cms').addClass('swiper');
+                $('.about-mission-list').addClass('swiper-wrapper');
+                $('.about-mission-item').addClass('swiper-slide');
+                let swiper = new Swiper(".about-mission-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.about-mission-pagi',
+                        bulletClass: 'about-mission-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'about-why-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.about-why-cms').addClass('swiper');
+                $('.about-why-list').addClass('swiper-wrapper');
+                $('.about-why-item').addClass('swiper-slide');
+                let swiper = new Swiper(".about-why-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.about-why-pagi',
+                        bulletClass: 'about-why-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+            animationReveal() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -3642,6 +3847,7 @@ const script = () => {
         videoDetail: VideoDetailPage,
         guideDetail: GuideDetailPage,
         articleDetail: ArticleDetailPage,
+        about: AboutPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
