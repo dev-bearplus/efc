@@ -665,7 +665,7 @@ const script = () => {
            onSuccess,
            onFail
         }) => {
-           let inputSubmit = $(`#${getIDFormName(onlyWorkOnThisFormName)} button[type="submit"] .heading`);
+           let inputSubmit = $(`#${getIDFormName(onlyWorkOnThisFormName)} button[type="submit"] .txt`);
   
            $(document).on('ajaxSend', function (event, xhr, settings) {
               if (settings.url.includes("https://webflow.com/api/v1/form/")) {
@@ -909,6 +909,44 @@ const script = () => {
                  let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
                  marquee.setup();
                  marquee.play();
+            }
+        },
+        'stories-support-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                let swiper = new Swiper('.stories-support-cms.swiper', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.stories-support-control-item.item-next',
+                        prevEl: '.stories-support-control-item.item-prev',
+                    },
+                    pagination: {
+                        el: '.stories-support-pagi',
+                        bulletClass: 'stories-support-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                    breakpoints: {
+                        991: {
+                            slidesPerView: 2,
+                        }
+                    },
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
             }
         },
         'home-testi-wrap': class extends TriggerSetup {
@@ -2003,38 +2041,26 @@ const script = () => {
                     return false;
                 }
             }
-            checkPhoneValid(phoneValue) {
-                // tôi k muốn check độ dài
-
-                const phoneRegex =  /^[\+]?[0-9\s\-\.\(\)]+$/;
-                if(phoneRegex.test(phoneValue)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
             checkFormValid() {
                 const messageEmail = "Invalid email";
-                const messagePhone = "invalid phone number";
                 const email = $('input[name="Email"]');
-                const phone = $('input[name="Phone"]');
-                const schoolName = $('input[name="School-Name"]');
-                const message = $('textarea[name="Message"]');
+                const firstName = $('input[name="First-Name"]');
+                const lastName = $('input[name="Last-Name"]');
                 const challenge = $('input[name="Challenge"]');
                 let isValid = true;
-                if(!challenge.val()) {
-                    challenge.closest('.schedule-hero-form-input-gr').addClass('error');
+                if(!firstName.val()) {
+                    firstName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
-                    challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
+                    firstName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!message.val()) {
-                    message.closest('.schedule-hero-form-input-gr').addClass('error');
+                if(!lastName.val()) {
+                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
-                    message.closest('.schedule-hero-form-input-gr').removeClass('error');
+                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
                 if(!email.val()) {
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
@@ -2048,24 +2074,12 @@ const script = () => {
                 else {
                     email.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!phone.val()) {
-                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else if(!this.checkPhoneValid(phone.val())) {
-                    phone.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messagePhone);
-                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                if(!challenge.val()) {
+                    challenge.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
-                    phone.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!schoolName.val()) {
-                    schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                    challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
                 console.log(isValid);
                 return isValid;
