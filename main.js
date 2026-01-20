@@ -3746,8 +3746,8 @@ const script = () => {
                 this.tlStickFade = gsap.timeline({
                     scrollTrigger: {
                        trigger: $('.about-mission-title').get(0),
-                       start: 'center bottom+=10%',
-                       end: `center top+=40%`,
+                       start: 'center+=20% bottom+=10%',
+                       end: `center+=20% top+=40%`,
                        scrub: true,
                     }
                  });
