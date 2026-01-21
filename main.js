@@ -944,6 +944,19 @@ const script = () => {
             animationScrub() {
             }
             interact() {
+                $('.stories-support-item-inner').on('click', (e) => {
+                    console.log('click');
+                    e.preventDefault();
+                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    $('.popup-video-iframe').attr('src', link);
+                    $('.popup-video').addClass('active');
+                    smoothScroll.stop();
+                });
+                $('.popup-video-close').on('click', () => {
+                    $('.popup-video-iframe').attr('src', '');
+                    $('.popup-video').removeClass('active');
+                    smoothScroll.start();
+                });
             }
             destroy() {
                 super.destroy();
@@ -2644,6 +2657,19 @@ const script = () => {
             animationScrub() {
             }
             interact() {
+                $('.stories-support-item-inner').on('click', (e) => {
+                    console.log('click');
+                    e.preventDefault();
+                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    $('.popup-video-iframe').attr('src', link);
+                    $('.popup-video').addClass('active');
+                    smoothScroll.stop();
+                });
+                $('.popup-video-close').on('click', () => {
+                    $('.popup-video-iframe').attr('src', '');
+                    $('.popup-video').removeClass('active');
+                    smoothScroll.start();
+                });
             }
             destroy() {
                 super.destroy();
@@ -3668,6 +3694,19 @@ const script = () => {
             animationScrub() {
             }
             interact() {
+                $('.stories-support-item-inner').on('click', (e) => {
+                    console.log('click');
+                    e.preventDefault();
+                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    $('.popup-video-iframe').attr('src', link);
+                    $('.popup-video').addClass('active');
+                    smoothScroll.stop();
+                });
+                $('.popup-video-close').on('click', () => {
+                    $('.popup-video-iframe').attr('src', '');
+                    $('.popup-video').removeClass('active');
+                    smoothScroll.start();
+                });
             }
             destroy() {
                 super.destroy();
@@ -3809,6 +3848,225 @@ const script = () => {
             }
         },
     }
+    const SummitPage = {
+        'summit-event-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                $('.summit-event-row-content').hide();
+                this.activeFaqItem($(this).find('.summit-event-row-head').eq(0));
+                
+            }
+            activeFaqItem(item) {
+                const $item = $(item);
+                const $itemSub = $item.closest('.summit-event-row').find('.summit-event-row-content');
+                const isActive = $item.hasClass('active');
+                
+                if (isActive) {
+                    $item.removeClass('active');
+                    $itemSub.slideUp();
+                } else {
+                    $('.summit-event-row-head').removeClass('active');
+                    $('.summit-event-row-content').slideUp();
+                    $item.addClass('active');
+                    $itemSub.slideDown();
+                }
+            }
+            interact() {
+                $('.summit-event-row-head').on('click', (e) => {
+                    e.preventDefault();
+                    this.activeFaqItem(e.currentTarget.closest('.summit-event-row-head'));
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'summit-make-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.summit-make-cms').addClass('swiper');
+                $('.summit-make-list').addClass('swiper-wrapper');
+                $('.summit-make-item').addClass('swiper-slide');
+                let swiper = new Swiper(".summit-make-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                })
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'summit-make-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 768) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.summit-make-main-wrap').addClass('swiper');
+                $('.summit-make-main').addClass('swiper-wrapper');
+                $('.summit-make-item').addClass('swiper-slide');
+                let swiper = new Swiper(".summit-make-main-wrap", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.summit-make-pagi',
+                        bulletClass: 'summit-make-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'summit-leader-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                if(viewport.w < 992) {
+                    this.initSwiper();
+                }
+            }
+            initSwiper() {
+                $('.summit-leader-cms').addClass('swiper');
+                $('.summit-leader-list').addClass('swiper-wrapper');
+                $('.summit-leader-item').addClass('swiper-slide');
+                let swiper = new Swiper(".summit-leader-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.summit-leader-pagi',
+                        bulletClass: 'summit-leader-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'stories-support-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                let swiper = new Swiper('.stories-support-cms.swiper', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    navigation: {
+                        nextEl: '.stories-support-control-item.item-next',
+                        prevEl: '.stories-support-control-item.item-prev',
+                    },
+                    pagination: {
+                        el: '.stories-support-pagi',
+                        bulletClass: 'stories-support-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                    breakpoints: {
+                        991: {
+                            slidesPerView: 2,
+                        }
+                    },
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+                 $('.stories-support-item-inner').on('click', (e) => {
+                    console.log('click');
+                    e.preventDefault();
+                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    $('.popup-video-iframe').attr('src', link);
+                    $('.popup-video').addClass('active');
+                    smoothScroll.stop();
+                });
+                $('.popup-video-close').on('click', () => {
+                    $('.popup-video-iframe').attr('src', '');
+                    $('.popup-video').removeClass('active');
+                    smoothScroll.start();
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'faq-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                $('.faq-item-sub').hide();
+                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                $('.faq-item').on('click', (e) => {
+                    e.preventDefault();
+                    this.activeFaqItem(e.currentTarget);
+                });
+            }
+            activeFaqItem(item) {
+                const $item = $(item);
+                const $itemSub = $item.find('.faq-item-sub');
+                const isActive = $item.hasClass('active');
+                
+                if (isActive) {
+                    $item.removeClass('active');
+                    $itemSub.slideUp();
+                } else {
+                    $('.faq-item').removeClass('active');
+                    $('.faq-item-sub').slideUp();
+                    $item.addClass('active');
+                    $itemSub.slideDown();
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -3862,6 +4120,7 @@ const script = () => {
         guideDetail: GuideDetailPage,
         articleDetail: ArticleDetailPage,
         about: AboutPage,
+        summit: SummitPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
