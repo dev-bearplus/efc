@@ -3754,6 +3754,10 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if(viewport.w >= 992) {
+                    let topStick = viewport.h/2 - $('.about-team-head').height() / 2;
+                    $('.about-team-head').css('top', topStick);
+                }
             }
             initSwiper() {
                 console.log('initSwiper');
