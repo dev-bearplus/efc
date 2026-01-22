@@ -3,6 +3,26 @@ const script = () => {
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
+    function multiLineText(el){
+        let line = $(el).next('.line-arr');
+        let textMapLine = $(el).find('.bp-line');
+        console.log(line)
+        let lineClone = line.clone();
+        console.log(lineClone)
+        if(textMapLine.length >1){
+            line.remove();
+            textMapLine.each((idx, item) => {
+              if(idx == 0){
+                $(item).attr('data-cursor-txtLink-child','')
+              }
+                $(item).css({
+                    position: 'relative',
+                    width: 'max-content'
+                  });
+                $(item).append(lineClone.clone());
+            })
+        }
+    }
     const reinitializeWebflow = (data) => {
 		if (!window.Webflow) return;
 
@@ -796,6 +816,42 @@ const script = () => {
     }
     const header = new Header();
     header.init();
+
+    function setupLocaleLinks() {
+        const currentPath = window.location.pathname;
+        const localeConfig = [
+            { subdirectory: '', index: 0 },
+            { subdirectory: '/uk', index: 1 },
+            { subdirectory: '/apac', index: 2 }
+        ];
+        
+        let basePath = currentPath;
+        let currentLocaleIndex = 0;
+        
+        localeConfig.forEach((config, index) => {
+            if (config.subdirectory && (currentPath.startsWith(config.subdirectory + '/') || currentPath === config.subdirectory)) {
+                basePath = currentPath.replace(config.subdirectory, '') || '/';
+                currentLocaleIndex = index;
+            }
+        });
+        
+        $('.header-lang-dropdown-inner .header-lang-item').removeClass('active');
+        
+        localeConfig.forEach(config => {
+            const newPath = config.subdirectory ? config.subdirectory + basePath : basePath;
+            const $item = $('.header-lang-dropdown-inner .header-lang-item').eq(config.index);
+            
+            if ($item.length) {
+                $item.attr('href', newPath);
+            }
+            
+            if (config.index === currentLocaleIndex) {
+                $item.addClass('active');
+            }
+        });
+    }
+    
+    setupLocaleLinks();
 
     const HomePage = {
         'home-product-wrap': class extends TriggerSetup {
@@ -1622,260 +1678,12 @@ const script = () => {
                 super();
                 this.onTrigger = () => {
                     this.animationReveal();
-                    this.animationScrub();
                     this.interact();
                 };
             }
             animationReveal() {
-                
-            }
-            animationScrub() {
             }
             interact() {
-                const $formSuccess = $('.schedule-form-success');
-                const $inputGr = $('.schedule-hero-form-input-gr');
-                const $selectWrap = $('.schedule-hero-form-select-wrap');
-                const $selectDropdown = $('.schedule-hero-form-select-dropdown');
-                
-                const formReset = (form) => {
-                    $(form)[0].reset();
-                    reinitializeWebflow();
-                    $('.schedule-hero-form-option-input-wrap').slideUp();
-                    $inputGr.removeClass('active');
-                    $('.input:not(.input-hidden)').closest('.schedule-hero-form-input-gr').removeClass('filled');
-                    $selectWrap.removeClass('filled open');
-                    $('.schedule-hero-form-select-inner .txt').text('Select');
-                }
-                
-                const onSuccessForm = (form) => {
-                    console.log('success');
-                    $formSuccess.addClass('active');
-                    formReset(form);
-                    setTimeout(() => {
-                        $formSuccess.removeClass('active');
-                    }, 5000);
-                }
-                
-                $('.schedule-form-success-btn').on('click', (e) => {
-                    e.preventDefault();
-                    $formSuccess.removeClass('active');
-                });
-                
-                formSubmitEvent.init({
-                    onlyWorkOnThisFormName: "Schedule a demo",
-                    onSuccess: () => onSuccessForm("#schedule-a-demo form"),
-                });
-                
-                $('input[type="checkbox"]').on('change', (e) => {
-                    const $current = $(e.currentTarget);
-                    const $inputWrap = $current.closest('.schedule-hero-form-option-item')
-                        .find('.schedule-hero-form-option-input-wrap');
-                    $inputWrap[$current.is(':checked') ? 'slideDown' : 'slideUp']();
-                });
-                
-                $('.schedule-hero-form-input').on('focus', (e) => {
-                    $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
-                });
-                
-                $('.schedule-hero-form-input').on('blur', (e) => {
-                    const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
-                        ? $current.closest('.schedule-hero-form-input-gr') 
-                        : $current.closest('.schedule-hero-form-option-input-inner');
-                    
-                    $parent.removeClass('active')
-                        .toggleClass('filled', !!$current.val());
-                });
-                
-                $('.schedule-hero-form-select-inner').on('click', (e) => {
-                    e.preventDefault();
-                    const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
-                    const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
-                    
-                    $selectWrap.not($parent).removeClass('open');
-                    $selectDropdown.not($dropdown).removeClass('active');
-                    
-                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
-                        $current.closest('.schedule-hero-form-input-gr').removeClass('active');
-                    }
-                    else {
-                        $('.schedule-hero-form-input-gr').removeClass('active');
-                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
-                    }
-                    $parent.toggleClass('active open');
-                    $dropdown.toggleClass('active');
-                });
-                
-                $(document).on('click', (e) => {
-                    if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
-                        $selectWrap.removeClass('open');
-                        if($(e.target).closest('.schedule-hero-form-input').length) {
-                            $inputGr.removeClass('active');
-                            $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
-                        }
-                        else {
-                            $inputGr.removeClass('active');
-                        }
-                        $selectDropdown.removeClass('active');
-                    }
-                });
-                
-                $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
-                    e.preventDefault();
-                    const $current = $(e.currentTarget);
-                    const text = $current.find('.txt').text();
-                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
-                    const $selectInner = $parent.find('.schedule-hero-form-select-inner');
-                    
-                    $inputGr.removeClass('active');
-                    $parent.addClass('filled').removeClass('open');
-                    $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
-                    $selectInner.find('.txt').text(text);
-                    $selectInner.find('input').val(text);
-                    
-                    $('.schedule-hero-form-select-dropdown-item').removeClass('active');
-                    $current.addClass('active');
-                });
-                
-                $('.schedule-hero-form-submit').on('click', (e) => {
-                    if (!this.checkFormValid()) {
-                        e.preventDefault();
-                        console.log('Form invalid');
-                    }
-                });
-                
-                $('button[type="submit"]').on("pointerenter", function () {
-                    $(this).prop("disabled", false);
-                });
-            }
-            checkEmailValid(emailValue) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if(emailRegex.test(emailValue)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            checkPhoneValid(phoneValue) {
-                // nếu có dấu + thì cũng oke, chỉnh lại phoneRegex
-                const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/;
-                if(phoneRegex.test(phoneValue)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            checkFormValid() {
-                const messageEmail = "Invalid email";
-                const messagePhone = "invalid phone number";
-                const fisrtName = $('input[name="First-Name"]');
-                const lastName = $('input[name="Last-Name"]');
-                const email = $('input[name="Email"]');
-                const phone = $('input[name="Phone"]');
-                const schoolName = $('input[name="School-Name"]');
-                const contactRadio = $('input[name="contact"]');
-                const contactRadioChecked = contactRadio.filter(':checked');
-                const systemCheckbox = $('input[name="system"]');
-                const systemChecked = systemCheckbox.filter(':checked');
-                const country = $('input[name="Country"]');
-                const size = $('input[name="Size"]');
-                const challenge = $('input[name="Challenge"]');
-                console.log(contactRadioChecked);
-                let isValid = true;
-                if(!country.val()) {
-                    country.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    country.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!size.val()) {
-                    size.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    size.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!challenge.val()) {
-                    challenge.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    challenge.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(systemChecked.length == 0) {
-                    systemCheckbox.closest('.schedule-hero-form-option-wrap').addClass('error');
-                    isValid = false;
-                }
-                else {
-
-                    systemCheckbox.closest('.schedule-hero-form-option-wrap').removeClass('error');
-                    systemChecked.each((i, el) => {
-                        const inputDetail = $(el).closest('.schedule-hero-form-option-item').find('.schedule-hero-form-option-input-inner input');
-                        if(!inputDetail.val()) {
-                            inputDetail.closest('.schedule-hero-form-option-input-inner').addClass('error');
-                            isValid = false;
-                        }
-                        else {
-                            inputDetail.closest('.schedule-hero-form-option-input-inner').removeClass('error');
-                        }
-                    });
-                }
-                if(contactRadioChecked.length !== 1) {
-                    contactRadio.closest('.schedule-hero-form-option-wrap').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    contactRadio.closest('.schedule-hero-form-option-wrap').removeClass('error');
-                }
-                if(!fisrtName.val()) {
-                    fisrtName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    fisrtName.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!lastName.val()) {
-                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!email.val()) {
-                    email.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else if(!this.checkEmailValid(email.val())) {
-                    email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
-                    email.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    email.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!phone.val()) {
-                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else if(!this.checkPhoneValid(phone.val())) {
-                    phone.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messagePhone);
-                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    phone.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                if(!schoolName.val()) {
-                    schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
-                    isValid = false;
-                }
-                else {
-                    schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
-                }
-                console.log(isValid);
-                return isValid;
             }
             destroy() {
                 super.destroy();
@@ -2060,7 +1868,17 @@ const script = () => {
                 const firstName = $('input[name="First-Name"]');
                 const lastName = $('input[name="Last-Name"]');
                 const challenge = $('input[name="Challenge"]');
+                const location = $('input[name="Location"]');
                 let isValid = true;
+                if(location.length > 0){
+                    if(!location.val()) {
+                        location.closest('.schedule-hero-form-input-gr').addClass('error');
+                        isValid = false;
+                    }
+                    else {
+                        location.closest('.schedule-hero-form-input-gr').removeClass('error');
+                    }
+                }
                 if(!firstName.val()) {
                     firstName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
@@ -2097,6 +1915,67 @@ const script = () => {
                 console.log(isValid);
                 return isValid;
             }
+            submitHubspot() {
+                const hubspot = {
+                portalId: 145687733,
+                formId: "69790463-8651-4e07-ad64-45f9c23549e9",
+                fields: [
+                   { name: "firstname", value: (data) => data["First name"] },
+                   { name: "lastname", value: (data) => data["Last name"] },
+                   { name: "phone", value: (data) => data["Phone number"] },
+                   { name: "email", value: (data) => data["Email"] },
+                   { name: "message", value: (data) => data["Message"] },
+                ],
+                };
+                const { portalId, formId, fields } = hubspot;
+                let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+                const data = mapFormToObject($(this.form).get(0));
+                const mapField = (data) => {
+                   if (!fields.length) return [];
+    
+                   const result = fields.map((field) => {
+                      const { name, value } = field;
+                      if (!value) {
+                      return {
+                         name,
+                         value: data[name] || "",
+                      };
+                      } else {
+                      const getValue = value(data);
+                      return {
+                         name,
+                         value: getValue || "",
+                      };
+                      }
+                   });
+                   return result;
+                };
+                const mappedFields = mapField(data);
+                const dataSend = {
+                   fields: mappedFields,
+                   context: {
+                      pageUri: window.location.href,
+                      pageName: "Contact page",
+                   },
+                };
+                $.ajax({
+                   url: url,
+                   method: "POST",
+                   data: JSON.stringify(dataSend),
+                   dataType: "json",
+                   headers: {
+                      accept: "application/json",
+                      "Access-Control-Allow-Origin": "*",
+                   },
+                   contentType: "application/json",
+                   success: function (response) {
+                      console.log(response);
+                   },
+                   error: function (xhr, resp, text) {
+                      console.log(xhr, resp, text);
+                   },
+                });
+             }
             destroy() {
                 super.destroy();
             }
@@ -3945,6 +3824,24 @@ const script = () => {
                         bulletActiveClass: 'active'
                     }
                 })
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'summit-location-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                console.log('animationReveal');
+                let titleLinkMap = SplitText.create('.summit-location-sub-txt .txt', {type: ' lines', linesClass: 'bp-line'});
+                multiLineText($('.summit-location-sub-txt .txt'));
             }
             interact() {
             }
