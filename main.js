@@ -734,9 +734,14 @@ const script = () => {
         }
         init(data) {
             this.el = document.querySelector('.header');
+            this.setupLocaleLinks();
+            this.animationReveal();
             if (viewport.w <= 991) {
                 this.interact();
             }
+        }
+        animationReveal() {
+            gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: .6, ease: 'power2.inOut'})
         }
         updateOnScroll(inst) {
             this.toggleHide(inst);
@@ -782,6 +787,41 @@ const script = () => {
                 $(this.el).removeClass("on-hide");
             }
         }
+        setupLocaleLinks() {
+            const currentPath = window.location.pathname;
+            const localeConfig = [
+                { subdirectory: '', index: 0 },
+                { subdirectory: '/uk', index: 1 },
+                { subdirectory: '/apac', index: 2 }
+            ];
+            
+            let basePath = currentPath;
+            let currentLocaleIndex = 0;
+            
+            localeConfig.forEach((config, index) => {
+                if (config.subdirectory && (currentPath.startsWith(config.subdirectory + '/') || currentPath === config.subdirectory)) {
+                    basePath = currentPath.replace(config.subdirectory, '') || '/';
+                    currentLocaleIndex = index;
+                }
+            });
+            
+            $('.header-lang-dropdown-inner .header-lang-item').removeClass('active');
+            
+            localeConfig.forEach(config => {
+                const newPath = config.subdirectory ? config.subdirectory + basePath : basePath;
+                const $item = $('.header-lang-dropdown-inner .header-lang-item').eq(config.index);
+                
+                if ($item.length) {
+                    $item.attr('href', newPath);
+                }
+                
+                if (config.index === currentLocaleIndex) {
+                    $item.addClass('active');
+                    let text = $item.find('.txt').text();
+                    $('.header-lang-txt .txt').text(text);
+                }
+            });
+        }
         interact() {
             if(viewport.w <= 991) {
                 $(this.el).find('.header-toggle').on('click', (e)=>{
@@ -817,41 +857,6 @@ const script = () => {
     const header = new Header();
     header.init();
 
-    function setupLocaleLinks() {
-        const currentPath = window.location.pathname;
-        const localeConfig = [
-            { subdirectory: '', index: 0 },
-            { subdirectory: '/uk', index: 1 },
-            { subdirectory: '/apac', index: 2 }
-        ];
-        
-        let basePath = currentPath;
-        let currentLocaleIndex = 0;
-        
-        localeConfig.forEach((config, index) => {
-            if (config.subdirectory && (currentPath.startsWith(config.subdirectory + '/') || currentPath === config.subdirectory)) {
-                basePath = currentPath.replace(config.subdirectory, '') || '/';
-                currentLocaleIndex = index;
-            }
-        });
-        
-        $('.header-lang-dropdown-inner .header-lang-item').removeClass('active');
-        
-        localeConfig.forEach(config => {
-            const newPath = config.subdirectory ? config.subdirectory + basePath : basePath;
-            const $item = $('.header-lang-dropdown-inner .header-lang-item').eq(config.index);
-            
-            if ($item.length) {
-                $item.attr('href', newPath);
-            }
-            
-            if (config.index === currentLocaleIndex) {
-                $item.addClass('active');
-            }
-        });
-    }
-    
-    setupLocaleLinks();
 
     const HomePage = {
         'home-product-wrap': class extends TriggerSetup {
