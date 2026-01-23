@@ -856,7 +856,16 @@ const script = () => {
     }
     const header = new Header();
     header.init();
-
+    function mapFormToObject(ele) {
+        return ([...new FormData(ele).entries()].reduce(
+           (prev, cur) => {
+              const name = cur[0];
+              const val = cur[1];
+              return { ...prev, [name]: val };
+           },
+           {}
+        ));
+     }
 
     const HomePage = {
         'home-product-wrap': class extends TriggerSetup {
@@ -1851,7 +1860,9 @@ const script = () => {
                 $('.schedule-hero-form-submit').on('click', (e) => {
                     if (!this.checkFormValid()) {
                         e.preventDefault();
-                        console.log('Form invalid');
+                    }
+                    else {
+                        this.submitHubspot();
                     }
                 });
                 
@@ -1922,19 +1933,30 @@ const script = () => {
             }
             submitHubspot() {
                 const hubspot = {
-                portalId: 145687733,
-                formId: "69790463-8651-4e07-ad64-45f9c23549e9",
-                fields: [
-                   { name: "firstname", value: (data) => data["First name"] },
-                   { name: "lastname", value: (data) => data["Last name"] },
-                   { name: "phone", value: (data) => data["Phone number"] },
-                   { name: "email", value: (data) => data["Email"] },
-                   { name: "message", value: (data) => data["Message"] },
-                ],
+                    portalId: 530303,
+                    formId: "09af315b-85df-4065-88b4-21d1d7a56f89",
+                    fields: [
+                        { name: "firstname", value: (data) => data["First-Name"] },
+                        { name: "lastname", value: (data) => data["Last-Name"] },
+                        { name: "email", value: (data) => data["Email"] },
+                        { name: "what_can_we_help_you_with", value: (data) => data["Challenge"] },
+                        { name: "message", value: (data) => data["Message"] }
+                    ],
                 };
+                if($('input[name="Location"]').length > 0) {
+                    hubspot.fields.push({ name: "location", value: (data) => data["Location"] });
+                }
+                //get current locale
+                const currentLocale = $('html').attr('lang');
+                if(currentLocale == 'en-GB') { //uk
+                    hubspot.formId = "ce557112-f014-4189-b3ca-ad1cc02691bb";
+                }
+                else if(currentLocale == 'en-AU') { //apac
+                    hubspot.formId = "e3e25e1f-9a2f-4d25-9d08-caf691c8c5db";
+                }
                 const { portalId, formId, fields } = hubspot;
                 let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
-                const data = mapFormToObject($(this.form).get(0));
+                const data = mapFormToObject($('#contact-form form').get(0));
                 const mapField = (data) => {
                    if (!fields.length) return [];
     
@@ -2741,42 +2763,10 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
-                    this.initSwiper();
-                }
             }
             animationScrub() {
             }
             interact() {
-            }
-            initSwiper() {
-                $('.home-pricing-head-cms').addClass('swiper');
-                $('.home-pricing-head-list').addClass('swiper-wrapper');
-                $('.home-pricing-head-item').addClass('swiper-slide');
-                const swiper = new Swiper('.home-pricing-head-cms', {
-                    slidesPerView: 1,
-                    spaceBetween: cvUnit(0, 'rem'),
-                    pagination: {
-                        el: '.home-pricing-pagi',
-                        bulletClass: 'home-pricing-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,
-                    },
-                    breakpoints: {
-                        768: {
-                            slidesPerView: 'auto',
-                        }
-                    },
-                    on: {
-                        slideChange: (swiper) => {
-                            let indexActive = swiper.activeIndex;
-                            $('.home-pricing-content').each((_, item) => {
-                                $(item).find('.home-pricing-content-item').removeClass('active');
-                                $(item).find('.home-pricing-content-item').eq(indexActive).addClass('active');
-                            });
-                        }
-                    }
-                });
             }
             destroy() {
                 super.destroy();
@@ -3973,6 +3963,80 @@ const script = () => {
             }
         },
     }
+    const ComparisonPage = {
+        'comp-diff-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            interact() {
+                if(viewport.w < 768) {
+                    $('.comp-diff-col-head').on('click', (e) => {
+                        e.preventDefault();
+                        this.activeCompItem(e.currentTarget.closest('.comp-diff-col-head'));
+                    });
+                    $('.comp-diff-item').eq(0).find('.comp-diff-col-head').trigger('click');
+                }
+            }
+            activeCompItem(item) {
+                const $item = $(item);
+                const $itemSub = $item.closest('.comp-diff-row').find('.comp-diff-col-wrap');
+                const isActive = $item.hasClass('active');
+                
+                if (isActive) {
+                    $item.removeClass('active');
+                    $itemSub.slideUp();
+                } else {
+                    $('.comp-diff-col-head').removeClass('active');
+                    $('.comp-diff-col-wrap').slideUp();
+                    $item.addClass('active');
+                    $itemSub.slideDown();
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+       'faq-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                $('.faq-item-sub').hide();
+                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                $('.faq-item').on('click', (e) => {
+                    e.preventDefault();
+                    this.activeFaqItem(e.currentTarget);
+                });
+            }
+            activeFaqItem(item) {
+                const $item = $(item);
+                const $itemSub = $item.find('.faq-item-sub');
+                const isActive = $item.hasClass('active');
+                
+                if (isActive) {
+                    $item.removeClass('active');
+                    $itemSub.slideUp();
+                } else {
+                    $('.faq-item').removeClass('active');
+                    $('.faq-item-sub').slideUp();
+                    $item.addClass('active');
+                    $itemSub.slideDown();
+                }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -4014,6 +4078,7 @@ const script = () => {
     const pageConfig = {
         home: HomePage,
         faq: FaqPage,
+        comparison: ComparisonPage,
         schedule: SchedulePage,
         contact: ContactPage,
         growth: GrowthPage,
