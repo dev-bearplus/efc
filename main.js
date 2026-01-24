@@ -4103,6 +4103,31 @@ const script = () => {
             }
         },
     }
+    const FeaturedPage = {
+        'fea-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+                $('.fea-hero-img-cms').each((_, item) => {
+                    console.log('item', item);
+                    let direction = $(item).attr('data-direction');
+                    let marquee = new Marquee($(item), $(item).find('.fea-hero-img-list'), 40, direction);
+                    marquee.setup();
+                    marquee.play();
+                });
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+    }
     class PageManager {
         constructor(page) {
             if (!page || typeof page !== 'object') {
@@ -4158,6 +4183,7 @@ const script = () => {
         articleDetail: ArticleDetailPage,
         about: AboutPage,
         summit: SummitPage,
+        featured: FeaturedPage,
     };
     if(!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
