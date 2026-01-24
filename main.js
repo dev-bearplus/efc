@@ -2755,18 +2755,50 @@ const script = () => {
         // },
     }
     const PricingPage = {
-        'home-pricing-wrap': class extends TriggerSetup {
+        'pricing-hero-wrap': class extends TriggerSetup {
             constructor() {
                 super();
                 this.onTrigger = () => {
+                    if(viewport.w < 767) {
+                        this.initSwiper();
+                    }
                     this.animationReveal();
+                    this.interact();
                 };
             }
             animationReveal() {
             }
-            animationScrub() {
-            }
             interact() {
+                console.log('interact');
+                $('.pricing-hero-package-item-link-popup').on('click', function(e) {
+                    e.preventDefault();
+                    let dataTable = $(this).attr('data-table');
+                    $('.pricing-popup-table').removeClass('active');
+                    $('.pricing-popup-table[data-table="' + dataTable + '"]').addClass('active');
+                    $('.pricing-popup').addClass('active');
+                    smoothScroll.stop();
+                });
+                $('.pricing-popup-close').on('click', function(e) {
+                    e.preventDefault();
+                    $('.pricing-popup').removeClass('active');
+                    $('.pricing-popup-table').removeClass('active');
+                    smoothScroll.start();
+                });
+            }
+            initSwiper() {
+                $('.pricing-hero-package-wrap').addClass('swiper');
+                $('.pricing-hero-package').addClass('swiper-wrapper');
+                $('.pricing-hero-package-item').addClass('swiper-slide');
+                const swiper = new Swiper('.pricing-hero-package-wrap', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(20, 'rem'),
+                    pagination: {
+                        el: '.pricing-hero-pagi',
+                        bulletClass: 'pricing-hero-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,
+                    }
+                });
             }
             destroy() {
                 super.destroy();
@@ -2776,7 +2808,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 768) {
+                    if(viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -2799,6 +2831,40 @@ const script = () => {
                         clickable: true,
                     }
                 });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'faq-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                $('.faq-item-sub').hide();
+                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                $('.faq-item').on('click', (e) => {
+                    e.preventDefault();
+                    this.activeFaqItem(e.currentTarget);
+                });
+            }
+            activeFaqItem(item) {
+                const $item = $(item);
+                const $itemSub = $item.find('.faq-item-sub');
+                const isActive = $item.hasClass('active');
+                
+                if (isActive) {
+                    $item.removeClass('active');
+                    $itemSub.slideUp();
+                } else {
+                    $('.faq-item').removeClass('active');
+                    $('.faq-item-sub').slideUp();
+                    $item.addClass('active');
+                    $itemSub.slideDown();
+                }
             }
             destroy() {
                 super.destroy();
