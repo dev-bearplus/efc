@@ -4107,6 +4107,8 @@ const script = () => {
         'fea-hero-wrap': class extends TriggerSetup {
             constructor() {
                 super();
+                this.timeline = null;
+                this.duration = 5;
                 this.onTrigger = () => {
                     this.animationReveal();
                     this.interact();
@@ -4114,11 +4116,134 @@ const script = () => {
             }
             animationReveal() {
                 $('.fea-hero-img-cms').each((_, item) => {
-                    console.log('item', item);
                     let direction = $(item).attr('data-direction');
                     let marquee = new Marquee($(item), $(item).find('.fea-hero-img-list'), 40, direction);
                     marquee.setup();
                     marquee.play();
+                });
+                
+                if(viewport.w >= 992) {
+                    this.items = $('.fea-hero-intro-item');
+                    if(this.items.length > 0) {
+                        this.setupTimeline();
+                    }
+                }
+                else {
+                    $('.fea-hero-intro-item').removeClass('active');
+                    $('.fea-hero-intro-item').eq(0).addClass('active');
+                    $('.fea-hero-intro-item').eq(0).find('.fea-hero-intro-item-content').slideDown();
+                }
+            }
+            setupTimeline() {
+                this.items.removeClass('active');
+                this.items.eq(0).addClass('active');
+                this.items.eq(0).find('.fea-hero-intro-item-content').slideDown();
+                $('.fea-hero-intro-img-item').removeClass('active');
+                $('.fea-hero-intro-img-item').eq(0).addClass('active');
+                gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
+                
+                this.timeline = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.fea-hero-intro',
+                        start: 'top top+=60%',
+                        once: true,
+                    },
+                    repeat: -1
+                });
+                
+                this.items.each((index, item) => {
+                    const $item = $(item);
+                    const $progress = $item.find('.fea-hero-intro-item-line-progress');
+                    const $content = $item.find('.fea-hero-intro-item-content');
+                    
+                    this.timeline
+                    .addLabel(`item${index}`)
+                    .call(() => {
+                        if(this.items.eq(index).hasClass('active')) {
+                            return;
+                        }
+                        this.items.removeClass('active');
+                        gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
+                        $item.addClass('active');
+                        
+                        $('.fea-hero-intro-img-item').removeClass('active');
+                        $('.fea-hero-intro-img-item').eq(index).addClass('active');
+                        
+                        $('.fea-hero-intro-item-content').slideUp();
+                        $content.slideDown();
+                    })
+                    .set($progress[0], { x: '-101%' })
+                    .to($progress[0], {
+                        x: '0%',
+                        duration: this.duration,
+                        ease: 'none'
+                    }, '<')
+                });
+            }
+            interact() {
+                if(viewport.w >= 992 && this.items) {
+                    this.items.each((index, item) => {
+                        $(item).find('.fea-hero-intro-item-head').on('click', (e) => {
+                            e.preventDefault();
+                            if(this.timeline) {
+                                this.timeline.pause();
+                                this.timeline.seek(`item${index}`);
+                                this.timeline.play();
+                            }
+                        });
+                    });
+                }
+                else {
+                    $('.fea-hero-intro-item-head').on('click', function(e) {
+                        e.preventDefault();
+                        let $item = $(this).closest('.fea-hero-intro-item');
+                        let $content = $item.find('.fea-hero-intro-item-content');
+                        
+                        if($item.hasClass('active')) {
+                            $item.removeClass('active');
+                            $content.slideUp();
+                        }
+                        else {
+                            $('.fea-hero-intro-item').removeClass('active');
+                            $('.fea-hero-intro-item-content').slideUp();
+                            $item.addClass('active');
+                            $content.slideDown();
+                        }
+                    });
+                }
+            }
+            destroy() {
+                if(this.timeline) {
+                    this.timeline.kill();
+                }
+                super.destroy();
+            }
+        },
+        'fea-complete-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                $('.fea-complete-main').addClass('swiper');
+                $('.fea-complete-inner').addClass('swiper-wrapper');
+                $('.fea-complete-item').addClass('swiper-slide');
+                let swiper = new Swiper('.fea-complete-main', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.fea-complete-pagi',
+                        bulletClass: 'fea-complete-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
                 });
             }
             interact() {
