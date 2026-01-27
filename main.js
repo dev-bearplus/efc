@@ -4314,6 +4314,7 @@ const script = () => {
                     }
                 });
                 if(viewport.w < 992) {
+                    header.registerDependent('.how-progress-tab-wrap');
                     console.log($('.how-progress-tab-item:nth-child(1) .how-progress-tab-item-line').eq(0))
                     $('.how-progress-tab-item:nth-child(1) .how-progress-tab-item-line').eq(0).addClass('active');
                     $('.how-progress-step').eq(0).find('.how-progress-step-item').eq(0).addClass('active');
@@ -4529,6 +4530,72 @@ const script = () => {
                 }
                 $('.how-progress-tab-item').off('click');
                 $('.how-progress-step-item').off('click');
+                super.destroy();
+            }
+        },
+        'how-work-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                $('.how-work-cms').addClass('swiper');
+                $('.how-work-main').addClass('swiper-wrapper');
+                $('.how-work-item').addClass('swiper-slide');
+                let swiper = new Swiper('.how-work-cms', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.how-work-pagi',
+                        bulletClass: 'how-work-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                });
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'fea-complete-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                $('.fea-complete-main').addClass('swiper');
+                $('.fea-complete-inner').addClass('swiper-wrapper');
+                $('.fea-complete-item').addClass('swiper-slide');
+                let swiper = new Swiper('.fea-complete-main', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.fea-complete-pagi',
+                        bulletClass: 'fea-complete-pagi-item',
+                        bulletActiveClass: 'active',
+                        clickable: true,  
+                      },
+                });
+            }
+            interact() {
+            }
+            destroy() {
                 super.destroy();
             }
         },
