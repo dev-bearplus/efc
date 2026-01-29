@@ -2414,6 +2414,12 @@ const script = () => {
             animationReveal() {
                 if(viewport.w < 768) {
                     $('.stories-people-item-content').attr('data-lenis-prevent', 'true');
+                    $('.stories-people-item-content').on('touchstart', () => {
+                        smoothScroll.stop();
+                    });
+                    $('.stories-people-item-content').on('touchend', () => {
+                        smoothScroll.start();
+                    });
                     $('.stories-people').css('height', viewport.h);
                     let heightContent = viewport.h - parseFloat($('.stories-people').css('padding-top'))*2 - $('.stories-people-title').outerHeight(true) - $('.stories-people-thumb-cms').outerHeight(true) - cvUnit(27, 'rem') ;
                     $('.stories-people-cms-wrap').css('height', heightContent + 'px');
