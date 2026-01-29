@@ -2414,6 +2414,9 @@ const script = () => {
             animationReveal() {
                 if(viewport.w < 768) {
                     $('.stories-people-item-content').attr('data-lenis-prevent', 'true');
+                    $('.stories-people').css('height', viewport.h);
+                    let heightContent = viewport.h - parseFloat($('.stories-people').css('padding-top'))*2 - $('.stories-people-title').outerHeight(true) - $('.stories-people-thumb-cms').outerHeight(true) - cvUnit(27, 'rem') ;
+                    $('.stories-people-cms-wrap').css('height', heightContent + 'px');
                 }
                 activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);  
                 const items = gsap.utils.toArray('.stories-people-thumb-item');
