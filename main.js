@@ -266,7 +266,7 @@ const script = () => {
     pointer.y = e.clientY;
     pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
     pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
-    if (cursor.userMoved != true) {
+    if (cursor.userMoved != true && viewport.w >= 992) {
         cursor.userMoved = true;
         cursor.init();
     }
@@ -2412,6 +2412,9 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if(viewport.w < 768) {
+                    $('.stories-people-item-content').attr('data-lenis-prevent', 'true');
+                }
                 activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);  
                 const items = gsap.utils.toArray('.stories-people-thumb-item');
                 if (items.length === 0) return;
