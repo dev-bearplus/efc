@@ -585,7 +585,9 @@ const script = () => {
 			if (this.lenis) {
 				this.lenis.destroy();
 			}
-			this.lenis = new Lenis();
+			this.lenis = new Lenis({
+                syncTouch: true
+            });
 			this.lenis.on("scroll", (e) => {
 				this.updateOnScroll(e);
 				ScrollTrigger.update();
@@ -4180,8 +4182,6 @@ const script = () => {
         'fea-hero-wrap': class extends TriggerSetup {
             constructor() {
                 super();
-                this.timeline = null;
-                this.duration = 5;
                 this.onTrigger = () => {
                     this.animationReveal();
                     this.interact();
@@ -4215,56 +4215,23 @@ const script = () => {
                 this.items.eq(0).find('.fea-hero-intro-item-content').slideDown();
                 $('.fea-hero-intro-img-item').removeClass('active');
                 $('.fea-hero-intro-img-item').eq(0).addClass('active');
-                gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
+            }
+            activateItem(index) {
+                this.items.removeClass('active');
+                $('.fea-hero-intro-img-item').removeClass('active');
                 
-                this.timeline = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '.fea-hero-intro',
-                        start: 'top top+=60%',
-                        once: true,
-                    },
-                    repeat: -1
-                });
+                this.items.eq(index).addClass('active');
+                $('.fea-hero-intro-img-item').eq(index).addClass('active');
                 
-                this.items.each((index, item) => {
-                    const $item = $(item);
-                    const $progress = $item.find('.fea-hero-intro-item-line-progress');
-                    const $content = $item.find('.fea-hero-intro-item-content');
-                    
-                    this.timeline
-                    .addLabel(`item${index}`)
-                    .call(() => {
-                        if(this.items.eq(index).hasClass('active')) {
-                            return;
-                        }
-                        this.items.removeClass('active');
-                        gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
-                        $item.addClass('active');
-                        
-                        $('.fea-hero-intro-img-item').removeClass('active');
-                        $('.fea-hero-intro-img-item').eq(index).addClass('active');
-                        
-                        $('.fea-hero-intro-item-content').slideUp();
-                        $content.slideDown();
-                    })
-                    .set($progress[0], { x: '-101%' })
-                    .to($progress[0], {
-                        x: '0%',
-                        duration: this.duration,
-                        ease: 'none'
-                    }, '<')
-                });
+                $('.fea-hero-intro-item-content').slideUp(400);
+                this.items.eq(index).find('.fea-hero-intro-item-content').slideDown(400);
             }
             interact() {
                 if(viewport.w >= 992 && this.items) {
                     this.items.each((index, item) => {
                         $(item).find('.fea-hero-intro-item-head').on('click', (e) => {
                             e.preventDefault();
-                            if(this.timeline) {
-                                this.timeline.pause();
-                                this.timeline.seek(`item${index}`);
-                                this.timeline.play();
-                            }
+                            this.activateItem(index);
                         });
                     });
                 }
@@ -4288,9 +4255,7 @@ const script = () => {
                 }
             }
             destroy() {
-                if(this.timeline) {
-                    this.timeline.kill();
-                }
+                $('.fea-hero-intro-item-head').off('click');
                 super.destroy();
             }
         },
@@ -4362,17 +4327,13 @@ const script = () => {
             constructor() {
                 super();
                 this.swiper = null;
-                this.timeline = null;
                 this.isDesktop = false;
                 this.onTrigger = () => {
                     this.animationReveal();
                 };
             }
             async animationReveal() {
-                console.log('animationReveal'); 
-                activeItem(['.how-progress-step', '.how-progress-step-img-item', '.how-progress-tab-item'], 0)
                 let lineClone = $('.how-progress-tab-item-line').eq(0).clone();
-                console.log(lineClone);
                 $('.how-progress-tab-item-line-wrap').html('');
                 $('.how-progress-tab-item-title').each((index, item) => {
                     let indexReal = `${index+1}.` 
@@ -4386,13 +4347,7 @@ const script = () => {
                         $('.how-progress-tab-item').eq(index).find('.how-progress-tab-item-line-wrap').append(html);
                     }
                 });
-                if(viewport.w < 992) {
-                    header.registerDependent('.how-progress-tab-wrap');
-                    console.log($('.how-progress-tab-item:nth-child(1) .how-progress-tab-item-line').eq(0))
-                    $('.how-progress-tab-item:nth-child(1) .how-progress-tab-item-line').eq(0).addClass('active');
-                    $('.how-progress-step').eq(0).find('.how-progress-step-item').eq(0).addClass('active');
-                    $('.how-progress-step').eq(0).find('.how-progress-step-item').eq(0).find('.how-progress-step-item-img').slideDown();
-                }
+                
                 this.swiper = new Swiper('.how-progress-tab-cms', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(24, 'rem'),
@@ -4405,131 +4360,54 @@ const script = () => {
                 this.isDesktop = window.innerWidth >= 992;
                 
                 if (this.isDesktop) {
-                    this.buildTimeline();
+                    this.activateStep(0, 0);
                     this.interactDesktop();
-                    this.timeline.play();
                 } else {
+                    header.registerDependent('.how-progress-tab-wrap');
+                    this.activateStep(0, 0);
                     this.interactMobile();
                 }
             }
             
-            buildTimeline() {
-                this.timeline = gsap.timeline({ 
-                    repeat: -1,
-                    paused: false 
-                });
-                
+            activateStep(stepIndex, itemIndex) {
                 const steps = $('.how-progress-step');
                 const tabItems = $('.how-progress-tab-item');
                 
-                steps.each((stepIndex, step) => {
-                    const currentStep = $(step);
-                    const currentTabItem = tabItems.eq(stepIndex);
-                    const items = currentStep.find('.how-progress-step-item');
-                    const stepImages = currentStep.find('.how-progress-step-img-item');
-                    const tabItemLines = currentTabItem.find('.how-progress-tab-item-line');
-                    
-                    this.timeline.addLabel(`step-${stepIndex}`);
-                    
-                    this.timeline.call(() => {
-                        steps.removeClass('active');
-                        tabItems.removeClass('active');
-                        currentStep.addClass('active');
-                        currentTabItem.addClass('active');
-                    });
-                    
-                    items.each((itemIndex, item) => {
-                        const currentItem = $(item);
-                        const lineProgress = currentItem.find('.how-progress-step-child-line-progress');
-                        
-                        this.timeline.addLabel(`step-${stepIndex}-item-${itemIndex}`);
-                        
-                        this.timeline.call(() => {
-                            items.removeClass('active');
-                            const progressLines = items.find('.how-progress-step-child-line-progress');
-                            gsap.set(progressLines, { x: '-101%' });
-                            currentItem.addClass('active');
-                            stepImages.removeClass('active');
-                            stepImages.eq(itemIndex).addClass('active');
-                            $('.how-progress-tab-item-line').removeClass('active');
-                            tabItemLines.eq(itemIndex).addClass('active');
-                        });
-                        
-                        this.timeline.to(lineProgress[0], {
-                            x: '0%',
-                            duration: 2,
-                            ease: 'none'
-                        });
-                        
-                        this.timeline.to({}, { duration: 0.5 });
-                    });
-                    
-                    this.timeline.call(() => {
-                        currentStep.removeClass('active');
-                        items.removeClass('active');
-                        const progressLines = items.find('.how-progress-step-child-line-progress');
-                        gsap.set(progressLines, { x: '-101%' });
-                        stepImages.removeClass('active');
-                    });
-                });
+                steps.removeClass('active');
+                tabItems.removeClass('active');
+                $('.how-progress-step-item').removeClass('active');
+                $('.how-progress-step-img-item').removeClass('active');
+                $('.how-progress-tab-item-line').removeClass('active');
                 
-                this.timeline.call(() => {
-                    $('.how-progress-step').removeClass('active');
-                    $('.how-progress-tab-item').removeClass('active');
-                    $('.how-progress-step-img-item').removeClass('active');
-                    $('.how-progress-tab-item-line').removeClass('active');
-                    $('.how-progress-step-item').removeClass('active');
-                    gsap.set('.how-progress-step-child-line-progress', {
-                        x: '-101%',
-                        clearProps: 'transform'
-                    });
-                });
+                const currentStep = steps.eq(stepIndex);
+                const currentTabItem = tabItems.eq(stepIndex);
+                const items = currentStep.find('.how-progress-step-item');
+                const stepImages = currentStep.find('.how-progress-step-img-item');
+                const tabItemLines = currentTabItem.find('.how-progress-tab-item-line');
                 
-                this.timeline.to({}, { duration: 1 });
+                currentStep.addClass('active');
+                currentTabItem.addClass('active');
+                items.eq(itemIndex).addClass('active');
+                stepImages.eq(itemIndex).addClass('active');
+                tabItemLines.eq(itemIndex).addClass('active');
+                
+                if(viewport.w <= 992) {
+                    items.eq(itemIndex).find('.how-progress-step-item-img').slideDown();
+                    items.not(items.eq(itemIndex)).find('.how-progress-step-item-img').slideUp();
+                }
             }
             interactDesktop() {
-                let clickDebounce = false;
-                
                 $('.how-progress-tab-item').on('click', (e) => {
                     e.stopPropagation();
-                    if (clickDebounce) return;
-                    clickDebounce = true;
-                    
                     const clickedIndex = $('.how-progress-tab-item').index($(e.currentTarget));
-                    console.log('Tab item clicked:', clickedIndex);
-                    
-                    this.resetAllStates();
-                    
-                    const label = `step-${clickedIndex}-item-0`;
-                    this.timeline.pause();
-                    this.timeline.play(label);
-                    
-                    setTimeout(() => { clickDebounce = false; }, 300);
+                    this.activateStep(clickedIndex, 0);
                 });
                 
                 $('.how-progress-step').each((stepIndex, step) => {
                     $(step).find('.how-progress-step-item').on('click', (e) => {
                         e.stopPropagation();
-                        if (clickDebounce) return;
-                        clickDebounce = true;
-                        
                         const clickedItemIndex = $(step).find('.how-progress-step-item').index($(e.currentTarget));
-                        console.log('Step item clicked - step:', stepIndex, 'item:', clickedItemIndex);
-                        
-                        const currentStep = $(step);
-                        const items = currentStep.find('.how-progress-step-item');
-                        const stepImages = currentStep.find('.how-progress-step-img-item');
-                        
-                        items.removeClass('active');
-                        gsap.set(items.find('.how-progress-step-child-line-progress'), { x: '-101%' });
-                        stepImages.removeClass('active');
-                        $('.how-progress-tab-item-line').removeClass('active');
-                        
-                        const label = `step-${stepIndex}-item-${clickedItemIndex}`;
-                        this.timeline.pause();
-                        this.timeline.play(label);
-                        
-                        setTimeout(() => { clickDebounce = false; }, 300);
+                        this.activateStep(stepIndex, clickedItemIndex);
                     });
                 });
             }
@@ -4538,65 +4416,27 @@ const script = () => {
                 $('.how-progress-tab-item').on('click', (e) => {
                     e.stopPropagation();
                     const clickedIndex = $('.how-progress-tab-item').index($(e.currentTarget));
-                    const steps = $('.how-progress-step');
-                    const tabItems = $('.how-progress-tab-item');
-                    
-                    steps.removeClass('active');
-                    tabItems.removeClass('active');
-                    $('.how-progress-step-item').removeClass('active');
-                    $('.how-progress-step-item-img').slideUp();
-                    
-                    const targetStep = steps.eq(clickedIndex);
-                    targetStep.addClass('active');
-                    $(e.currentTarget).addClass('active');
-                    
-                    const firstItem = targetStep.find('.how-progress-step-item').eq(0);
-                    $('.how-progress-tab-item-line').removeClass('active');
-                    tabItems.eq(clickedIndex).find('.how-progress-tab-item-line').eq(0).addClass('active');
-                    firstItem.addClass('active');
-                    firstItem.find('.how-progress-step-item-img').slideDown();
+                    this.activateStep(clickedIndex, 0);
                 });
                 
                 $('.how-progress-step').each((stepIndex, step) => {
                     $(step).find('.how-progress-step-item').on('click', function(e) {
                         e.stopPropagation();
                         const $item = $(this);
-                        const $img = $item.find('.how-progress-step-item-img');
                         const itemIndex = $(step).find('.how-progress-step-item').index($item);
-                        const tabItem = $('.how-progress-tab-item').eq(stepIndex);
-                        const tabLines = tabItem.find('.how-progress-tab-item-line');
-                        
                         
                         if (!$item.hasClass('active')) {
-                            $('.how-progress-step-item').removeClass('active');
-                            $('.how-progress-step.active .how-progress-step-item-img').slideUp();
-                            $item.addClass('active');
-                            $img.slideDown();
-                            $('.how-progress-tab-item-line').removeClass('active');
-                            tabLines.eq(itemIndex).addClass('active');
+                            this.activateStep(stepIndex, itemIndex);
                         } else {
                             $item.removeClass('active');
-                            $img.slideUp();
-                            tabLines.eq(itemIndex).removeClass('active');
+                            $item.find('.how-progress-step-item-img').slideUp();
+                            $('.how-progress-tab-item').eq(stepIndex).find('.how-progress-tab-item-line').eq(itemIndex).removeClass('active');
                         }
-                    });
+                    }.bind(this));
                 });
             }
             
-            resetAllStates() {
-                $('.how-progress-step').removeClass('active');
-                $('.how-progress-tab-item').removeClass('active');
-                $('.how-progress-step-item').removeClass('active');
-                $('.how-progress-step-img-item').removeClass('active');
-                $('.how-progress-tab-item-line').removeClass('active');
-                gsap.set('.how-progress-step-child-line-progress', { x: '-101%' });
-            }
-            
             destroy() {
-                if (this.timeline) {
-                    this.timeline.kill();
-                    this.timeline = null;
-                }
                 if (this.swiper) {
                     this.swiper.destroy(true, true);
                     this.swiper = null;
