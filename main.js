@@ -891,70 +891,54 @@ const script = () => {
                 }
             }
             setupScrollTriggers() {
-                // Clear any existing scroll trigger
                 if(this.mainTrigger) {
                     this.mainTrigger.kill();
                 }
                 
-                // Set all items to inactive initially
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
                 $('.home-product-item-content').each(function() {
                     gsap.set(this, { height: 0, opacity: 0, overflow: 'hidden', display: 'none' });
                 });
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
+                
                 let itemCount = this.items.length;
                 
-                // Create a single optimized scroll trigger
                 this.mainTrigger = ScrollTrigger.create({
                     trigger: '.home-product-wrap',
-                    start: 'top center',
-                    end: 'bottom center',
-                    scrub: 1,
-                    marquee: true,
+                    start: 'top bottom',
+                    end: 'bottom-=30% top',
+                    scrub: 0.5,
                     onUpdate: (self) => {
                         let progress = self.progress;
                         let newIndex = Math.floor(progress * itemCount);
                         
-                        // Clamp to valid range
                         newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
                         
-                        // Calculate progress within current item's range
                         let itemStartProgress = newIndex / itemCount;
                         let itemEndProgress = (newIndex + 1) / itemCount;
                         let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
                         itemProgress = Math.max(0, Math.min(1, itemProgress));
                         
-                        // Console log the progress
-                        console.log(`Item ${newIndex} progress: ${(itemProgress * 100).toFixed(2)}%`);
-                        
-                        // Only activate if changed
                         if(newIndex !== this.currentIndex) {
                             this.currentIndex = newIndex;
                             this.activateItem(newIndex);
                         }
                         
-                        // Update progress bar based on scroll
                         this.updateProgressBar(newIndex, itemProgress);
                     }
                 });
             }
             activateItem(index) {
-                // Remove active class from all items
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
-                
-                // Reset all progress bars
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
                 
-                // Add active class to current item
                 $(this.items[index]).addClass('active');
                 $('.home-product-img-item').eq(index).addClass('active');
                 
-                // Animate content with GSAP for smoother performance
                 $('.home-product-item-content').each(function(idx) {
                     if(idx === index) {
-                        // For active item: expand to full height
                         let element = this;
                         gsap.set(element, { height: 'auto', display: 'block' });
                         let autoHeight = $(element).outerHeight();
@@ -962,15 +946,14 @@ const script = () => {
                             height: 0,
                             opacity: 0,
                             duration: 0.4,
-                            ease: 'none'
+                            ease: 'power2.out'
                         });
                         gsap.to(element, {
                             opacity: 1,
                             duration: 0.4,
-                            ease: 'none'
+                            ease: 'power2.out'
                         });
                     } else {
-                        // For inactive items: collapse
                         gsap.to(this, {
                             height: 0,
                             opacity: 0,
@@ -984,7 +967,6 @@ const script = () => {
                 });
             }
             updateProgressBar(index, progress) {
-                // Update the progress bar for the active item based on scroll progress
                 let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
                 if(progressBar.length > 0) {
                     console.log(progress);
@@ -1005,7 +987,6 @@ const script = () => {
                 }
             }
             interact() {
-                // Only add click handlers for mobile
                 if(viewport.w <= 992) {
                     this.items.each((index, item) => {
                         $(item).find('.home-product-item-head').on('click', (e) => {
@@ -1014,7 +995,6 @@ const script = () => {
                     });
                 }
                 
-                // Video popup handlers
                 $('.home-product-img-item-cta-link').on('click', (e) => {
                     e.preventDefault();
                     let href = $(e.currentTarget).attr('href');
@@ -1322,8 +1302,10 @@ const script = () => {
                     header.registerDependent(this.$els.categorySticky);
                 }
                 const topInit = (viewport.h - this.$els.tabInner.outerHeight()) / 2;
-                if(this.$els.tabMain.outerHeight() > this.$els.tabInner.outerHeight()) {
-                    this.$els.tabInner.attr('data-lenis-prevent', 'true');
+                console.log($('.faq-main-category-cms.custom-scroll .faq-main-category-list').height(), $('.faq-main-category-cms.custom-scroll').height());
+                if($('.faq-main-category-cms.custom-scroll .faq-main-category-list').height() > $('.faq-main-category-cms.custom-scroll').height()) {
+                    console.log('prevent');
+                    $('.faq-main-category-cms').attr('data-lenis-prevent', 'true');
                 }
                 this.$els.tabInner.css('top', topInit + 'px');
                 this.initContent();
