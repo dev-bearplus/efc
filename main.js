@@ -1061,10 +1061,10 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                $('.stories-support-item-inner').on('click', (e) => {
+                $('.stories-support-item-link').on('click', (e) => {
                     console.log('click');
                     e.preventDefault();
-                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    let link = $(e.target).closest('.stories-support-item-link').attr('href');
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
                     smoothScroll.stop();
@@ -2635,10 +2635,10 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                $('.stories-support-item-inner').on('click', (e) => {
+                $('.stories-support-item-link').on('click', (e) => {
                     console.log('click');
                     e.preventDefault();
-                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    let link = $(e.target).closest('.stories-support-item-link').attr('href');
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
                     smoothScroll.stop();
@@ -2663,6 +2663,9 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if($('.stories-fb-item').length == 0) {
+                    $('.stories-fb').hide();
+                }
                 let swiper = new Swiper('.stories-fb-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
@@ -3706,10 +3709,10 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                $('.stories-support-item-inner').on('click', (e) => {
+                $('.stories-support-item-link').on('click', (e) => {
                     console.log('click');
                     e.preventDefault();
-                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    let link = $(e.target).closest('.stories-support-item-link').attr('href');
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
                     smoothScroll.stop();
@@ -4048,10 +4051,10 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                 $('.stories-support-item-inner').on('click', (e) => {
+                 $('.stories-support-item-link').on('click', (e) => {
                     console.log('click');
                     e.preventDefault();
-                    let link = $(e.target).closest('.stories-support-item-inner').attr('href');
+                    let link = $(e.target).closest('.stories-support-item-link').attr('href');
                     $('.popup-video-iframe').attr('src', link);
                     $('.popup-video').addClass('active');
                     smoothScroll.stop();
