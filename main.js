@@ -585,10 +585,7 @@ const script = () => {
 			if (this.lenis) {
 				this.lenis.destroy();
 			}
-			this.lenis = new Lenis({
-                smooth: viewport.w >= 992 ? true : false, 
-                syncTouch: true
-            });
+			this.lenis = new Lenis();
 			this.lenis.on("scroll", (e) => {
 				this.updateOnScroll(e);
 				ScrollTrigger.update();
