@@ -586,6 +586,7 @@ const script = () => {
 				this.lenis.destroy();
 			}
 			this.lenis = new Lenis({
+                smooth: viewport.w >= 992 ? true : false, 
                 syncTouch: true
             });
 			this.lenis.on("scroll", (e) => {
