@@ -425,7 +425,8 @@ const script = () => {
     onHover() {
         let type = $("[data-cursor]:hover").attr("data-cursor");
         let gotBtnSize = false;
-        if ($("[data-cursor]:hover").length) {
+        if ($("[data-cursor]:hover").length && type != 'hidden') {
+            $('.cursor').addClass('on-hover');
         switch (type) {
             case "hidden":
                 $(".cursor").addClass("on-hover-hidden");
@@ -488,11 +489,13 @@ const script = () => {
                 break;
         }
         } else {
-        gotBtnSize = false;
+            $('.cursor').removeClass('on-hover');
+            gotBtnSize = false;
         }
     }
     reset() {
         $(".cursor").removeClass("on-hover-hidden");
+        $('.cursor').removeClass('on-hover');
         $('[data-cursor] .txt').css('transform', 'translateX(0px)')
     }
     }
@@ -871,10 +874,9 @@ const script = () => {
         'home-product-wrap': class extends TriggerSetup {
             constructor() {
                 super();
-                this.currentIndex = 0;
-                this.interval = null;
-                this.duration = 5000;
+                this.currentIndex = -1;
                 this.items = $('.home-product-item');
+                this.mainTrigger = null;
                 this.onTrigger = () => {
                     this.animationReveal();
                     this.interact();
@@ -882,72 +884,137 @@ const script = () => {
             }
             animationReveal() {
                 if(this.items.length > 0 && viewport.w > 992) {
-                    this.autoPlay();
+                    this.setupScrollTriggers();
                 }
                 if(viewport.w <= 992) {
                     this.toggleItem(0);
                 }
             }
-            autoPlay() {
-                if(this.interval) {
-                    clearInterval(this.interval);
+            setupScrollTriggers() {
+                // Clear any existing scroll trigger
+                if(this.mainTrigger) {
+                    this.mainTrigger.kill();
                 }
                 
-                this.activateItem(this.currentIndex);
+                // Set all items to inactive initially
+                this.items.removeClass('active');
+                $('.home-product-img-item').removeClass('active');
+                $('.home-product-item-content').each(function() {
+                    gsap.set(this, { height: 0, opacity: 0, overflow: 'hidden', display: 'none' });
+                });
+                gsap.set('.home-product-item-line-progress', { x: '-101%' });
+                let itemCount = this.items.length;
                 
-                this.interval = setInterval(() => {
-                    this.currentIndex = (this.currentIndex + 1) % this.items.length;
-                    this.activateItem(this.currentIndex);
-                }, this.duration);
+                // Create a single optimized scroll trigger
+                this.mainTrigger = ScrollTrigger.create({
+                    trigger: '.home-product-wrap',
+                    start: 'top center',
+                    end: 'bottom center',
+                    scrub: 1,
+                    marquee: true,
+                    onUpdate: (self) => {
+                        let progress = self.progress;
+                        let newIndex = Math.floor(progress * itemCount);
+                        
+                        // Clamp to valid range
+                        newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
+                        
+                        // Calculate progress within current item's range
+                        let itemStartProgress = newIndex / itemCount;
+                        let itemEndProgress = (newIndex + 1) / itemCount;
+                        let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
+                        itemProgress = Math.max(0, Math.min(1, itemProgress));
+                        
+                        // Console log the progress
+                        console.log(`Item ${newIndex} progress: ${(itemProgress * 100).toFixed(2)}%`);
+                        
+                        // Only activate if changed
+                        if(newIndex !== this.currentIndex) {
+                            this.currentIndex = newIndex;
+                            this.activateItem(newIndex);
+                        }
+                        
+                        // Update progress bar based on scroll
+                        this.updateProgressBar(newIndex, itemProgress);
+                    }
+                });
             }
             activateItem(index) {
-                gsap.killTweensOf('.home-product-item-line-progress');
-                
+                // Remove active class from all items
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
                 
+                // Reset all progress bars
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
                 
+                // Add active class to current item
                 $(this.items[index]).addClass('active');
-                
                 $('.home-product-img-item').eq(index).addClass('active');
-                $('.home-product-item-content').slideUp();
-                 $(this.items[index]).find('.home-product-item-content').slideDown();
-                let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
-                gsap.fromTo(progressBar[0], 
-                    { x: '-101%' },
-                    { 
-                        x: '0%',
-                        duration: this.duration / 1000,
-                        ease: 'none'
+                
+                // Animate content with GSAP for smoother performance
+                $('.home-product-item-content').each(function(idx) {
+                    if(idx === index) {
+                        // For active item: expand to full height
+                        let element = this;
+                        gsap.set(element, { height: 'auto', display: 'block' });
+                        let autoHeight = $(element).outerHeight();
+                        gsap.from(element, {
+                            height: 0,
+                            opacity: 0,
+                            duration: 0.4,
+                            ease: 'none'
+                        });
+                        gsap.to(element, {
+                            opacity: 1,
+                            duration: 0.4,
+                            ease: 'none'
+                        });
+                    } else {
+                        // For inactive items: collapse
+                        gsap.to(this, {
+                            height: 0,
+                            opacity: 0,
+                            duration: 0.3,
+                            ease: 'power2.in',
+                            onComplete: () => {
+                                $(this).css('display', 'none');
+                            }
+                        });
                     }
-                );
+                });
+            }
+            updateProgressBar(index, progress) {
+                // Update the progress bar for the active item based on scroll progress
+                let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
+                if(progressBar.length > 0) {
+                    console.log(progress);
+                    let xPos = -101 + (progress * 101);
+                    gsap.set(progressBar[0], { x: xPos + '%' });
+                }
             }
             toggleItem(index) {
-                console.log(this.items[index]);
                 if($(this.items[index]).hasClass('active')) {
                     $(this.items[index]).removeClass('active');
-                    $(this.items[index]).find('.home-product-item-content').slideUp();
+                    $(this.items[index]).find('.home-product-item-content').slideUp(300);
                 }
                 else {
                     $(this.items).removeClass('active');
                     $(this.items[index]).addClass('active');
-                    $('.home-product-item-content').slideUp();
-                    $(this.items[index]).find('.home-product-item-content').slideDown();
+                    $('.home-product-item-content').slideUp(300);
+                    $(this.items[index]).find('.home-product-item-content').slideDown(300);
                 }
             }
             interact() {
-                this.items.each((index, item) => {
-                    $(item).find('.home-product-item-head').on('click', (e) => {
-                        if(viewport.w > 992) {
-                            this.currentIndex = index;
-                            this.autoPlay();
-                        }
-                        else {
+                // Only add click handlers for mobile
+                if(viewport.w <= 992) {
+                    this.items.each((index, item) => {
+                        $(item).find('.home-product-item-head').on('click', (e) => {
                             this.toggleItem(index);
-                        }
+                        });
                     });
-                });
+                }
+                
+                // Video popup handlers
                 $('.home-product-img-item-cta-link').on('click', (e) => {
                     e.preventDefault();
                     let href = $(e.currentTarget).attr('href');
@@ -959,11 +1026,11 @@ const script = () => {
                     $(".popup-video").removeClass('active');
                     $(".popup-video-inner iframe").attr('src', '');
                 });
-
             }
             destroy() {
-                if(this.interval) {
-                    clearInterval(this.interval);
+                if(this.mainTrigger) {
+                    this.mainTrigger.kill();
+                    this.mainTrigger = null;
                 }
                 super.destroy();
             }
@@ -2417,6 +2484,17 @@ const script = () => {
                     $('.stories-people-item-content').on('touchstart', () => {
                         smoothScroll.stop();
                     });
+                    
+                    // Kiểm tra khi scroll đến cuối thì tự động start smoothScroll
+                    $('.stories-people-item-content').on('scroll', function() {
+                        const element = $(this)[0];
+                        const isAtBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 1;
+                        
+                        if (isAtBottom) {
+                            smoothScroll.start();
+                        }
+                    });
+                    
                     $('.stories-people-item-content').on('touchend', () => {
                         smoothScroll.start();
                     });
@@ -4054,16 +4132,17 @@ const script = () => {
             }
             interact() {
                 if(viewport.w < 768) {
-                    $('.comp-diff-col-head').on('click', (e) => {
+                    $('.comp-diff-item').on('click', (e) => {
                         e.preventDefault();
-                        this.activeCompItem(e.currentTarget.closest('.comp-diff-col-head'));
+                        this.activeCompItem(e.currentTarget.closest('.comp-diff-item'));
                     });
-                    $('.comp-diff-item').eq(0).find('.comp-diff-col-head').trigger('click');
+                    $('.comp-diff-item').eq(0).trigger('click');
                 }
             }
             activeCompItem(item) {
-                const $item = $(item);
-                const $itemSub = $item.closest('.comp-diff-row').find('.comp-diff-col-wrap');
+                console.log(item);
+                const $item = $(item).find('.comp-diff-col-head');
+                const $itemSub = $(item).find('.comp-diff-col-wrap');
                 const isActive = $item.hasClass('active');
                 
                 if (isActive) {
