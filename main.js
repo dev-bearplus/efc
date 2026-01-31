@@ -3605,10 +3605,13 @@ const script = () => {
                     $formSuccess.removeClass('active');
                 });
                 
-                $('.dt-guide-hero-form-submit').on('click', (e) => {
-                    e.preventDefault();
+                $('.dt-guide-hero-form-submit-new').on('click', (e) => {
                     if (this.checkFormValid()) {
                         this.submitHubspot();
+                    }
+                    else {
+                        e.preventDefault();
+
                     }
                 });
             }
@@ -3649,24 +3652,24 @@ const script = () => {
             submitHubspot() {
                 const hubspot = {
                     portalId: 530303,
-                    formId: "YOUR_GUIDE_DOWNLOAD_FORM_ID",
+                    formId: "1cf30793-5250-4788-82ff-5c38cd4836aa",
                     fields: [
-                        { name: "firstname", value: (data) => data["Full-Name"] },
+                        { name: "full_name", value: (data) => data["Full-Name"] },
                         { name: "email", value: (data) => data["Email"] }
                     ],
                 };
                 
                 const currentLocale = $('html').attr('lang');
                 if(currentLocale == 'en-GB') {
-                    hubspot.formId = "YOUR_UK_GUIDE_FORM_ID";
+                    hubspot.formId = "680ebb16-a7f0-46cd-adc2-334d5381c441";
                 }
                 else if(currentLocale == 'en-AU') {
-                    hubspot.formId = "YOUR_APAC_GUIDE_FORM_ID";
+                    hubspot.formId = "4dca4fbb-2260-4085-8caa-362a9bd497e0";
                 }
                 
                 const { portalId, formId, fields } = hubspot;
                 let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
-                const data = mapFormToObject($('#download-free-guide form').get(0));
+                const data = mapFormToObject($('#download-free-guide').get(0));
                 
                 const mapField = (data) => {
                     if (!fields.length) return [];
@@ -3690,6 +3693,7 @@ const script = () => {
                 };
                 
                 const mappedFields = mapField(data);
+                console.log(mappedFields);
                 const dataSend = {
                     fields: mappedFields,
                     context: {
