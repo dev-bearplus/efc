@@ -1036,6 +1036,10 @@ const script = () => {
                 };
             }
             animationReveal() {
+                if($('.home-trust-logo-item').length == 0){
+                    $('.home-trust').hide();
+                    return;
+                }
                  let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
                  marquee.setup();
                  marquee.play();
@@ -1054,21 +1058,60 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    navigation: {
-                        nextEl: '.stories-support-control-item.item-next',
-                        prevEl: '.stories-support-control-item.item-prev',
+                    speed: 4000,
+                    loop: true,
+                    autoplay: {
+                        delay: 0,
+                        disableOnInteraction: false,
                     },
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
                         bulletActiveClass: 'active',
                         clickable: true,  
-                      },
+                    },
                     breakpoints: {
                         991: {
                             slidesPerView: 2,
                         }
                     },
+                    on: {
+                        init: function() {
+                            updateNavigationState(this);
+                        },
+                        slideChange: function() {
+                            updateNavigationState(this);
+                        }
+                    }
+                });
+                
+                function updateNavigationState(swiperInstance) {
+                    const prevBtn = $('.stories-support-control-item.item-prev');
+                    const nextBtn = $('.stories-support-control-item.item-next');
+                    
+                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
+                        prevBtn.addClass('swiper-button-disabled');
+                    } else {
+                        prevBtn.removeClass('swiper-button-disabled');
+                    }
+                    
+                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
+                        nextBtn.addClass('swiper-button-disabled');
+                    } else {
+                        nextBtn.removeClass('swiper-button-disabled');
+                    }
+                }
+                
+                $('.stories-support-control-item.item-next').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slideNext(600);
+                });
+                
+                $('.stories-support-control-item.item-prev').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slidePrev(600);
                 });
             }
             animationScrub() {
@@ -2628,21 +2671,60 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    navigation: {
-                        nextEl: '.stories-support-control-item.item-next',
-                        prevEl: '.stories-support-control-item.item-prev',
+                    speed: 4000,
+                    loop: true,
+                    autoplay: {
+                        delay: 0,
+                        disableOnInteraction: false,
                     },
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
                         bulletActiveClass: 'active',
                         clickable: true,  
-                      },
+                    },
                     breakpoints: {
                         991: {
                             slidesPerView: 2,
                         }
                     },
+                    on: {
+                        init: function() {
+                            updateNavigationState(this);
+                        },
+                        slideChange: function() {
+                            updateNavigationState(this);
+                        }
+                    }
+                });
+                
+                function updateNavigationState(swiperInstance) {
+                    const prevBtn = $('.stories-support-control-item.item-prev');
+                    const nextBtn = $('.stories-support-control-item.item-next');
+                    
+                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
+                        prevBtn.addClass('swiper-button-disabled');
+                    } else {
+                        prevBtn.removeClass('swiper-button-disabled');
+                    }
+                    
+                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
+                        nextBtn.addClass('swiper-button-disabled');
+                    } else {
+                        nextBtn.removeClass('swiper-button-disabled');
+                    }
+                }
+                
+                $('.stories-support-control-item.item-next').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slideNext(600);
+                });
+                
+                $('.stories-support-control-item.item-prev').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slidePrev(600);
                 });
             }
             animationScrub() {
@@ -3702,21 +3784,60 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    navigation: {
-                        nextEl: '.stories-support-control-item.item-next',
-                        prevEl: '.stories-support-control-item.item-prev',
+                    speed: 4000,
+                    loop: true,
+                    autoplay: {
+                        delay: 0,
+                        disableOnInteraction: false,
                     },
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
                         bulletActiveClass: 'active',
                         clickable: true,  
-                      },
+                    },
                     breakpoints: {
                         991: {
                             slidesPerView: 2,
                         }
                     },
+                    on: {
+                        init: function() {
+                            updateNavigationState(this);
+                        },
+                        slideChange: function() {
+                            updateNavigationState(this);
+                        }
+                    }
+                });
+                
+                function updateNavigationState(swiperInstance) {
+                    const prevBtn = $('.stories-support-control-item.item-prev');
+                    const nextBtn = $('.stories-support-control-item.item-next');
+                    
+                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
+                        prevBtn.addClass('swiper-button-disabled');
+                    } else {
+                        prevBtn.removeClass('swiper-button-disabled');
+                    }
+                    
+                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
+                        nextBtn.addClass('swiper-button-disabled');
+                    } else {
+                        nextBtn.removeClass('swiper-button-disabled');
+                    }
+                }
+                
+                $('.stories-support-control-item.item-next').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slideNext(600);
+                });
+                
+                $('.stories-support-control-item.item-prev').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slidePrev(600);
                 });
             }
             animationScrub() {
@@ -4044,21 +4165,60 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    navigation: {
-                        nextEl: '.stories-support-control-item.item-next',
-                        prevEl: '.stories-support-control-item.item-prev',
+                    speed: 4000,
+                    loop: true,
+                    autoplay: {
+                        delay: 0,
+                        disableOnInteraction: false,
                     },
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
                         bulletActiveClass: 'active',
                         clickable: true,  
-                      },
+                    },
                     breakpoints: {
                         991: {
                             slidesPerView: 2,
                         }
                     },
+                    on: {
+                        init: function() {
+                            updateNavigationState(this);
+                        },
+                        slideChange: function() {
+                            updateNavigationState(this);
+                        }
+                    }
+                });
+                
+                function updateNavigationState(swiperInstance) {
+                    const prevBtn = $('.stories-support-control-item.item-prev');
+                    const nextBtn = $('.stories-support-control-item.item-next');
+                    
+                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
+                        prevBtn.addClass('swiper-button-disabled');
+                    } else {
+                        prevBtn.removeClass('swiper-button-disabled');
+                    }
+                    
+                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
+                        nextBtn.addClass('swiper-button-disabled');
+                    } else {
+                        nextBtn.removeClass('swiper-button-disabled');
+                    }
+                }
+                
+                $('.stories-support-control-item.item-next').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slideNext(600);
+                });
+                
+                $('.stories-support-control-item.item-prev').on('click', function (e) {
+                    e.preventDefault();
+                    swiper.autoplay.stop();
+                    swiper.slidePrev(600);
                 });
             }
             animationScrub() {
@@ -4405,6 +4565,10 @@ const script = () => {
                 stepImages.eq(itemIndex).addClass('active');
                 tabItemLines.eq(itemIndex).addClass('active');
                 
+                if(this.swiper && !this.swiper.destroyed) {
+                    this.swiper.slideTo(stepIndex);
+                }
+                
                 if(viewport.w <= 992) {
                     items.eq(itemIndex).find('.how-progress-step-item-img').slideDown();
                     items.not(items.eq(itemIndex)).find('.how-progress-step-item-img').slideUp();
@@ -4413,8 +4577,23 @@ const script = () => {
             interactDesktop() {
                 $('.how-progress-tab-item').on('click', (e) => {
                     e.stopPropagation();
-                    const clickedIndex = $('.how-progress-tab-item').index($(e.currentTarget));
-                    this.activateStep(clickedIndex, 0);
+                    const $clickedTab = $(e.currentTarget);
+                    const clickedIndex = $('.how-progress-tab-item').index($clickedTab);
+                    
+                    if($clickedTab.hasClass('active')) {
+                        const $activeLines = $clickedTab.find('.how-progress-tab-item-line.active');
+                        const $allLines = $clickedTab.find('.how-progress-tab-item-line');
+                        
+                        if($activeLines.length > 0) {
+                            const currentLineIndex = $allLines.index($activeLines.eq(0));
+                            const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
+                            this.activateStep(clickedIndex, nextLineIndex);
+                        } else {
+                            this.activateStep(clickedIndex, 0);
+                        }
+                    } else {
+                        this.activateStep(clickedIndex, 0);
+                    }
                 });
                 
                 $('.how-progress-step').each((stepIndex, step) => {
@@ -4429,8 +4608,23 @@ const script = () => {
             interactMobile() {
                 $('.how-progress-tab-item').on('click', (e) => {
                     e.stopPropagation();
-                    const clickedIndex = $('.how-progress-tab-item').index($(e.currentTarget));
-                    this.activateStep(clickedIndex, 0);
+                    const $clickedTab = $(e.currentTarget);
+                    const clickedIndex = $('.how-progress-tab-item').index($clickedTab);
+                    
+                    if($clickedTab.hasClass('active')) {
+                        const $activeLines = $clickedTab.find('.how-progress-tab-item-line.active');
+                        const $allLines = $clickedTab.find('.how-progress-tab-item-line');
+                        
+                        if($activeLines.length > 0) {
+                            const currentLineIndex = $allLines.index($activeLines.eq(0));
+                            const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
+                            this.activateStep(clickedIndex, nextLineIndex);
+                        } else {
+                            this.activateStep(clickedIndex, 0);
+                        }
+                    } else {
+                        this.activateStep(clickedIndex, 0);
+                    }
                 });
                 
                 $('.how-progress-step').each((stepIndex, step) => {
