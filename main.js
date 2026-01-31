@@ -897,16 +897,16 @@ const script = () => {
                 
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
-                $('.home-product-item-content').each(function() {
-                    gsap.set(this, { height: 0, opacity: 0, overflow: 'hidden', display: 'none' });
-                });
+                // $('.home-product-item-content').each(function() {
+                //     gsap.set(this, { height: 0, opacity: 0, overflow: 'hidden', display: 'none' });
+                // });
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
                 
                 let itemCount = this.items.length;
                 
                 this.mainTrigger = ScrollTrigger.create({
                     trigger: '.home-product-wrap',
-                    start: 'top bottom',
+                    start: 'top+=30% bottom',
                     end: 'bottom-=30% top',
                     scrub: 0.5,
                     onUpdate: (self) => {
@@ -937,32 +937,20 @@ const script = () => {
                 $(this.items[index]).addClass('active');
                 $('.home-product-img-item').eq(index).addClass('active');
                 
-                $('.home-product-item-content').each(function(idx) {
+                $('.home-product-item-content').each(function(idx, item) {
                     if(idx === index) {
-                        let element = this;
-                        gsap.set(element, { height: 'auto', display: 'block' });
-                        let autoHeight = $(element).outerHeight();
-                        gsap.from(element, {
-                            height: 0,
-                            opacity: 0,
-                            duration: 0.4,
-                            ease: 'power2.out'
-                        });
-                        gsap.to(element, {
-                            opacity: 1,
-                            duration: 0.4,
-                            ease: 'power2.out'
-                        });
+                        $(item).slideDown();
                     } else {
-                        gsap.to(this, {
-                            height: 0,
-                            opacity: 0,
-                            duration: 0.3,
-                            ease: 'power2.in',
-                            onComplete: () => {
-                                $(this).css('display', 'none');
-                            }
-                        });
+                        // gsap.to(this, {
+                        //     height: 0,
+                        //     opacity: 0,
+                        //     duration: 0.3,
+                        //     ease: 'power2.in',
+                        //     onComplete: () => {
+                        //         $(this).css('display', 'none');
+                        //     }
+                        // });
+                        $(item).slideUp();
                     }
                 });
             }
