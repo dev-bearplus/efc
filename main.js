@@ -1003,6 +1003,31 @@ const script = () => {
                 super.destroy();
             }
         },
+        'home-trans-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if(viewport.w < 767) {
+                        this.initSwiper();
+                    }
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+            initSwiper() {
+                $('.home-trans-inner').addClass('swiper');
+                $('.home-trans-main-wrap').addClass('swiper-wrapper');
+                $('.home-trans-main').addClass('swiper-slide');
+                const swiper = new Swiper('.home-trans-inner', {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(0, 'rem'),
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'home-trust-wrap': class extends TriggerSetup {
             constructor() {
                 super();
