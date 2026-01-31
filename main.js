@@ -859,6 +859,112 @@ const script = () => {
     }
     const header = new Header();
     header.init();
+    class Footer {
+        constructor() {
+            this.el = null;
+        }
+        init() {
+            this.el = document.querySelector('.footer');
+            this.animationReveal();
+            this.validateEmail();
+            this.handleSubmit();
+        }
+        animationReveal() {
+            
+        }
+        validateEmail() {
+            const $input = $('.footer-form-input');
+            const $submitBtn = $('.footer-form-btn, .footer form [type="submit"]');
+            
+            if($input.length === 0) return;
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            $input.on('input', function() {
+                const email = $(this).val().trim();
+                
+                if(emailRegex.test(email)) {
+                    $submitBtn.addClass('active');
+                } else {
+                    $submitBtn.removeClass('active');
+                }
+            });
+        }
+        handleSubmit() {
+            const $form = $('.footer form');
+            if($form.length === 0) return;
+            
+            $form.on('submit', (e) => {
+                e.preventDefault();
+                
+                const $input = $('.footer-form-input');
+                const email = $input.val().trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if(emailRegex.test(email)) {
+                    this.submitHubspot(email);
+                }
+            });
+        }
+        submitHubspot(email) {
+            const hubspot = {
+                portalId: 530303,
+                formId: "1c950273-f9a4-4c0f-8d02-30db7d834225",
+                fields: [
+                    { name: "email", value: email }
+                ],
+            };
+            
+            const currentLocale = $('html').attr('lang');
+            if(currentLocale == 'en-GB') {
+                hubspot.formId = "f52180a2-350e-4dd9-b180-73f2b394dcb7";
+            }
+            else if(currentLocale == 'en-AU') {
+                hubspot.formId = "f9e6eafa-041f-4a90-9802-c7f5d04732e4";
+            }
+            
+            const { portalId, formId, fields } = hubspot;
+            let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+            
+            const dataSend = {
+                fields: fields.map(field => ({
+                    name: field.name,
+                    value: field.value
+                })),
+                context: {
+                    pageUri: window.location.href,
+                    pageName: "Footer Newsletter",
+                },
+            };
+            
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: JSON.stringify(dataSend),
+                dataType: "json",
+                headers: {
+                    accept: "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                contentType: "application/json",
+                success: (response) => {
+                    console.log('Newsletter subscription successful:', response);
+                    $('.footer-form-input').val('');
+                    $('.footer-form-btn, .footer form [type="submit"]').removeClass('active');
+                    $('.footer-form-message').addClass('active');
+                    setTimeout(() => {
+                        $('.footer-form-message').removeClass('active');
+                    }, 3000);
+                },
+                error: (xhr, resp, text) => {
+                    console.error('Newsletter subscription failed:', xhr, resp, text);
+                    alert('Something went wrong. Please try again.');
+                },
+            });
+        }
+    }
+    const footer = new Footer();
+    footer.init();
     function mapFormToObject(ele) {
         return ([...new FormData(ele).entries()].reduce(
            (prev, cur) => {
@@ -3499,14 +3605,10 @@ const script = () => {
                     $formSuccess.removeClass('active');
                 });
                 
-                formSubmitEvent.init({
-                    onlyWorkOnThisFormName: "Download Free Guide",
-                    onSuccess: () => onSuccessForm("#download-free-guide"),
-                });
                 $('.dt-guide-hero-form-submit').on('click', (e) => {
-                    if (!this.checkFormValid()) {
-                        e.preventDefault();
-                        console.log('Form invalid');
+                    e.preventDefault();
+                    if (this.checkFormValid()) {
+                        this.submitHubspot();
                     }
                 });
             }
@@ -3543,6 +3645,87 @@ const script = () => {
                     email.closest('.dt-guide-hero-form-input-gr').removeClass('error');
                 }
                 return isValid;
+            }
+            submitHubspot() {
+                const hubspot = {
+                    portalId: 530303,
+                    formId: "YOUR_GUIDE_DOWNLOAD_FORM_ID",
+                    fields: [
+                        { name: "firstname", value: (data) => data["Full-Name"] },
+                        { name: "email", value: (data) => data["Email"] }
+                    ],
+                };
+                
+                const currentLocale = $('html').attr('lang');
+                if(currentLocale == 'en-GB') {
+                    hubspot.formId = "YOUR_UK_GUIDE_FORM_ID";
+                }
+                else if(currentLocale == 'en-AU') {
+                    hubspot.formId = "YOUR_APAC_GUIDE_FORM_ID";
+                }
+                
+                const { portalId, formId, fields } = hubspot;
+                let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+                const data = mapFormToObject($('#download-free-guide form').get(0));
+                
+                const mapField = (data) => {
+                    if (!fields.length) return [];
+                    
+                    const result = fields.map((field) => {
+                        const { name, value } = field;
+                        if (!value) {
+                            return {
+                                name,
+                                value: data[name] || "",
+                            };
+                        } else {
+                            const getValue = value(data);
+                            return {
+                                name,
+                                value: getValue || "",
+                            };
+                        }
+                    });
+                    return result;
+                };
+                
+                const mappedFields = mapField(data);
+                const dataSend = {
+                    fields: mappedFields,
+                    context: {
+                        pageUri: window.location.href,
+                        pageName: "Guide Download",
+                    },
+                };
+                
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: JSON.stringify(dataSend),
+                    dataType: "json",
+                    headers: {
+                        accept: "application/json",
+                        "Access-Control-Allow-Origin": "*",
+                    },
+                    contentType: "application/json",
+                    success: (response) => {
+                        console.log('Form submitted successfully:', response);
+                        const $formSuccess = $('.dt-guide-form-success');
+                        const $inputGr = $('.dt-guide-hero-form-input-gr');
+                        
+                        $formSuccess.addClass('active');
+                        $('#download-free-guide form')[0].reset();
+                        $inputGr.removeClass('active filled error');
+                        
+                        setTimeout(() => {
+                            $formSuccess.removeClass('active');
+                        }, 5000);
+                    },
+                    error: (xhr, resp, text) => {
+                        console.error('Form submission failed:', xhr, resp, text);
+                        alert('Something went wrong. Please try again.');
+                    },
+                });
             }
             initContent() {
                 let tableItem = $('.dt-guide-hero-tab-title-item').eq(0).clone();
