@@ -4716,6 +4716,12 @@ const script = () => {
                         prevEl: '.how-progress-tab-content-item.item-prev',
                         nextEl: '.how-progress-tab-content-item.item-next',
                     },
+                    on: {
+                        slideChange: () => {
+                            const activeIndex = this.swiper.activeIndex;
+                            this.activateStep(activeIndex, 0);
+                        }
+                    }
                 });
                 
                 this.isDesktop = window.innerWidth >= 992;
