@@ -4689,6 +4689,7 @@ const script = () => {
                 super();
                 this.swiper = null;
                 this.isDesktop = false;
+                this.isUpdatingFromCode = false;
                 this.onTrigger = () => {
                     this.animationReveal();
                 };
@@ -4718,8 +4719,10 @@ const script = () => {
                     },
                     on: {
                         slideChange: () => {
-                            const activeIndex = this.swiper.activeIndex;
-                            this.activateStep(activeIndex, 0);
+                            if(!this.isUpdatingFromCode) {
+                                const activeIndex = this.swiper.activeIndex;
+                                this.activateStep(activeIndex, 0);
+                            }
                         }
                     }
                 });
@@ -4759,7 +4762,11 @@ const script = () => {
                 tabItemLines.eq(itemIndex).addClass('active');
                 
                 if(this.swiper && !this.swiper.destroyed) {
+                    this.isUpdatingFromCode = true;
                     this.swiper.slideTo(stepIndex);
+                    setTimeout(() => {
+                        this.isUpdatingFromCode = false;
+                    }, 100);
                 }
                 
                 if(viewport.w <= 992) {
