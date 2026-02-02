@@ -655,7 +655,7 @@ const script = () => {
 	}
 	const smoothScroll = new SmoothScroll();
     smoothScroll.init();
-
+    
     class TriggerSetup extends HTMLElement {
         constructor() {
             super();
@@ -729,6 +729,40 @@ const script = () => {
            init
         }
      })();
+     function setupLocationRedirect() {
+        let lang = $('html').attr('lang');
+        let CurrentPathUrl = window.location.pathname;
+        switch(lang) {
+            case 'en':
+                let urlRedirectToHome = ['/summit', '/efc-vs-white-belt', '/efc-vs-mind-body']
+                urlRedirectToHome.forEach(url => {
+                    if(CurrentPathUrl.includes(url)) {
+                        window.location.href = '/';
+                        return;
+                    }
+                });
+                break;
+            case 'en-AU':
+                let urlRedirectToHomeAU = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner']
+                urlRedirectToHomeAU.forEach(url => {
+                    if(CurrentPathUrl.includes(url)) {
+                        window.location.href = '/apac';
+                        return;
+                    }
+                });
+                break;
+            case 'en-GB':
+                let urlRedirectToHomeGB = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner', '/efc-vs-white-belt', '/efc-vs-mind-body']
+                urlRedirectToHomeGB.forEach(url => {
+                    if(CurrentPathUrl.includes(url)) {
+                        window.location.href = '/gb';
+                        return;
+                    }
+                });
+                break;
+        }
+     }
+     setupLocationRedirect();
     class Header {
         constructor() {
             this.el = null;
