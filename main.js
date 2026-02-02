@@ -995,6 +995,10 @@ const script = () => {
                 if(viewport.w <= 992) {
                     this.toggleItem(0);
                 }
+                else {
+                    activeItem(['.home-product-item', '.home-product-img-item'], 0);
+                    $('.home-product-item').eq(0).find('.home-product-item-content').slideDown();
+                }
             }
             setupScrollTriggers() {
                 if(this.mainTrigger) {
@@ -1164,7 +1168,7 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 4000,
+                    speed: 6000,
                     loop: true,
                     autoplay: {
                         delay: 0,
@@ -2777,7 +2781,7 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 4000,
+                    speed: 6000,
                     loop: true,
                     autoplay: {
                         delay: 0,
@@ -3971,7 +3975,7 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 4000,
+                    speed: 6000,
                     loop: true,
                     autoplay: {
                         delay: 0,
@@ -4352,7 +4356,7 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 4000,
+                    speed: 6000,
                     loop: true,
                     autoplay: {
                         delay: 0,
