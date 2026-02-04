@@ -1063,6 +1063,72 @@ const script = () => {
      }
 
     const HomePage = {
+        "home-partner-wrap": class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                const pathMaps = $('.path-map');
+                
+                if(pathMaps.length === 0) return;
+                
+                const tl = gsap.timeline({
+                    repeat: -1,
+                    repeatDelay: 1,
+                    scrollTrigger: {
+                        trigger: '.home-partner-wrap',
+                        start: 'top bottom-=20%',
+                        once: true
+                    }
+                });
+                
+                pathMaps.each((index, path) => {
+                    const totalLength = path.getTotalLength();
+                    gsap.set(path, {
+                        strokeDasharray: totalLength,
+                        strokeDashoffset: totalLength
+                    });
+                });
+                
+                const animatePath = (indices) => {
+                    const expandLabel = `expand-${indices.join('-')}`;
+                    
+                    indices.forEach(index => {
+                        const path = pathMaps[index];
+                        const totalLength = path.getTotalLength();
+                        
+                        tl.to(path, {
+                            strokeDashoffset: 0,
+                            duration: 1.2,
+                            ease: 'power2.inOut'
+                        }, expandLabel);
+                    });
+                    
+                    indices.forEach(index => {
+                        const path = pathMaps[index];
+                        const totalLength = path.getTotalLength();
+                        
+                        tl.to(path, {
+                            strokeDashoffset: -totalLength,
+                            duration: 1.2,
+                            ease: 'power2.inOut',
+                            onComplete: () => {
+                                gsap.set(path, { strokeDashoffset: totalLength });
+                            }
+                        }, `${expandLabel}+=1.5`);
+                    });
+                };
+                
+                animatePath([0, 1]);
+                tl.addLabel('delay1', '+=0.3');
+                animatePath([2]);
+                tl.addLabel('delay2', '+=0.3');
+                animatePath([3, 4]);
+            }
+        },
         'home-product-wrap': class extends TriggerSetup {
             constructor() {
                 super();
