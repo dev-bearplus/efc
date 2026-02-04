@@ -3,6 +3,93 @@ const script = () => {
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
+    
+    function autoRedirectByLocation() {
+        // Chỉ chạy 1 lần trong session (reset khi đóng browser)
+        // Đổi thành localStorage nếu muốn nhớ mãi mãi
+        const hasRedirected = sessionStorage.getItem('locationRedirected');
+        if(hasRedirected) {
+            console.log('Already redirected in this session');
+            return;
+        }
+        
+        const currentPath = window.location.pathname;
+        const localeConfig = {
+            default: { subdirectory: '' },
+            uk: { subdirectory: '/uk', countries: ['GB', 'IE'] },
+            apac: { subdirectory: '/apac', countries: ['AU', 'NZ'] }
+        };
+        
+        const detectLocationByTimezone = () => {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            if(timezone.includes('Europe')) {
+                return 'uk';
+            } else if(timezone.includes('Asia') || timezone.includes('Australia') || timezone.includes('Pacific')) {
+                return 'apac';
+            } else {
+                return 'default';
+            }
+        };
+        
+        const detectLocationByAPI = async () => {
+            try {
+                const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+                const data = await response.text();
+                const lines = data.split('\n');
+                const locLine = lines.find(line => line.startsWith('loc='));
+                const countryCode = locLine ? locLine.split('=')[1] : null;
+                
+                if(!countryCode) {
+                    return detectLocationByTimezone();
+                }
+                
+                for(const [locale, config] of Object.entries(localeConfig)) {
+                    if(config.countries.includes(countryCode)) {
+                        return locale;
+                    }
+                }
+                return 'default';
+            } catch (error) {
+                console.log('Cloudflare detection failed, using timezone fallback');
+                return detectLocationByTimezone();
+            }
+        };
+        
+        const getCurrentLocale = () => {
+            if(currentPath.startsWith('/uk')) return 'uk';
+            if(currentPath.startsWith('/apac')) return 'apac';
+            return 'default';
+        };
+        
+        const redirectToLocale = (targetLocale) => {
+            const currentLocale = getCurrentLocale();
+            if(currentLocale === targetLocale) return;
+            
+            let basePath = currentPath;
+            if(currentPath.startsWith('/uk')) {
+                basePath = currentPath.replace('/uk', '');
+            } else if(currentPath.startsWith('/apac')) {
+                basePath = currentPath.replace('/apac', '');
+            }
+            
+            const targetPath = localeConfig[targetLocale].subdirectory + (basePath || '/');
+            
+            // Mark đã redirect để không chạy lại trong session này
+            sessionStorage.setItem('locationRedirected', 'true');
+            
+            console.log(`Redirecting from ${currentLocale} to ${targetLocale}: ${targetPath}`);
+            window.location.href = targetPath;
+        };
+        
+        // Detect và redirect
+        detectLocationByAPI().then(detectedLocale => {
+            redirectToLocale(detectedLocale);
+        });
+    }
+    
+    // Uncomment dòng dưới để enable auto-redirect (chỉ chạy first load)
+    autoRedirectByLocation();
     function multiLineText(el){
         let line = $(el).next('.line-arr');
         let textMapLine = $(el).find('.bp-line');
@@ -512,43 +599,6 @@ const script = () => {
             }
         });
     }
-    class ParallaxImage {
-        constructor({ el, scaleOffset = 0.1 }) {
-            this.el = el;
-            this.elWrap = null;
-            this.scaleOffset = scaleOffset;
-            this.init();
-        }
-        init() {
-            this.elWrap = this.el.parentElement;
-            this.setup();
-        }
-        setup() {
-            const scalePercent = 100 + 5 + ((this.scaleOffset - 0.1) * 100);
-            gsap.set(this.el, {
-                width: scalePercent + '%',
-                height: $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
-            });
-            this.scrub();
-        }
-        scrub() {
-            let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
-            let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
-            this.updateOnScroll(dist, total);
-            smoothScroll.lenis.on('scroll', () => {
-                this.updateOnScroll(dist, total);
-            });
-        }
-        updateOnScroll(dist, total) {
-            if (this.el) {
-                if (isInViewport(this.elWrap)) {
-                    let percent = this.elWrap.getBoundingClientRect().top / total;
-                    gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
-                    gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
-                }
-            }
-        }
-    }
     class SmoothScroll {
 		constructor() {
 			this.lenis = null;
@@ -778,7 +828,7 @@ const script = () => {
             }
         }
         animationReveal() {
-            gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: .6, ease: 'power2.inOut'})
+            // gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: .6, ease: 'power2.inOut'})
         }
         updateOnScroll(inst) {
             this.toggleHide(inst);
@@ -904,7 +954,9 @@ const script = () => {
             this.handleSubmit();
         }
         animationReveal() {
-            
+            // get current year 
+            const currentYear = new Date().getFullYear();
+            $('.txt-year-current').text(currentYear);
         }
         validateEmail() {
             const $input = $('.footer-form-input');
@@ -1202,12 +1254,13 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 6000,
+                    speed: 12000,
                     loop: true,
                     autoplay: {
                         delay: 0,
-                        disableOnInteraction: false,
+                        disableOnInteraction: true,
                     },
+                    loopAdditionalSlides: 1,
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
@@ -1218,44 +1271,26 @@ const script = () => {
                         991: {
                             slidesPerView: 2,
                         }
-                    },
-                    on: {
-                        init: function() {
-                            updateNavigationState(this);
-                        },
-                        slideChange: function() {
-                            updateNavigationState(this);
-                        }
                     }
                 });
                 
-                function updateNavigationState(swiperInstance) {
-                    const prevBtn = $('.stories-support-control-item.item-prev');
-                    const nextBtn = $('.stories-support-control-item.item-next');
-                    
-                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
-                        prevBtn.addClass('swiper-button-disabled');
-                    } else {
-                        prevBtn.removeClass('swiper-button-disabled');
-                    }
-                    
-                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
-                        nextBtn.addClass('swiper-button-disabled');
-                    } else {
-                        nextBtn.removeClass('swiper-button-disabled');
-                    }
-                }
+                let originalSpeed = swiper.params.speed;
                 
-                $('.stories-support-control-item.item-next').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slideNext(600);
+                $('.stories-support-cms.swiper').on('mouseenter', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = 600;
+                        swiper.autoplay.stop();
+                        setTimeout(() => {
+                            swiper.setTranslate(swiper.getTranslate());
+                        }, 0);
+                    }
                 });
                 
-                $('.stories-support-control-item.item-prev').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slidePrev(600);
+                $('.stories-support-cms.swiper').on('mouseleave', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = originalSpeed;
+                        swiper.autoplay.start();
+                    }
                 });
             }
             animationScrub() {
@@ -2815,12 +2850,13 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 6000,
+                    speed: 12000,
                     loop: true,
                     autoplay: {
                         delay: 0,
-                        disableOnInteraction: false,
+                        disableOnInteraction: true,
                     },
+                    loopAdditionalSlides: 1,
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
@@ -2831,44 +2867,26 @@ const script = () => {
                         991: {
                             slidesPerView: 2,
                         }
-                    },
-                    on: {
-                        init: function() {
-                            updateNavigationState(this);
-                        },
-                        slideChange: function() {
-                            updateNavigationState(this);
-                        }
                     }
                 });
                 
-                function updateNavigationState(swiperInstance) {
-                    const prevBtn = $('.stories-support-control-item.item-prev');
-                    const nextBtn = $('.stories-support-control-item.item-next');
-                    
-                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
-                        prevBtn.addClass('swiper-button-disabled');
-                    } else {
-                        prevBtn.removeClass('swiper-button-disabled');
-                    }
-                    
-                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
-                        nextBtn.addClass('swiper-button-disabled');
-                    } else {
-                        nextBtn.removeClass('swiper-button-disabled');
-                    }
-                }
+                let originalSpeed = swiper.params.speed;
                 
-                $('.stories-support-control-item.item-next').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slideNext(600);
+                $('.stories-support-cms.swiper').on('mouseenter', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = 600;
+                        swiper.autoplay.stop();
+                        setTimeout(() => {
+                            swiper.setTranslate(swiper.getTranslate());
+                        }, 0);
+                    }
                 });
                 
-                $('.stories-support-control-item.item-prev').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slidePrev(600);
+                $('.stories-support-cms.swiper').on('mouseleave', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = originalSpeed;
+                        swiper.autoplay.start();
+                    }
                 });
             }
             animationScrub() {
@@ -4009,12 +4027,13 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 6000,
+                    speed: 12000,
                     loop: true,
                     autoplay: {
                         delay: 0,
-                        disableOnInteraction: false,
+                        disableOnInteraction: true,
                     },
+                    loopAdditionalSlides: 1,
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
@@ -4025,44 +4044,26 @@ const script = () => {
                         991: {
                             slidesPerView: 2,
                         }
-                    },
-                    on: {
-                        init: function() {
-                            updateNavigationState(this);
-                        },
-                        slideChange: function() {
-                            updateNavigationState(this);
-                        }
                     }
                 });
                 
-                function updateNavigationState(swiperInstance) {
-                    const prevBtn = $('.stories-support-control-item.item-prev');
-                    const nextBtn = $('.stories-support-control-item.item-next');
-                    
-                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
-                        prevBtn.addClass('swiper-button-disabled');
-                    } else {
-                        prevBtn.removeClass('swiper-button-disabled');
-                    }
-                    
-                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
-                        nextBtn.addClass('swiper-button-disabled');
-                    } else {
-                        nextBtn.removeClass('swiper-button-disabled');
-                    }
-                }
+                let originalSpeed = swiper.params.speed;
                 
-                $('.stories-support-control-item.item-next').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slideNext(600);
+                $('.stories-support-cms.swiper').on('mouseenter', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = 600;
+                        swiper.autoplay.stop();
+                        setTimeout(() => {
+                            swiper.setTranslate(swiper.getTranslate());
+                        }, 0);
+                    }
                 });
                 
-                $('.stories-support-control-item.item-prev').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slidePrev(600);
+                $('.stories-support-cms.swiper').on('mouseleave', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = originalSpeed;
+                        swiper.autoplay.start();
+                    }
                 });
             }
             animationScrub() {
@@ -4128,10 +4129,10 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w >= 992) {
-                    let topStick = viewport.h/2 - $('.about-team-head').height() / 2;
-                    $('.about-team-head').css('top', topStick);
-                }
+                // if(viewport.w >= 992) {
+                //     let topStick = viewport.h/2 - $('.about-team-head').height() / 2;
+                //     $('.about-team-head').css('top', topStick);
+                // }
             }
             initSwiper() {
                 console.log('initSwiper');
@@ -4390,12 +4391,13 @@ const script = () => {
                 let swiper = new Swiper('.stories-support-cms.swiper', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(20, 'rem'),
-                    speed: 6000,
+                    speed: 12000,
                     loop: true,
                     autoplay: {
                         delay: 0,
-                        disableOnInteraction: false,
+                        disableOnInteraction: true,
                     },
+                    loopAdditionalSlides: 1,
                     pagination: {
                         el: '.stories-support-pagi',
                         bulletClass: 'stories-support-pagi-item',
@@ -4406,44 +4408,26 @@ const script = () => {
                         991: {
                             slidesPerView: 2,
                         }
-                    },
-                    on: {
-                        init: function() {
-                            updateNavigationState(this);
-                        },
-                        slideChange: function() {
-                            updateNavigationState(this);
-                        }
                     }
                 });
                 
-                function updateNavigationState(swiperInstance) {
-                    const prevBtn = $('.stories-support-control-item.item-prev');
-                    const nextBtn = $('.stories-support-control-item.item-next');
-                    
-                    if(swiperInstance.isBeginning && !swiperInstance.params.loop) {
-                        prevBtn.addClass('swiper-button-disabled');
-                    } else {
-                        prevBtn.removeClass('swiper-button-disabled');
-                    }
-                    
-                    if(swiperInstance.isEnd && !swiperInstance.params.loop) {
-                        nextBtn.addClass('swiper-button-disabled');
-                    } else {
-                        nextBtn.removeClass('swiper-button-disabled');
-                    }
-                }
+                let originalSpeed = swiper.params.speed;
                 
-                $('.stories-support-control-item.item-next').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slideNext(600);
+                $('.stories-support-cms.swiper').on('mouseenter', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = 600;
+                        swiper.autoplay.stop();
+                        setTimeout(() => {
+                            swiper.setTranslate(swiper.getTranslate());
+                        }, 0);
+                    }
                 });
                 
-                $('.stories-support-control-item.item-prev').on('click', function (e) {
-                    e.preventDefault();
-                    swiper.autoplay.stop();
-                    swiper.slidePrev(600);
+                $('.stories-support-cms.swiper').on('mouseleave', function() {
+                    if(swiper.autoplay) {
+                        swiper.params.speed = originalSpeed;
+                        swiper.autoplay.start();
+                    }
                 });
             }
             animationScrub() {
