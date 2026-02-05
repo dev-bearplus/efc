@@ -81,7 +81,7 @@ const script = () => {
             sessionStorage.setItem('locationRedirected', 'true');
             
             console.log(`Redirecting from ${currentLocale} to ${targetLocale}: ${targetPath}`);
-            // window.location.href = targetPath;
+            window.location.href = targetPath;
         };
         
         // Detect và redirect
@@ -90,7 +90,7 @@ const script = () => {
         });
     }
     
-    // autoRedirectByLocation();
+    autoRedirectByLocation();
     function multiLineText(el){
         let line = $(el).next('.line-arr');
         let textMapLine = $(el).find('.bp-line');
