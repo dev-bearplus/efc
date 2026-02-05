@@ -1077,7 +1077,7 @@ const script = () => {
                 
                 const tl = gsap.timeline({
                     repeat: -1,
-                    repeatDelay: 1,
+                    repeatDelay: .1,
                     scrollTrigger: {
                         trigger: '.home-partner-wrap',
                         start: 'top bottom-=20%',
@@ -1102,7 +1102,7 @@ const script = () => {
                         
                         tl.to(path, {
                             strokeDashoffset: 0,
-                            duration: 1.2,
+                            duration: .8,
                             ease: 'power2.inOut'
                         }, expandLabel);
                     });
@@ -1113,7 +1113,7 @@ const script = () => {
                         
                         tl.to(path, {
                             strokeDashoffset: -totalLength,
-                            duration: 1.2,
+                            duration: .8,
                             ease: 'power2.inOut',
                             onComplete: () => {
                                 gsap.set(path, { strokeDashoffset: totalLength });
@@ -1123,9 +1123,9 @@ const script = () => {
                 };
                 
                 animatePath([0, 1]);
-                tl.addLabel('delay1', '+=0.3');
+                tl.addLabel('delay1', '+=0.2');
                 animatePath([2]);
-                tl.addLabel('delay2', '+=0.3');
+                tl.addLabel('delay2', '+=0.2');
                 animatePath([3, 4]);
             }
         },
