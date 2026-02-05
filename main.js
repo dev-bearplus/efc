@@ -3,10 +3,7 @@ const script = () => {
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
-    
     function autoRedirectByLocation() {
-        // Chỉ chạy 1 lần trong session (reset khi đóng browser)
-        // Đổi thành localStorage nếu muốn nhớ mãi mãi
         const hasRedirected = sessionStorage.getItem('locationRedirected');
         if(hasRedirected) {
             console.log('Already redirected in this session');
@@ -22,14 +19,20 @@ const script = () => {
         
         const detectLocationByTimezone = () => {
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            
-            if(timezone.includes('Europe')) {
+            console.log(timezone)
+            // UK: GB, IE
+            const ukTimezones = ['Europe/London', 'Europe/Dublin', 'Europe/Belfast'];
+            if(ukTimezones.some(tz => timezone.includes(tz))) {
                 return 'uk';
-            } else if(timezone.includes('Asia') || timezone.includes('Australia') || timezone.includes('Pacific')) {
-                return 'apac';
-            } else {
-                return 'default';
             }
+            
+            // APAC: AU, NZ
+            const apacTimezones = ['Australia', 'Pacific/Auckland'];
+            if(apacTimezones.some(tz => timezone.includes(tz))) {
+                return 'apac';
+            }
+            
+            return 'default';
         };
         
         const detectLocationByAPI = async () => {
@@ -75,11 +78,10 @@ const script = () => {
             
             const targetPath = localeConfig[targetLocale].subdirectory + (basePath || '/');
             
-            // Mark đã redirect để không chạy lại trong session này
             sessionStorage.setItem('locationRedirected', 'true');
             
             console.log(`Redirecting from ${currentLocale} to ${targetLocale}: ${targetPath}`);
-            window.location.href = targetPath;
+            // window.location.href = targetPath;
         };
         
         // Detect và redirect
@@ -88,8 +90,7 @@ const script = () => {
         });
     }
     
-    // Uncomment dòng dưới để enable auto-redirect (chỉ chạy first load)
-    autoRedirectByLocation();
+    // autoRedirectByLocation();
     function multiLineText(el){
         let line = $(el).next('.line-arr');
         let textMapLine = $(el).find('.bp-line');
