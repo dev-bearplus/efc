@@ -1125,10 +1125,8 @@ const script = () => {
                 };
                 
                 animatePath([0, 1]);
-                tl.addLabel('delay1', '+=0.2');
-                animatePath([2]);
-                tl.addLabel('delay2', '+=0.2');
-                animatePath([3, 4]);
+                tl.addLabel('delay1', '+=0.1');
+                animatePath([2, 3]);
             }
         },
         'home-product-wrap': class extends TriggerSetup {
@@ -1148,6 +1146,11 @@ const script = () => {
                 }
                 if(viewport.w <= 992) {
                     this.toggleItem(0);
+                    $('.home-product-img-item').each(function(index, item) {
+                        let list = $(item).find('.home-product-img-thumb-list').clone();
+                        console.log(list);
+                        $('.home-product-item').eq(index).find('.home-product-item-video').append(list);
+                    });
                 }
                 else {
                     activeItem(['.home-product-item', '.home-product-img-item'], 0);
@@ -1161,17 +1164,14 @@ const script = () => {
                 
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
-                // $('.home-product-item-content').each(function() {
-                //     gsap.set(this, { height: 0, opacity: 0, overflow: 'hidden', display: 'none' });
-                // });
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
                 
                 let itemCount = this.items.length;
                 
                 this.mainTrigger = ScrollTrigger.create({
                     trigger: '.home-product-wrap',
-                    start: 'top+=30% bottom',
-                    end: 'bottom-=30% top',
+                    start: 'top+=40% bottom',
+                    end: 'bottom-=20% top',
                     scrub: 0.5,
                     onUpdate: (self) => {
                         let progress = self.progress;
@@ -1179,17 +1179,19 @@ const script = () => {
                         
                         newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
                         
-                        let itemStartProgress = newIndex / itemCount;
-                        let itemEndProgress = (newIndex + 1) / itemCount;
-                        let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
-                        itemProgress = Math.max(0, Math.min(1, itemProgress));
-                        
                         if(newIndex !== this.currentIndex) {
                             this.currentIndex = newIndex;
                             this.activateItem(newIndex);
                         }
                         
-                        this.updateProgressBar(newIndex, itemProgress);
+                        let itemStartProgress = this.currentIndex / itemCount;
+                        let itemEndProgress = (this.currentIndex + 1) / itemCount;
+                        let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
+                        itemProgress = Math.max(0, Math.min(1, itemProgress));
+                        
+                        if(itemProgress >= 0 && itemProgress <= 1) {
+                            this.updateProgressBar(this.currentIndex, itemProgress);
+                        }
                     }
                 });
             }
@@ -1225,6 +1227,22 @@ const script = () => {
                     let xPos = -101 + (progress * 101);
                     gsap.set(progressBar[0], { x: xPos + '%' });
                 }
+                
+                if(index === 0) {
+                    const thumbContainer = $('.home-product-img-item').eq(index).find('.home-product-img-thumb');
+                    const thumbList = thumbContainer.find('.home-product-img-thumb-list');
+                    
+                    if(thumbList.length > 0 && thumbContainer.length > 0) {
+                        const containerWidth = thumbContainer.outerWidth();
+                        const listWidth = thumbList.outerWidth();
+                        const maxTranslate = listWidth - containerWidth;
+                        
+                        if(maxTranslate > 0) {
+                            const translateX = -(progress * maxTranslate);
+                            gsap.set(thumbList[0], { x: translateX + 'px' });
+                        }
+                    }
+                }
             }
             toggleItem(index) {
                 if($(this.items[index]).hasClass('active')) {
@@ -1239,7 +1257,13 @@ const script = () => {
                 }
             }
             interact() {
-                if(viewport.w <= 992) {
+                if(viewport.w > 992) {
+                    this.items.each((index, item) => {
+                        $(item).find('.home-product-item-head').on('click', (e) => {
+                            this.scrollToItem(index);
+                        });
+                    });
+                } else {
                     this.items.each((index, item) => {
                         $(item).find('.home-product-item-head').on('click', (e) => {
                             this.toggleItem(index);
@@ -1258,6 +1282,29 @@ const script = () => {
                     $(".popup-video").removeClass('active');
                     $(".popup-video-inner iframe").attr('src', '');
                 });
+            }
+            scrollToItem(index) {
+                if(!this.mainTrigger) return;
+                
+                const itemCount = this.items.length;
+                const targetProgress = (index + 0.02) / itemCount;
+                
+                const scrollStart = this.mainTrigger.start;
+                const scrollEnd = this.mainTrigger.end;
+                const scrollDistance = scrollEnd - scrollStart;
+                const targetScroll = scrollStart + (scrollDistance * targetProgress);
+                
+                if(smoothScroll && smoothScroll.lenis) {
+                    smoothScroll.scrollTo(targetScroll, {
+                        duration: 1,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                    });
+                } else {
+                    window.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
+                }
             }
             destroy() {
                 if(this.mainTrigger) {
