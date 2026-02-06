@@ -1079,7 +1079,7 @@ const script = () => {
                 
                 const tl = gsap.timeline({
                     repeat: -1,
-                    repeatDelay: .1,
+                    repeatDelay: 0,
                     scrollTrigger: {
                         trigger: '.home-partner-wrap',
                         start: 'top bottom-=20%',
@@ -1125,7 +1125,7 @@ const script = () => {
                 };
                 
                 animatePath([0, 1]);
-                tl.addLabel('delay1', '+=0.1');
+                tl.addLabel('delay1', '-=0.1');
                 animatePath([2, 3]);
             }
         },
@@ -1151,6 +1151,9 @@ const script = () => {
                         console.log(list);
                         $('.home-product-item').eq(index).find('.home-product-item-video').append(list);
                     });
+                    let marquee = new Marquee($('.home-product-item:first-child .home-product-item-video'), $('.home-product-item:first-child .home-product-img-thumb-list'), 120);
+                    marquee.setup();
+                    marquee.play();
                 }
                 else {
                     activeItem(['.home-product-item', '.home-product-img-item'], 0);
@@ -1407,9 +1410,27 @@ const script = () => {
                 //         swiper.autoplay.start();
                 //     }
                 // });
-                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
-                marquee.setup();
-                marquee.play();
+                if(viewport.w > 992) {
+                    let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                    marquee.setup();
+                    marquee.play();
+                }
+                else {
+                    $('.stories-support-cms').addClass('swiper');
+                    $('.stories-support-list').addClass('swiper-wrapper');
+                    $('.stories-support-item').addClass('swiper-slide');
+                    $('.stories-support-cms').css('grid-column-gap', 0);
+                    const swiper = new Swiper('.stories-support-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem'),
+                        pagination: {
+                            el: '.stories-support-pagi',
+                            bulletClass: 'stories-support-pagi-item',
+                            bulletActiveClass: 'active',
+                            clickable: true,
+                        }
+                    });
+                }
             }
             animationScrub() {
             }
@@ -1963,11 +1984,9 @@ const script = () => {
                 if(viewport.w > 991) return;
                 
                 const $itemIc = $currentTarget.find('.faq-main-category-item-ic .w-embed');
-                const $itemTitle = $currentTarget.find('.faq-main-category-item-title .txt');
-                
+                const $itemTitle = $currentTarget.find('.faq-main-category-item-title .txt').eq(0);
                 this.$els.categoryStickyIc.html($itemIc.html());
-                this.$els.categoryStickyTitle.text($itemTitle.text());
-                this.$els.categoryStickyInner.removeClass('active');
+                this.$els.categoryStickyTitle.text($itemTitle.eq(0).text());
             }
             
             interact() {
@@ -1985,6 +2004,7 @@ const script = () => {
                     this.updateMobileCategoryUI($current);
                     this.$els.categoryItems.removeClass('active');
                     $current.addClass('active');
+                    this.$els.categoryStickyInner.removeClass('active');
                     
                     const dataTitle = $current.attr('data-title');
                     const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
@@ -2965,9 +2985,27 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
-                marquee.setup();
-                marquee.play();
+                if(viewport.w > 992) {
+                    let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                    marquee.setup();
+                    marquee.play();
+                }
+                else {
+                    $('.stories-support-cms').addClass('swiper');
+                    $('.stories-support-list').addClass('swiper-wrapper');
+                    $('.stories-support-item').addClass('swiper-slide');
+                    $('.stories-support-cms').css('grid-column-gap', 0);
+                    const swiper = new Swiper('.stories-support-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem'),
+                        pagination: {
+                            el: '.stories-support-pagi',
+                            bulletClass: 'stories-support-pagi-item',
+                            bulletActiveClass: 'active',
+                            clickable: true,
+                        }
+                    });
+                }
             }
             animationScrub() {
             }
@@ -3003,9 +3041,27 @@ const script = () => {
                 if($('.stories-fb-item').length == 0) {
                     $('.stories-fb').hide();
                 }
-                let marquee = new Marquee($('.stories-fb-cms'), $('.stories-fb-list'), 120, 'right');
-                marquee.setup();
-                marquee.play();
+                if(viewport.w > 992) {
+                    let marquee = new Marquee($('.stories-fb-cms'), $('.stories-fb-list'), 120, 'right');
+                    marquee.setup();
+                    marquee.play();
+                }
+                else {
+                    $('.stories-fb-cms').addClass('swiper');
+                    $('.stories-fb-list').addClass('swiper-wrapper');
+                    $('.stories-fb-item').addClass('swiper-slide');
+                    $('.stories-fb-cms').css('grid-column-gap', 0);
+                    const swiper = new Swiper('.stories-fb-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem'),
+                        pagination: {
+                            el: '.stories-fb-pagi',
+                            bulletClass: 'stories-fb-pagi-item',
+                            bulletActiveClass: 'active',
+                            clickable: true,
+                        }
+                    });
+                }
             }
             animationScrub() {
             }
@@ -4093,9 +4149,45 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
-                marquee.setup();
-                marquee.play();
+                if(viewport.w > 992) {
+                    if(viewport.w > 992) {
+                        let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                        marquee.setup();
+                        marquee.play();
+                    }
+                    else {
+                        $('.stories-support-cms').addClass('swiper');
+                        $('.stories-support-list').addClass('swiper-wrapper');
+                        $('.stories-support-item').addClass('swiper-slide');
+                        $('.stories-support-cms').css('grid-column-gap', 0);
+                        const swiper = new Swiper('.stories-support-cms', {
+                            slidesPerView: 'auto',
+                            spaceBetween: cvUnit(20, 'rem'),
+                            pagination: {
+                                el: '.stories-support-pagi',
+                                bulletClass: 'stories-support-pagi-item',
+                                bulletActiveClass: 'active',
+                                clickable: true,
+                            }
+                        });
+                    }
+                }
+                else {
+                    $('.stories-support-cms').addClass('swiper');
+                    $('.stories-support-list').addClass('swiper-wrapper');
+                    $('.stories-support-item').addClass('swiper-slide');
+                    $('.stories-support-cms').css('grid-column-gap', 0);
+                    const swiper = new Swiper('.stories-support-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem'),
+                        pagination: {
+                            el: '.stories-support-pagi',
+                            bulletClass: 'stories-support-pagi-item',
+                            bulletActiveClass: 'active',
+                            clickable: true,
+                        }
+                    });
+                }
             }
             animationScrub() {
             }
@@ -4419,9 +4511,27 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
-                marquee.setup();
-                marquee.play();
+                if(viewport.w > 992) {
+                    let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                    marquee.setup();
+                    marquee.play();
+                }
+                else {
+                    $('.stories-support-cms').addClass('swiper');
+                    $('.stories-support-list').addClass('swiper-wrapper');
+                    $('.stories-support-item').addClass('swiper-slide');
+                    $('.stories-support-cms').css('grid-column-gap', 0);
+                    const swiper = new Swiper('.stories-support-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(20, 'rem'),
+                        pagination: {
+                            el: '.stories-support-pagi',
+                            bulletClass: 'stories-support-pagi-item',
+                            bulletActiveClass: 'active',
+                            clickable: true,
+                        }
+                    });
+                }
             }
             animationScrub() {
             }
