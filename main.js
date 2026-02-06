@@ -806,7 +806,7 @@ const script = () => {
                 let urlRedirectToHomeGB = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner', '/efc-vs-white-belt', '/efc-vs-mind-body']
                 urlRedirectToHomeGB.forEach(url => {
                     if(CurrentPathUrl.includes(url)) {
-                        window.location.href = '/gb';
+                        window.location.href = '/uk';
                         return;
                     }
                 });
@@ -907,6 +907,7 @@ const script = () => {
                     $item.addClass('active');
                     let text = $item.find('.txt').text();
                     $('.header-lang-txt .txt').text(text);
+                    $('.header-lang-ic img').attr('src', $item.find('img').attr('src'));
                 }
             });
         }
