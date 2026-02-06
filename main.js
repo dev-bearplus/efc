@@ -1170,8 +1170,8 @@ const script = () => {
                 
                 this.mainTrigger = ScrollTrigger.create({
                     trigger: '.home-product-wrap',
-                    start: 'top+=40% bottom',
-                    end: 'bottom-=20% top',
+                    start: 'top+=30% center',
+                    end: 'bottom-=20% center',
                     scrub: 0.5,
                     onUpdate: (self) => {
                         let progress = self.progress;
@@ -1366,47 +1366,50 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let swiper = new Swiper('.stories-support-cms.swiper', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(20, 'rem'),
-                    speed: 12000,
-                    loop: true,
-                    autoplay: {
-                        delay: 0,
-                        disableOnInteraction: true,
-                    },
-                    loopAdditionalSlides: 1,
-                    pagination: {
-                        el: '.stories-support-pagi',
-                        bulletClass: 'stories-support-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,  
-                    },
-                    breakpoints: {
-                        991: {
-                            slidesPerView: 2,
-                        }
-                    }
-                });
+                // let swiper = new Swiper('.stories-support-cms.swiper', {
+                //     slidesPerView: 'auto',
+                //     spaceBetween: cvUnit(20, 'rem'),
+                //     speed: 12000,
+                //     loop: true,
+                //     autoplay: {
+                //         delay: 0,
+                //         disableOnInteraction: true,
+                //     },
+                //     loopAdditionalSlides: 1,
+                //     pagination: {
+                //         el: '.stories-support-pagi',
+                //         bulletClass: 'stories-support-pagi-item',
+                //         bulletActiveClass: 'active',
+                //         clickable: true,  
+                //     },
+                //     breakpoints: {
+                //         991: {
+                //             slidesPerView: 2,
+                //         }
+                //     }
+                // });
                 
-                let originalSpeed = swiper.params.speed;
+                // let originalSpeed = swiper.params.speed;
                 
-                $('.stories-support-cms.swiper').on('mouseenter', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = 600;
-                        swiper.autoplay.stop();
-                        setTimeout(() => {
-                            swiper.setTranslate(swiper.getTranslate());
-                        }, 0);
-                    }
-                });
+                // $('.stories-support-cms.swiper').on('mouseenter', function() {
+                //     if(swiper.autoplay) {
+                //         swiper.params.speed = 600;
+                //         swiper.autoplay.stop();
+                //         setTimeout(() => {
+                //             swiper.setTranslate(swiper.getTranslate());
+                //         }, 0);
+                //     }
+                // });
                 
-                $('.stories-support-cms.swiper').on('mouseleave', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = originalSpeed;
-                        swiper.autoplay.start();
-                    }
-                });
+                // $('.stories-support-cms.swiper').on('mouseleave', function() {
+                //     if(swiper.autoplay) {
+                //         swiper.params.speed = originalSpeed;
+                //         swiper.autoplay.start();
+                //     }
+                // });
+                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                marquee.setup();
+                marquee.play();
             }
             animationScrub() {
             }
@@ -1562,7 +1565,7 @@ const script = () => {
             }
             animationReveal() {
                 $('.faq-item-sub').hide();
-                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                // this.activeFaqItem($(this).find('.faq-item').eq(0));
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
@@ -2962,47 +2965,9 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let swiper = new Swiper('.stories-support-cms.swiper', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(20, 'rem'),
-                    speed: 12000,
-                    loop: true,
-                    autoplay: {
-                        delay: 0,
-                        disableOnInteraction: true,
-                    },
-                    loopAdditionalSlides: 1,
-                    pagination: {
-                        el: '.stories-support-pagi',
-                        bulletClass: 'stories-support-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,  
-                    },
-                    breakpoints: {
-                        991: {
-                            slidesPerView: 2,
-                        }
-                    }
-                });
-                
-                let originalSpeed = swiper.params.speed;
-                
-                $('.stories-support-cms.swiper').on('mouseenter', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = 600;
-                        swiper.autoplay.stop();
-                        setTimeout(() => {
-                            swiper.setTranslate(swiper.getTranslate());
-                        }, 0);
-                    }
-                });
-                
-                $('.stories-support-cms.swiper').on('mouseleave', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = originalSpeed;
-                        swiper.autoplay.start();
-                    }
-                });
+                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                marquee.setup();
+                marquee.play();
             }
             animationScrub() {
             }
@@ -3038,20 +3003,9 @@ const script = () => {
                 if($('.stories-fb-item').length == 0) {
                     $('.stories-fb').hide();
                 }
-                let swiper = new Swiper('.stories-fb-cms.swiper', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(20, 'rem'),
-                    navigation: {
-                        nextEl: '.stories-fb-control-item.item-next',
-                        prevEl: '.stories-fb-control-item.item-prev',
-                    },
-                    pagination: {
-                        el: '.stories-fb-pagi',
-                        bulletClass: 'stories-fb-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,  
-                      }
-                });
+                let marquee = new Marquee($('.stories-fb-cms'), $('.stories-fb-list'), 120, 'right');
+                marquee.setup();
+                marquee.play();
             }
             animationScrub() {
             }
@@ -3292,7 +3246,7 @@ const script = () => {
             }
             animationReveal() {
                 $('.faq-item-sub').hide();
-                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                // this.activeFaqItem($(this).find('.faq-item').eq(0));
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
@@ -4139,47 +4093,9 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let swiper = new Swiper('.stories-support-cms.swiper', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(20, 'rem'),
-                    speed: 12000,
-                    loop: true,
-                    autoplay: {
-                        delay: 0,
-                        disableOnInteraction: true,
-                    },
-                    loopAdditionalSlides: 1,
-                    pagination: {
-                        el: '.stories-support-pagi',
-                        bulletClass: 'stories-support-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,  
-                    },
-                    breakpoints: {
-                        991: {
-                            slidesPerView: 2,
-                        }
-                    }
-                });
-                
-                let originalSpeed = swiper.params.speed;
-                
-                $('.stories-support-cms.swiper').on('mouseenter', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = 600;
-                        swiper.autoplay.stop();
-                        setTimeout(() => {
-                            swiper.setTranslate(swiper.getTranslate());
-                        }, 0);
-                    }
-                });
-                
-                $('.stories-support-cms.swiper').on('mouseleave', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = originalSpeed;
-                        swiper.autoplay.start();
-                    }
-                });
+                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                marquee.setup();
+                marquee.play();
             }
             animationScrub() {
             }
@@ -4503,47 +4419,9 @@ const script = () => {
                 };
             }
             animationReveal() {
-                let swiper = new Swiper('.stories-support-cms.swiper', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(20, 'rem'),
-                    speed: 12000,
-                    loop: true,
-                    autoplay: {
-                        delay: 0,
-                        disableOnInteraction: true,
-                    },
-                    loopAdditionalSlides: 1,
-                    pagination: {
-                        el: '.stories-support-pagi',
-                        bulletClass: 'stories-support-pagi-item',
-                        bulletActiveClass: 'active',
-                        clickable: true,  
-                    },
-                    breakpoints: {
-                        991: {
-                            slidesPerView: 2,
-                        }
-                    }
-                });
-                
-                let originalSpeed = swiper.params.speed;
-                
-                $('.stories-support-cms.swiper').on('mouseenter', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = 600;
-                        swiper.autoplay.stop();
-                        setTimeout(() => {
-                            swiper.setTranslate(swiper.getTranslate());
-                        }, 0);
-                    }
-                });
-                
-                $('.stories-support-cms.swiper').on('mouseleave', function() {
-                    if(swiper.autoplay) {
-                        swiper.params.speed = originalSpeed;
-                        swiper.autoplay.start();
-                    }
-                });
+                let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
+                marquee.setup();
+                marquee.play();
             }
             animationScrub() {
             }
@@ -4575,7 +4453,7 @@ const script = () => {
             }
             animationReveal() {
                 $('.faq-item-sub').hide();
-                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                // this.activeFaqItem($(this).find('.faq-item').eq(0));
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
@@ -4650,7 +4528,7 @@ const script = () => {
             }
             animationReveal() {
                 $('.faq-item-sub').hide();
-                this.activeFaqItem($(this).find('.faq-item').eq(0));
+                // this.activeFaqItem($(this).find('.faq-item').eq(0));
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
