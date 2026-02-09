@@ -2475,6 +2475,18 @@ const script = () => {
                 if(viewport.w < 767) {
                     this.initSwiper();
                 }
+                if($('.growth-articles-item').length == 0) {
+                    $('.growth-articles').hide();
+                }
+                if($('.growth-guide-item').length == 0) {
+                    $('.growth-guide').hide();
+                }
+                if($('.growth-training-item').length == 0) {
+                    $('.growth-training').hide();
+                }
+                if($('.growth-event-item').length == 0) {
+                    $('.growth-event').hide();
+                }
             }
             animationScrub() {
             }   
