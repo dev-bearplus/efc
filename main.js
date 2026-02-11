@@ -4713,6 +4713,10 @@ const script = () => {
         'fea-hero-wrap': class extends TriggerSetup {
             constructor() {
                 super();
+                this.scrollTrigger = null;
+                this.currentIndex = -1;
+                this.items = null;
+                this.isManualClick = false;
                 this.onTrigger = () => {
                     this.animationReveal();
                     this.interact();
@@ -4742,14 +4746,45 @@ const script = () => {
             }
             setupTimeline() {
                 this.items.removeClass('active');
-                this.items.eq(0).addClass('active');
-                this.items.eq(0).find('.fea-hero-intro-item-content').slideDown();
+                $('.fea-hero-intro-item-content').hide();
                 $('.fea-hero-intro-img-item').removeClass('active');
-                $('.fea-hero-intro-img-item').eq(0).addClass('active');
+                
+                const itemCount = this.items.length;
+                this.currentIndex = -1;
+                
+                this.scrollTrigger = ScrollTrigger.create({
+                    trigger: '.fea-hero-intro-wrap',
+                    start: 'top+=25% bottom',
+                    end: 'bottom-=45% top',
+                    scrub: 0.5,
+                    onUpdate: (self) => {
+                        if(this.isManualClick) return;
+                        
+                        let progress = self.progress;
+                        let newIndex = Math.floor(progress * itemCount);
+                        
+                        newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
+                        
+                        if(newIndex !== this.currentIndex) {
+                            this.currentIndex = newIndex;
+                            this.activateItem(newIndex);
+                        }
+                        
+                        let itemStartProgress = this.currentIndex / itemCount;
+                        let itemEndProgress = (this.currentIndex + 1) / itemCount;
+                        let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
+                        itemProgress = Math.max(0, Math.min(1, itemProgress));
+                        
+                        if(itemProgress >= 0 && itemProgress <= 1) {
+                            this.updateProgressBar(this.currentIndex, itemProgress);
+                        }
+                    }
+                });
             }
             activateItem(index) {
                 this.items.removeClass('active');
                 $('.fea-hero-intro-img-item').removeClass('active');
+                gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
                 
                 this.items.eq(index).addClass('active');
                 $('.fea-hero-intro-img-item').eq(index).addClass('active');
@@ -4757,12 +4792,19 @@ const script = () => {
                 $('.fea-hero-intro-item-content').slideUp(400);
                 this.items.eq(index).find('.fea-hero-intro-item-content').slideDown(400);
             }
+            updateProgressBar(index, progress) {
+                let progressBar = this.items.eq(index).find('.fea-hero-intro-item-line-progress');
+                if(progressBar.length > 0) {
+                    let xPos = -101 + (progress * 101);
+                    gsap.set(progressBar[0], { x: xPos + '%' });
+                }
+            }
             interact() {
                 if(viewport.w >= 992 && this.items) {
                     this.items.each((index, item) => {
                         $(item).find('.fea-hero-intro-item-head').on('click', (e) => {
                             e.preventDefault();
-                            this.activateItem(index);
+                            this.jumpToItem(index);
                         });
                     });
                 }
@@ -4785,7 +4827,43 @@ const script = () => {
                     });
                 }
             }
+            jumpToItem(index) {
+                if(!this.scrollTrigger) return;
+                
+                this.isManualClick = true;
+                this.currentIndex = index;
+                this.activateItem(index);
+                this.updateProgressBar(index, 0);
+                
+                const itemCount = this.items.length;
+                const targetProgress = (index + 0.02) / itemCount;
+                
+                const scrollStart = this.scrollTrigger.start;
+                const scrollEnd = this.scrollTrigger.end;
+                const scrollDistance = scrollEnd - scrollStart;
+                const targetScroll = scrollStart + (scrollDistance * targetProgress);
+                
+                if(smoothScroll && smoothScroll.lenis) {
+                    smoothScroll.scrollTo(targetScroll, {
+                        duration: 0.8,
+                        immediate: false
+                    });
+                } else {
+                    window.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                setTimeout(() => {
+                    this.isManualClick = false;
+                }, 1000);
+            }
             destroy() {
+                if(this.scrollTrigger) {
+                    this.scrollTrigger.kill();
+                    this.scrollTrigger = null;
+                }
                 $('.fea-hero-intro-item-head').off('click');
                 super.destroy();
             }
