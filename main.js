@@ -4,6 +4,7 @@ const script = () => {
         invalidateOnRefresh: true
     });
     function autoRedirectByLocation() {
+        console.log('autoRedirectByLocation')
         const hasRedirected = sessionStorage.getItem('locationRedirected');
         if(hasRedirected) {
             console.log('Already redirected in this session');
@@ -67,7 +68,10 @@ const script = () => {
         
         const redirectToLocale = (targetLocale) => {
             const currentLocale = getCurrentLocale();
-            if(currentLocale === targetLocale) return;
+            if(currentLocale === targetLocale) {
+                sessionStorage.setItem('locationRedirected', 'true');
+                return;
+            };
             
             let basePath = currentPath;
             if(currentPath.startsWith('/uk')) {
@@ -1054,14 +1058,21 @@ const script = () => {
     const footer = new Footer();
     footer.init();
     function mapFormToObject(ele) {
-        return ([...new FormData(ele).entries()].reduce(
-           (prev, cur) => {
-              const name = cur[0];
-              const val = cur[1];
-              return { ...prev, [name]: val };
-           },
-           {}
-        ));
+        const formData = new FormData(ele);
+        const result = {};
+        
+        for(const [name, val] of formData.entries()) {
+            result[name] = val;
+        }
+        
+        $(ele).find('input[type="checkbox"]').each(function() {
+            const name = $(this).attr('name');
+            if(name) {
+                result[name] = this.checked;
+            }
+        });
+        
+        return result;
      }
 
     const HomePage = {
@@ -2362,7 +2373,8 @@ const script = () => {
                         { name: "lastname", value: (data) => data["Last-Name"] },
                         { name: "email", value: (data) => data["Email"] },
                         { name: "what_can_we_help_you_with", value: (data) => data["Challenge"] },
-                        { name: "message", value: (data) => data["Message"] }
+                        { name: "message", value: (data) => data["Message"] },
+                        { name: "LEGAL_CONSENT.subscription_type_1997065850", value: (data) => data["wants_marketing_emails"] }
                     ],
                 };
                 if($('input[name="Location"]').length > 0) {
