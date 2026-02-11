@@ -10,7 +10,7 @@ const script = () => {
             console.log('Already redirected in this session');
             return;
         }
-        
+        sessionStorage.setItem('locationRedirected', 'true');
         const currentPath = window.location.pathname;
         const localeConfig = {
             default: { subdirectory: '' },
@@ -69,7 +69,6 @@ const script = () => {
         const redirectToLocale = (targetLocale) => {
             const currentLocale = getCurrentLocale();
             if(currentLocale === targetLocale) {
-                sessionStorage.setItem('locationRedirected', 'true');
                 return;
             };
             
@@ -81,10 +80,6 @@ const script = () => {
             }
             
             const targetPath = localeConfig[targetLocale].subdirectory + (basePath || '/');
-            
-            sessionStorage.setItem('locationRedirected', 'true');
-            
-            console.log(`Redirecting from ${currentLocale} to ${targetLocale}: ${targetPath}`);
             window.location.href = targetPath;
         };
         
