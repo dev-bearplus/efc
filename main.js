@@ -2369,7 +2369,7 @@ const script = () => {
                         { name: "email", value: (data) => data["Email"] },
                         { name: "what_can_we_help_you_with", value: (data) => data["Challenge"] },
                         { name: "message", value: (data) => data["Message"] },
-                        { name: "LEGAL_CONSENT.subscription_type_1997065850", value: (data) => data["wants_marketing_emails"] }
+                        { name: "wants_marketing_emails", value: (data) => data["wants_marketing_emails"] }
                     ],
                 };
                 if($('input[name="Location"]').length > 0) {
@@ -3725,6 +3725,36 @@ const script = () => {
                 }
             }
             interact() {
+                $( 'a[data-download]').on('click', async function (e) {
+                    e.preventDefault();
+                    console.log('Downloading file...');
+                    const url = $(this).attr("href");
+                    const filename = $(this).data("download");
+                    
+                    try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const objectUrl = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement("a");
+                        a.href = objectUrl;
+                        a.download = filename;
+                        
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(objectUrl);
+                        }, 100);
+                        
+                        console.log('Download started:', filename);
+                    } catch (error) {
+                        console.error('Download failed:', error);
+                        window.open(url, '_blank');
+                    }
+                });
+                  
                 if(viewport.w < 992) {
                     $('.dt-guide-hero-tab-inner:not(.mode-dk)').on('click', function(e) {
                         e.preventDefault();
@@ -3779,7 +3809,7 @@ const script = () => {
                     $parent.removeClass('active')
                         .toggleClass('filled', !!$current.val());
                 });
-                const $formSuccess = $('.dt-guide-form-success');
+                const $formSuccess = $('.dt-guide-hero-form-mess');
                 const $inputGr = $('.dt-guide-hero-form-input-gr');
                 
                 const formReset = (form) => {
@@ -3795,11 +3825,11 @@ const script = () => {
                     console.log('success');
                     $formSuccess.addClass('active');
                     formReset(form);
-                    setTimeout(() => {
-                        $formSuccess.removeClass('active');
-                    }, 5000);
                 }
-                
+                formSubmitEvent.init({
+                    onlyWorkOnThisFormName: "Download Free Guide",
+                    onSuccess: () => onSuccessForm("#download-free-guide"),
+                });
                 $('.dt-guide-form-success-btn').on('click', (e) => {
                     e.preventDefault();
                     $formSuccess.removeClass('active');
@@ -3914,16 +3944,12 @@ const script = () => {
                     contentType: "application/json",
                     success: (response) => {
                         console.log('Form submitted successfully:', response);
-                        const $formSuccess = $('.dt-guide-form-success');
+                        const $formSuccess = $('.dt-guide-hero-form-mess');
                         const $inputGr = $('.dt-guide-hero-form-input-gr');
-                        
+                        $('.dt-guide-hero-form-main').removeClass('active');
                         $formSuccess.addClass('active');
                         $('#download-free-guide form')[0].reset();
                         $inputGr.removeClass('active filled error');
-                        
-                        setTimeout(() => {
-                            $formSuccess.removeClass('active');
-                        }, 5000);
                     },
                     error: (xhr, resp, text) => {
                         console.error('Form submission failed:', xhr, resp, text);
