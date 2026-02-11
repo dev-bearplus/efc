@@ -1071,6 +1071,16 @@ const script = () => {
      }
 
     const HomePage = {
+        "home-hero-wrap": class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+            }
+        },
         "home-partner-wrap": class extends TriggerSetup {
             constructor() {
                 super();
@@ -3056,6 +3066,20 @@ const script = () => {
                     this.interact();
                 };
             }
+            async  fetchReviews() {
+                const res = await fetch(
+                  "https://places.googleapis.com/v1/places/ChIJlbDSW2JIcUgRcMQMDznhlrg",
+                  {
+                    headers: {
+                      "X-Goog-Api-Key": "AIzaSyDH37VLLUhc-z6_s_ahMatC8ruQlmrNJAc",
+                      "X-Goog-FieldMask": "displayName,rating,userRatingCount,reviews"
+                    }
+                  }
+                );
+              
+                const data = await res.json();
+                console.log(data);
+              }
             animationReveal() {
                 if($('.stories-fb-item').length == 0) {
                     $('.stories-fb').hide();
