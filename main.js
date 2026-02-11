@@ -4961,10 +4961,6 @@ const script = () => {
                 this.swiper = new Swiper('.how-progress-tab-cms', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(24, 'rem'),
-                    navigation: {
-                        prevEl: '.how-progress-tab-content-item.item-prev',
-                        nextEl: '.how-progress-tab-content-item.item-next',
-                    },
                     on: {
                         slideChange: () => {
                             if(!this.isUpdatingFromCode) {
@@ -4974,6 +4970,8 @@ const script = () => {
                         }
                     }
                 });
+                
+                this.setupNavigation();
                 
                 this.isDesktop = window.innerWidth >= 992;
                 
@@ -4987,6 +4985,69 @@ const script = () => {
                 }
             }
             
+            setupNavigation() {
+                $('.how-progress-tab-content-item.item-next').on('click', (e) => {
+                    e.preventDefault();
+                    this.navigateNext();
+                });
+                
+                $('.how-progress-tab-content-item.item-prev').on('click', (e) => {
+                    e.preventDefault();
+                    this.navigatePrev();
+                });
+            }
+            navigateNext() {
+                const steps = $('.how-progress-step');
+                const $activeStep = steps.filter('.active');
+                const stepIndex = steps.index($activeStep);
+                
+                if(stepIndex === -1) {
+                    this.activateStep(0, 0);
+                    return;
+                }
+                
+                const items = $activeStep.find('.how-progress-step-item');
+                const $activeItem = items.filter('.active');
+                const itemIndex = items.index($activeItem);
+                
+                if(itemIndex < items.length - 1) {
+                    this.activateStep(stepIndex, itemIndex + 1);
+                } else {
+                    if(stepIndex < steps.length - 1) {
+                        this.activateStep(stepIndex + 1, 0);
+                    } else {
+                        this.activateStep(0, 0);
+                    }
+                }
+            }
+            navigatePrev() {
+                const steps = $('.how-progress-step');
+                const $activeStep = steps.filter('.active');
+                const stepIndex = steps.index($activeStep);
+                
+                if(stepIndex === -1) {
+                    this.activateStep(0, 0);
+                    return;
+                }
+                
+                const items = $activeStep.find('.how-progress-step-item');
+                const $activeItem = items.filter('.active');
+                const itemIndex = items.index($activeItem);
+                
+                if(itemIndex > 0) {
+                    this.activateStep(stepIndex, itemIndex - 1);
+                } else {
+                    if(stepIndex > 0) {
+                        const prevStep = steps.eq(stepIndex - 1);
+                        const prevItems = prevStep.find('.how-progress-step-item');
+                        this.activateStep(stepIndex - 1, prevItems.length - 1);
+                    } else {
+                        const lastStep = steps.eq(steps.length - 1);
+                        const lastItems = lastStep.find('.how-progress-step-item');
+                        this.activateStep(steps.length - 1, lastItems.length - 1);
+                    }
+                }
+            }
             activateStep(stepIndex, itemIndex) {
                 const steps = $('.how-progress-step');
                 const tabItems = $('.how-progress-tab-item');
@@ -5020,6 +5081,28 @@ const script = () => {
                 if(viewport.w <= 992) {
                     items.eq(itemIndex).find('.how-progress-step-item-img').slideDown();
                     items.not(items.eq(itemIndex)).find('.how-progress-step-item-img').slideUp();
+                }
+                
+                this.updateNavigationState(stepIndex, itemIndex);
+            }
+            updateNavigationState(stepIndex, itemIndex) {
+                const steps = $('.how-progress-step');
+                const currentStep = steps.eq(stepIndex);
+                const items = currentStep.find('.how-progress-step-item');
+                
+                const prevBtn = $('.how-progress-tab-content-item.item-prev');
+                const nextBtn = $('.how-progress-tab-content-item.item-next');
+                
+                if(stepIndex === 0 && itemIndex === 0) {
+                    prevBtn.addClass('swiper-button-disabled');
+                } else {
+                    prevBtn.removeClass('swiper-button-disabled');
+                }
+                
+                if(stepIndex === steps.length - 1 && itemIndex === items.length - 1) {
+                    nextBtn.addClass('swiper-button-disabled');
+                } else {
+                    nextBtn.removeClass('swiper-button-disabled');
                 }
             }
             interactDesktop() {
@@ -5099,6 +5182,7 @@ const script = () => {
                 }
                 $('.how-progress-tab-item').off('click');
                 $('.how-progress-step-item').off('click');
+                $('.how-progress-tab-content-item').off('click');
                 super.destroy();
             }
         },
