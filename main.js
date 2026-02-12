@@ -959,6 +959,67 @@ const script = () => {
             // get current year 
             const currentYear = new Date().getFullYear();
             $('.txt-year-current').text(currentYear);
+            new MasterTimeline({
+                timeline: gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.footer-form',
+                        start: 'top top+=75%',
+                        once: true,
+                    },
+                }),
+                tweenArr: [
+                    new FadeSplitText({ el: $('.footer-form-title .heading').get(0), mask: 'lines' }),
+                    new FadeSplitText({ el: $('.footer-form-sub .txt').get(0), mask: 'lines' }),
+                    new FadeIn({ el: $('.footer-form-main'), type: 'bottom' }),
+                ]
+            });
+            $('.footer-menu').each((index, item) => {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: item,
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $(item).find('.footer-menu-title .txt').get(0), mask: 'lines' }),
+                        ...($(item).find('.footer-menu-item').length > 0 ? Array.from($(item).find('.footer-menu-item')).flatMap(menuItem => [
+                                new FadeIn({ el: menuItem, delay: 0}),
+                                new FadeSplitText({ el: $(menuItem).find('.footer-menu-item-title .txt').get(0), mask: 'lines' }),
+                            ]) : []),
+                        ...($(item).find('.footer-menu-social').length > 0 ? [new FadeIn({ el: $(item).find('.footer-menu-social'), type: 'bottom' })] : []),
+                    ].filter(Boolean)
+                });
+            });
+            new MasterTimeline({
+                timeline: gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.footer-logo-wrap',
+                        start: 'top top+=90%',
+                        once: true,
+                    },
+                }),
+                tweenArr: [
+                    new FadeIn({ el: $('.footer-logo'), type: 'bottom' }),
+                ]
+            });
+            new MasterTimeline({
+                timeline: gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.footer-copyright-wrap',
+                        start: 'top bottom',
+                        once: true,
+                    },
+                }),
+                tweenArr: [
+                    new FadeSplitText({ el: $('.footer-copyright .txt').get(0), mask: 'lines' }),
+                    ...Array.from($('.footer-policy-item')).flatMap(item => [
+                        new FadeIn({ el: item, delay: 0}),
+                        new FadeSplitText({ el: $(item).find('.txt').get(0), mask: 'lines' }),
+                    ]),
+                ]
+            });
         }
         validateEmail() {
             const $input = $('.footer-form-input');
@@ -1410,6 +1471,28 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-trans',
+                            start: 'top top+=60%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-trans-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-trans-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.home-trans-btn'), type: 'bottom'}),
+                        new FadeIn({ el: $('.home-trans-head'), type: 'bottom'}),
+                        ...Array.from($('.home-trans-head-inner .heading')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                        ...Array.from($('.home-trans-row')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom'}),
+                            new FadeSplitText({ el: $(item).find('.home-trans-row-title .heading').get(0), mask: 'lines'}),
+                            ...Array.from($(item).find('.home-trans-row-item')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                        ]),
+                    ]
+                });
+
             }
             initSwiper() {
                 $('.home-trans-inner').addClass('swiper');
@@ -1439,7 +1522,7 @@ const script = () => {
                  let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
                  marquee.setup();
                  marquee.play();
-                 new MasterTimeline({
+                new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
                             trigger: '.home-trust',
@@ -1498,7 +1581,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item}),
+                            new FadeIn({ el: item, delay: 0.05}),
                             new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
@@ -1629,6 +1712,24 @@ const script = () => {
                 if(viewport.w < 992) {
                     this.initSwiper();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-resource',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-resource-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-resource-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new ScaleInset({ el: $(item).find('.home-resource-item-img').get(0) }),
+                            new FadeSplitText({ el: $(item).find('.home-resource-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.home-resource-item-sub .txt').get(0), mask: 'lines' })
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.home-resource-cms').addClass('swiper');
@@ -1653,6 +1754,74 @@ const script = () => {
                 super.destroy();
             }
         },
+        'home-grow-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-grow',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-grow-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-grow-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-grow-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: $(item).find('.home-grow-item-ic'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.home-grow-item-title .heading').get(0), mask: 'lines' }),
+                        ]),
+                        new FadeIn({ el: $('.home-grow-btn'), type: 'bottom' }),
+                        new ScaleInset({ el: $('.home-grow-img').get(0) }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'faq-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -1661,8 +1830,24 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.faq',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.faq-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
+                            new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
+                        ]),
+                    ]
+                });
                 $('.faq-item-sub').hide();
-                // this.activeFaqItem($(this).find('.faq-item').eq(0));
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
@@ -2900,6 +3085,32 @@ const script = () => {
         }
     }
     const StoriesPage = {
+        'stories-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.stories-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.stories-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.stories-hero-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'home-trust-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -2911,6 +3122,20 @@ const script = () => {
                  let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
                  marquee.setup();
                  marquee.play();
+                 new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-trust',
+                            start: 'top top+=80%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-trust-logo-label .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-trust-logo-item')).map(item => new FadeIn({ el: item, delay: 0.1 })),
+                        new FadeIn({ el: $('.home-trust-star').get(0), delay: 0.2 }),
+                    ]
+                });
             }
         },
         'stories-people-wrap': class extends TriggerSetup {
@@ -2949,12 +3174,40 @@ const script = () => {
                 activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);  
                 const items = gsap.utils.toArray('.stories-people-thumb-item');
                 if (items.length === 0) return;
-                
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-people',
+                            start: 'top top+=65%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-people-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-people-thumb-item')).flatMap(item => [
+                            new FadeIn({ el: item}),
+                        ]),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-content-item:first-child .stories-people-item-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-sub .txt').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-content-item:nth-child(2) .stories-people-item-label .heading').get(0), mask: 'lines' }),
+
+                        ...Array.from($('.stories-people-item:first-child .stories-people-item-sub li')).flatMap(item => [
+                            new FadeSplitText({ el: $(item).get(0), mask: 'lines' }),
+                        ]),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-quote .txt').get(0), mask: 'lines', isDisableRevert: true }),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-name .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-school .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-people-cms-control-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' }),
+                        ]),
+                        new FadeIn({ el: $('.stories-people-item:first-child .stories-people-item-btn-wrap'), type: 'bottom' }),
+                    ]
+                });
                 // Tạo timeline với repeat vô hạn
                 const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: '.stories-people',
-                        start: 'top top+=75%',
+                        start: 'top top+=55%',
                         once: true,
                     },
                     repeat: -1 });
@@ -3327,6 +3580,57 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.pricing-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.pricing-hero-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.pricing-hero-package-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-sub .txt').get(0), mask: 'lines' }),
+                            $(item).find('.pricing-hero-package-item-desc').length > 0 ? new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-desc .txt').get(0), mask: 'lines' }) : null,
+                            new FadeIn({ el: $(item).find('.pricing-hero-package-item-pricing'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-inclu-title .txt').get(0), mask: 'lines' }),
+                            ...Array.from($(item).find('.pricing-hero-package-item-inclu-item')).flatMap(item => [
+                                new FadeIn({ el: $(item).find('.pricing-hero-package-item-inclu-item-ic'), delay: 0}),
+                                new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-inclu-item-title .txt').get(0), mask: 'lines' }),
+                            ]),
+                            $(item).find('.pricing-hero-package-item-link-popup').length > 0 ? new FadeIn({ el: $(item).find('.pricing-hero-package-item-link-popup'), type: 'bottom' }) : null,
+                            new FadeIn({ el: $(item).find('.pricing-hero-package-item-link-btn'), type: 'bottom' }),
+                        ]),
+                    ].filter(Boolean)
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.pricing-hero-ticket-main-wrap',
+                            start: 'top top+=60%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeIn({ el: $('.pricing-hero-ticket-price-item-label') }),
+                        new FadeSplitText({ el: $('.pricing-hero-ticket-price-name .heading').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.pricing-hero-ticket-price-most'), type: 'bottom' }),
+                        new FadeSplitText({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-desc .txt').get(0), mask: 'lines' }),    
+                        new FadeIn({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-title-wrap'), type: 'bottom' }),
+                        new FadeSplitText({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-desc-bot .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-sub-wrap')).flatMap(item => [
+                            new FadeSplitText({ el: $(item).find('.pricing-hero-ticket-sub-title .txt').get(0), mask: 'lines' }),
+                            ...Array.from($(item).find('.pricing-hero-ticket-benefit-item')).flatMap(item => [
+                                new FadeIn({ el: $(item).find('.pricing-hero-ticket-benefit-item-ic'), delay: 0}),
+                                new FadeSplitText({ el: $(item).find('.pricing-hero-ticket-benefit-item-title .txt').get(0), mask: 'lines' }),
+                            ]),
+                        ]),
+                        $('.pricing-hero-ticket-main-wrap .pricing-hero-package-item-link-popup').length > 0 ? new FadeIn({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-package-item-link-popup'), type: 'bottom' }) : null,
+                        new FadeIn({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-package-item-link-btn'), type: 'bottom' }),
+                    ]
+                });
             }
             interact() {
                 console.log('interact');
@@ -3375,6 +3679,35 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.pricing-plan-title',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.pricing-plan-title .heading').get(0), mask: 'lines' })
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.pricing-plan-list',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.pricing-plan-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: $(item).find('.pricing-plan-item-ic'), delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.pricing-plan-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.pricing-plan-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 console.log('initSwiper222');
@@ -3396,6 +3729,85 @@ const script = () => {
                 super.destroy();
             }
         },
+        'pricing-optional-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.pricing-optional-title',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.pricing-optional-title .heading').get(0), mask: 'lines' })
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.pricing-optional-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.pricing-optional-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: $(item).find('.pricing-optional-item-ic'), delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.pricing-optional-item-title-wrap .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.pricing-optional-item-sub .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.pricing-optional-item-benefit-title .txt').get(0), mask: 'lines' }),
+                            ...Array.from($(item).find('.pricing-optional-item-benefit-info')).flatMap(item => [
+                                new FadeIn({ el: $(item).find('.pricing-optional-item-benefit-info-ic'), delay: 0}),
+                                new FadeSplitText({ el: $(item).find('.pricing-optional-item-benefit-info-txt .txt').get(0), mask: 'lines' }),
+                            ]),
+                            new FadeIn({ el: $(item).find('.pricing-optional-item-btn'), type: 'bottom' }),
+                        ]),
+                    ]
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'faq-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -3409,6 +3821,23 @@ const script = () => {
                 $('.faq-item').on('click', (e) => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.faq',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.faq-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
+                            new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
+                        ]),
+                    ]
                 });
             }
             activeFaqItem(item) {
@@ -4697,6 +5126,23 @@ const script = () => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
                 });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.faq',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.faq-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
+                            new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
+                        ]),
+                    ]
+                });
             }
             activeFaqItem(item) {
                 const $item = $(item);
@@ -4772,6 +5218,23 @@ const script = () => {
                     e.preventDefault();
                     this.activeFaqItem(e.currentTarget);
                 });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.faq',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.faq-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
+                            new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
+                        ]),
+                    ]
+                });
             }
             activeFaqItem(item) {
                 const $item = $(item);
@@ -4807,6 +5270,7 @@ const script = () => {
                 };
             }
             animationReveal() {
+
                 if($('.fea-hero-img-cms').length> 0) {
                     $('.fea-hero-img-cms').each((_, item) => {
                         let direction = $(item).attr('data-direction');
@@ -4827,6 +5291,44 @@ const script = () => {
                     $('.fea-hero-intro-item').eq(0).addClass('active');
                     $('.fea-hero-intro-item').eq(0).find('.fea-hero-intro-item-content').slideDown();
                 }
+
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.fea-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.fea-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.fea-hero-sub .txt').get(0), mask: 'lines', delay: 0.5}),
+                        ...Array.from($('.fea-hero-btn')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                        ]),
+                        ...Array.from($('.fea-hero-img-cms')).flatMap(item => [
+                            ...Array.from($(item).find('.fea-hero-img-list')).flatMap(list => [
+                                ...Array.from($(list).find('.fea-hero-img-item')).flatMap(child => new FadeIn({ el: child })),
+                            ]),
+                        ]),
+                        $('.fea-hero-img').length > 0 ? new FadeIn({ el: $('.fea-hero-img'), type: 'bottom' }) : null,
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-hero-intro',
+                            start: 'top top+=65%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.fea-hero-intro-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.fea-hero-intro-item')).flatMap(item => 
+                            new FadeIn({ el: item, delay: 0}),
+                        ),
+                        new FadeIn({ el: $('.fea-hero-intro-img'), type: 'bottom' }),
+                    ]
+                });
             }
             setupTimeline() {
                 this.items.removeClass('active');
@@ -4963,6 +5465,37 @@ const script = () => {
                 if($('.fea-system-item-grow').length > 0) {
                     this.waveAnim();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-system-title-wrap',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.fea-system-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.fea-system-sub .txt').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-system-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.fea-system-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                        ]),
+                        ...Array.from($('.fea-system-space')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                        ]),
+                        new FadeIn({ el: $('.fea-system-btn'), type: 'bottom' }),
+                    ]
+                });
             }
             waveAnim() {
                 console.log('waveAnim');
@@ -4992,6 +5525,36 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-complete-head',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.fea-complete-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.fea-complete-sub .txt').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-complete-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.fea-complete-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: $(item).find('.fea-complete-item-ic'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.fea-complete-main').addClass('swiper');
@@ -5014,8 +5577,69 @@ const script = () => {
                 super.destroy();
             }
         },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
     }
     const howItWorkPage = {
+        'how-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.home-hero-btn'), type: 'bottom' }),
+                       ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'how-progress-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -5067,6 +5691,31 @@ const script = () => {
                     this.activateStep(0, 0);
                     this.interactMobile();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.how-progress',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.how-progress-tab-content-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                        ]),
+                        ...Array.from($('.how-progress-tab-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
+                        ]),
+                        new FadeIn({ el: $('.how-progress-step:first-child .how-progress-step-label').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.how-progress-step:first-child .how-progress-step-title .heading').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.how-progress-step-img-list'), type: 'bottom' }),
+                        ...Array.from($('.how-progress-step:first-child .how-progress-step-item')).flatMap(item => [    
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.how-progress-step-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $(item).find('.how-progress-step-item-ic'), type: 'bottom' }),
+                        ]),
+                    ]
+                });
             }
             
             setupNavigation() {
@@ -5281,6 +5930,35 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.how-work-title-wrap',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.how-work-title .heading').get(0), mask: 'lines' })
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.how-work-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.how-work-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: $(item).find('.how-work-item-ic'), delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.how-work-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.how-work-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.how-work-cms').addClass('swiper');
@@ -5314,6 +5992,36 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-complete-head',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.fea-complete-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.fea-complete-sub .txt').get(0), mask: 'lines' })
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.fea-complete-inner',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.fea-complete-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: $(item).find('.fea-complete-item-ic'), delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.fea-complete-main').addClass('swiper');
@@ -5329,6 +6037,37 @@ const script = () => {
                         clickable: true,  
                       },
                 });
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
             }
             interact() {
             }
