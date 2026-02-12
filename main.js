@@ -1586,8 +1586,8 @@ const script = () => {
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
-                            new FadeIn({ el: $(item).find('.stories-support-item-link') }),
-                        ]) 
+                            $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null   ,
+                        ]).filter(Boolean)
                     ]
                 });
             }
@@ -2739,16 +2739,36 @@ const script = () => {
                 }
                 if($('.growth-articles-item').length == 0) {
                     $('.growth-articles').hide();
+                    $('.growth-hero-category-item').eq(1).hide()
                 }
                 if($('.growth-guide-item').length == 0) {
                     $('.growth-guide').hide();
+                    $('.growth-hero-category-item').eq(2).hide()
                 }
                 if($('.growth-training-item').length == 0) {
                     $('.growth-training').hide();
+                    $('.growth-hero-category-item').eq(3).hide()
                 }
                 if($('.growth-event-item').length == 0) {
                     $('.growth-event').hide();
+                    $('.growth-hero-category-item').eq(4).hide()
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.growth-hero-form-inner'), type: 'bottom' }),
+                        ...Array.from($('.growth-hero-category-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', isDisableRevert: true }),
+                        ]),
+                    ]
+                });
             }
             animationScrub() {
             }   
@@ -2818,6 +2838,32 @@ const script = () => {
                 }
             }
             animationScrub() {
+                if($('.growth-articles-item').length > 0) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.growth-articles',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.growth-articles-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.growth-articles-sub .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.growth-articles-btn'), type: 'bottom' }),
+                            ...Array.from($('.growth-articles-item')).flatMap(item => [
+                                new FadeIn({ el: item, type: 'bottom', delay: .05 }),
+                                new ScaleInset({ el: $(item).find('.growth-articles-item-img').get(0) }),
+                                new FadeIn({ el: $(item).find('.growth-articles-item-category'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.growth-articles-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.growth-articles-item-sub .txt').get(0), mask: 'lines' }),
+                                ...Array.from($(item).find('.growth-articles-item-info-item')).flatMap(item => [
+                                    new FadeIn({ el: $(item).get(0), type: 'bottom' }),
+                                ])
+                            ]),
+                        ]
+                    });
+                }
             }   
             initSwiper() {
                 $('.growth-articles-cms').addClass('swiper');
@@ -2855,6 +2901,29 @@ const script = () => {
                 }
             }
             animationScrub() {
+                if($('.growth-guide-item').length > 0) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.growth-guide',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.growth-guide-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.growth-guide-sub .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.growth-guide-btn'), type: 'bottom' }),
+                            ...Array.from($('.growth-guide-item')).flatMap(item => [
+                                new FadeIn({ el: item, type: 'bottom', delay: .05 }),
+                                new ScaleInset({ el: $(item).find('.growth-guide-item-img').get(0) }),
+                                new FadeSplitText({ el: $(item).find('.growth-guide-item-title .heading').get(0), delay: .6, mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.growth-guide-item-sub .txt').get(0), mask: 'lines', delay: .6 }),
+                                new FadeIn({ el: $(item).find('.growth-guide-item-link'), type: 'bottom', delay: .6 }),
+                            ]),
+                        ]
+                    });
+                }
             }   
             initSwiper() {
                 $('.growth-guide-cms').addClass('swiper');
@@ -2892,6 +2961,31 @@ const script = () => {
                 }
             }
             animationScrub() {
+                if($('.growth-training-item').length > 0) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.growth-training',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.growth-training-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.growth-training-sub .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.growth-training-btn'), type: 'bottom' }),
+                            ...Array.from($('.growth-training-item')).flatMap(item => [
+                                new FadeIn({ el: item, type: 'bottom', delay: .05 }),
+                                $(item).find('.growth-training-item-img').length > 0 ? new ScaleInset({ el: $(item).find('.growth-training-item-img').get(0) }) : null,
+                                new FadeSplitText({ el: $(item).find('.growth-training-item-title .heading').get(0), delay: .6, mask: 'lines' }),
+                                $(item).find('.growth-training-item-sub').length > 0 ? new FadeSplitText({ el: $(item).find('.growth-training-item-sub .txt').get(0), mask: 'lines', delay: .6 }) : null,
+                                ...$(item).find('.growth-training-item-link').length > 0 ? Array.from($(item).find('.growth-articles-item-info-item')).flatMap(item => [
+                                    new FadeIn({ el: item, type: 'bottom', delay: .6 }),
+                                ]) : null,
+                            ]).filter(Boolean),
+                        ]
+                    });
+                }
             }   
             initSwiper() {
                 $('.growth-training-cms').addClass('swiper');
@@ -2914,6 +3008,51 @@ const script = () => {
                 super.destroy();
             }
         },
+        'growth-event-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                    this.animationScrub();
+                    this.interact();
+                };
+            }
+            animationReveal() {
+            }
+            animationScrub() {
+                if($('.growth-event-item').length > 0) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.growth-event',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.growth-event-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.growth-event-sub .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.growth-event-btn'), type: 'bottom' }),
+                            ...Array.from($('.growth-event-item')).flatMap(item => [
+                                new FadeIn({ el: item, type: 'bottom', delay: .05 }),
+                                new ScaleInset({ el: $(item).find('.growth-event-item-img').get(0) }),
+                                new FadeIn({ el: $(item).find('.growth-event-item-category'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.growth-event-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.growth-event-item-sub .txt').get(0), mask: 'lines', delay: .6 }),
+                                new FadeIn({ el: $(item).find('.growth-event-item-info'), type: 'bottom', delay: .6 }),
+                                new FadeIn({ el: $(item).find('.growth-event-item-link'), type: 'bottom', delay: .6 }),
+                            ]),
+                        ]
+                    });
+                }
+            }   
+            interact() {
+
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'growth-topic-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -2929,6 +3068,35 @@ const script = () => {
                 }
             }
             animationScrub() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.growth-topic-title-wrap',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.growth-topic-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-topic-sub .txt').get(0), mask: 'lines' })
+                    ]
+                });
+                $('.growth-topic-item').each((_, item) => {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: item,
+                                start: 'top top+=65%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeIn({ el: item, type: 'bottom', delay: .05 }),
+                            new FadeSplitText({ el: $(item).find('.growth-topic-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.growth-topic-item-sub .txt').get(0), mask: 'lines' }),
+                        ]
+                    });
+                });
             }   
             initSwiper() {
                 $('.growth-topic-cms').addClass('swiper');
@@ -2951,6 +3119,39 @@ const script = () => {
                 super.destroy();
             }
         },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.cta-btn')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' })
+                        ]),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        }
     }
     const GrowthCategoryPage = {
         'growth-hero-wrap': class extends TriggerSetup {
@@ -2968,6 +3169,22 @@ const script = () => {
                 }
             }
             animationScrub() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.growth-hero-form-inner'), type: 'bottom' }),
+                        ...Array.from($('.growth-hero-category-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', isDisableRevert: true }),
+                        ]),
+                    ]
+                });
             }   
             initSwiper() {
                 $('.growth-hero-category-wrap').addClass('swiper');
@@ -3029,7 +3246,103 @@ const script = () => {
                 };
             }
             animationReveal() {
-                
+
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.tp-articles',
+                            start: 'top top+=65%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.tp-articles-title .heading').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.tp-articles-sort-wrap'), type: 'bottom' }),
+                    ]
+                });
+                let sectionName =$('[data-section]').attr('data-section');
+                if(sectionName === 'article') {
+                    $('.tp-articles-item').each((_, item) => {
+                        new MasterTimeline({
+                            timeline: gsap.timeline({
+                                scrollTrigger: {
+                                    trigger: item,
+                                    start: 'top top+=65%',
+                                    once: true,
+                                },
+                            }),
+                            tweenArr: [
+                                new FadeIn({ el: $(item).find('.tp-articles-item-inner'), type: 'bottom', delay: .05 }),
+                                new ScaleInset({ el: $(item).find('.tp-articles-item-img').get(0) }),
+                                new FadeIn({ el: $(item).find('.tp-articles-item-category'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.tp-articles-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.tp-articles-item-sub .txt').get(0), mask: 'lines' }),
+                                new FadeIn({ el: $(item).find('.tp-articles-item-info'), type: 'bottom' }),
+                            ]
+                        });
+                    });
+                }
+                else if(sectionName === 'guide') {
+                    $('.tp-guide-item').each((_, item) => {
+                        new MasterTimeline({
+                            timeline: gsap.timeline({
+                                scrollTrigger: {
+                                    trigger: item,
+                                    start: 'top top+=65%',
+                                    once: true,
+                                },
+                            }),
+                            tweenArr: [
+                                new ScaleInset({ el: $(item).find('.tp-guide-item-img').get(0) }),
+                                new FadeSplitText({ el: $(item).find('.tp-guide-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.tp-guide-item-sub .txt').get(0), mask: 'lines' }),
+                                new FadeIn({ el: $(item).find('.tp-guide-item-link'), type: 'bottom' }),
+                            ]
+                        });
+                    });
+                }
+                else if(sectionName === 'video') {
+                    $('.tp-training-item').each((_, item) => {
+                        new MasterTimeline({
+                            timeline: gsap.timeline({
+                                scrollTrigger: {
+                                    trigger: item,
+                                    start: 'top top+=75%',
+                                    once: true,
+                                },
+                            }),
+                            tweenArr: [
+                                new FadeIn({ el: item, type: 'bottom' }),
+                                new ScaleInset({ el: $(item).find('.tp-training-item-img').get(0) }),
+                                new FadeSplitText({ el: $(item).find('.tp-training-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.tp-training-item-sub .txt').get(0), mask: 'lines' }),
+                                new FadeIn({ el: $(item).find('.tp-training-item-info'), type: 'bottom' }),
+                            ]
+                        });
+                    });
+                }
+                else if(sectionName === 'event') {
+                    $('.tp-event-item').each((_, item) => {
+                        new MasterTimeline({
+                            timeline: gsap.timeline({
+                                scrollTrigger: {
+                                    trigger: item,
+                                    start: 'top top+=75%',
+                                    once: true,
+                                },
+                            }),
+                            tweenArr: [
+                                new FadeIn({ el: item, type: 'bottom' }),
+                                new ScaleInset({ el: $(item).find('.tp-event-item-img').get(0) }),
+                                new FadeIn({ el: $(item).find('.tp-event-item-category'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.tp-event-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.tp-event-item-sub .txt').get(0), mask: 'lines' }),
+                                new FadeIn({ el: $(item).find('.tp-event-item-info'), type: 'bottom' }),
+                                new FadeIn({ el: $(item).find('.tp-event-item-link'), type: 'bottom' }),
+                            ]
+                        });
+                    });
+                }
             }
             interact() {
                 $('.tp-articles-sort-inner').on('click', function(e) {
@@ -3082,7 +3395,40 @@ const script = () => {
             destroy() {
                 super.destroy();
             }
-        }
+        },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.cta-btn')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' })
+                        ]),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
     }
     const StoriesPage = {
         'stories-hero-wrap': class extends TriggerSetup {
@@ -3190,10 +3536,11 @@ const script = () => {
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-content-item:first-child .stories-people-item-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-sub .txt').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-content-item:nth-child(2) .stories-people-item-label .heading').get(0), mask: 'lines' }),
-
+                        new FadeIn({ el: $('.stories-people-item:first-child .stories-people-item-sub '), type: 'bottom' }),
                         ...Array.from($('.stories-people-item:first-child .stories-people-item-sub li')).flatMap(item => [
                             new FadeSplitText({ el: $(item).get(0), mask: 'lines' }),
                         ]),
+                        new FadeIn({ el: $('.stories-people-item:first-child .stories-people-item-quote'), type: 'bottom' }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-quote .txt').get(0), mask: 'lines', isDisableRevert: true }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-name .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-school .txt').get(0), mask: 'lines' }),
@@ -3348,6 +3695,26 @@ const script = () => {
                         }
                     });
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-support',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-support-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
+                            $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null,
+                        ]).filter(Boolean)
+                    ]
+                });
             }
             animationScrub() {
             }
@@ -3418,6 +3785,25 @@ const script = () => {
                         }
                     });
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-fb',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-fb-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-fb-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeSplitText({ el: $(item).find('.stories-fb-item-name .heading').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $(item).find('.stories-fb-item-star'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.stories-fb-item-message .txt').get(0), mask: 'lines' }),
+                            $(item).find('.stories-fb-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-fb-item-link') }) : null,
+                        ]) 
+                    ].filter(Boolean)
+                });
             }
             animationScrub() {
             }
@@ -3427,145 +3813,39 @@ const script = () => {
                 super.destroy();
             }
         },
-        // 'stories-work-wrap': class extends TriggerSetup {
-        //     constructor() {
-        //         super();
-        //         this.onTrigger = () => {
-        //             if(viewport.w >= 992) {
-        //                 this.progressBarItem();
-        //             }
-        //             else {
-        //                 this.initSwiper();
-        //             }
-        //             this.animationReveal();
-        //             this.interact();
-        //         };
-        //         this.lastActiveIndex = 0;
-        //         this.firstLoading = false;
-        //     }
-        //     animationReveal() {
-                
-        //     }
-        //     progressBarItem() {
-        //         const items = gsap.utils.toArray('.stories-work-item');
-        //         if (items.length === 0) return;
-                
-        //         const tl = gsap.timeline({
-        //             scrollTrigger: {
-        //                 trigger: '.stories-work',
-        //                 start: 'top top+=65%',
-        //                 once: true,
-        //             },
-        //             repeat: -1,
-        //         });
-        //         $('.stories-work-card-item').each((_, item) => {
-        //             let itemTitle = SplitText.create($(item).find('.stories-work-card-item-title .heading'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-        //             let itemSub = SplitText.create($(item).find('.stories-work-card-item-sub .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-        //             let itemDesc = SplitText.create($(item).find('.stories-work-card-item-desc .txt'), { type: "words", mask: "lines", wordsClass: 'word-item' })
-        //             let itemImg = $(item).find('.stories-work-card-item-img img');
-        //             gsap.set(itemTitle.words, { opacity: 0, yPercent: 100 });
-        //             gsap.set(itemSub.words, { opacity: 0, yPercent: 100 });
-        //             gsap.set(itemDesc.words, { opacity: 0, yPercent: 100 });
-        //             gsap.set(itemImg, { opacity: 0, scale: 1.2 });
-        //         });
-        //         items.forEach((item, index) => {
-        //             const progressBar = item.querySelector('.stories-work-item-line-progress');
-        //             if (!progressBar) return;
-                    
-        //             tl.addLabel(`item-${index}`);
-                    
-        //             tl.add(() => {
-        //                 this.animItemCard(index);
-        //             })
-        //             .fromTo(progressBar, 
-        //                 { transform: 'translateX(-100%)' },
-        //                 { 
-        //                     transform: 'translateX(0%)',
-        //                     duration: 5,
-        //                     ease: 'linear',
-        //                     onComplete: () => {
-        //                         gsap.set(progressBar, { transform: 'translateX(-100%)' });
-        //                         item.classList.remove('active');
-        //                     }
-        //                 }
-        //             );
-        //         });
-                
-        //         this.timeline = tl;
-                
-        //         items.forEach((item, index) => {
-        //             $(item).on('click', () => {
-        //                 this.timeline.pause();
-                        
-                        
-        //                 this.timeline.seek(`item-${index}`);
-        //                 items.forEach((el, idx) => {
-        //                     const bar = el.querySelector('.stories-work-item-line-progress');
-        //                     if (bar) {
-        //                         gsap.set(bar, { transform: 'translateX(-100%)' });
-        //                     }
-        //                     el.classList.remove('active');
-        //                 });
-        //                 this.timeline.play();
-        //             });
-        //         });
-        //     }
-        //     animItemCard(index) {
-        //         let item = $('.stories-work-card-item').eq(index);
-        //         $(item).find('.stories-work-card-item-inner').each((_, itemInner) => {
-        //             let itemInnerEl = $(itemInner);
-        //             let itemTitle = itemInnerEl.find('.stories-work-card-item-title .heading .word-item');
-        //             let itemImg = itemInnerEl.find('.stories-work-card-item-img img');
-        //             let itemSub = itemInnerEl.find('.stories-work-card-item-sub .txt .word-item');
-        //             let itemDesc = itemInnerEl.find('.stories-work-card-item-desc .txt .word-item');
-        //             gsap.to(itemTitle, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.02 });
-        //             gsap.to(itemSub, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.015});
-        //             gsap.to(itemDesc, { opacity: 1, yPercent: 0, duration: .4, stagger: 0.01});
-        //             gsap.to(itemImg, { opacity: 1, scale: 1, duration: 1.2 });
-        //         })
-        //         activeItem(['.stories-work-card-item', '.stories-work-item'], index);
-        //         let lastItem = $('.stories-work-card-item').eq(this.lastActiveIndex);
-        //         let itemTitleLast = lastItem.find('.stories-work-card-item-title .heading .word-item');
-        //         let itemSubLast = lastItem.find('.stories-work-card-item-sub .txt .word-item');
-        //         let itemDescLast = lastItem.find('.stories-work-card-item-desc .txt .word-item');
-        //         let itemImgLast = lastItem.find('.stories-work-card-item-img img');
-        //         if(this.firstLoading) {
-        //             setTimeout(() => {
-        //                 gsap.set(itemTitleLast, { opacity: 0, yPercent: 100 });
-        //                 gsap.set(itemSubLast, { opacity: 0, yPercent: 100 });
-        //                 gsap.set(itemDescLast, { opacity: 0, yPercent: 100 });
-        //                 gsap.set(itemImgLast, { opacity: 0, scale: 1.2 });
-        //             }, 1000);
-        //         }
-        //         this.firstLoading = true;
-        //         this.lastActiveIndex = index;
-
-        //     } 
-        //     initSwiper() {
-        //         $('.stories-work-item-content-wrap').each((_, item) => {
-        //             let swiper = new Swiper($(item).get(0), {
-        //                 slidesPerView: 'auto',
-        //                 spaceBetween: cvUnit(20, 'rem')
-        //             });
-        //         });
-        //     }
-        //     interact() {
-        //         if(viewport.w < 992) {
-        //             $('.stories-work-item-title-wrap').on('click', function(e) {
-        //                 e.preventDefault();
-        //                 $(this).closest('.stories-work-item').toggleClass('active');
-        //                 $(this).closest('.stories-work-item').find('.stories-work-item-content-wrap').slideToggle();
-        //             });
-        //             $('.stories-work-item-title-wrap').eq(0).click();
-        //         }
-        //     }
-        //     destroy() {
-        //         if (this.timeline) {
-        //             this.timeline.kill();
-        //         }
-        //         super.destroy();
-        //     }
-        // },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.cta-btn')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' })
+                        ]),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
     }
     const PricingPage = {
         'pricing-hero-wrap': class extends TriggerSetup {
@@ -3881,6 +4161,22 @@ const script = () => {
                 else if (categoryValue) {
                     this.searchCategory(categoryValue);
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.growth-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.growth-hero-form-inner'), type: 'bottom' }),
+                        ...Array.from($('.growth-hero-category-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' }),
+                        ]),
+                    ]
+                });
             }
             searchValue(value) {
                 let items = $('[data-title]');
@@ -3980,6 +4276,37 @@ const script = () => {
                 super.destroy();
             }
         },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        }
     }
     const EventDetailPage = {
         'dt-event-hero-wrap': class extends TriggerSetup {
@@ -4746,6 +5073,26 @@ const script = () => {
                         }
                     });
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-support',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-support-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
+                            $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null,
+                        ]).filter(Boolean)
+                    ]
+                });
             }
             animationScrub() {
             }
@@ -5090,6 +5437,26 @@ const script = () => {
                         }
                     });
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-support',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-support-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
+                            $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null,
+                        ]).filter(Boolean)
+                    ]
+                });
             }
             animationScrub() {
             }
