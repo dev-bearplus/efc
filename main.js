@@ -821,14 +821,15 @@ const script = () => {
         }
         init(data) {
             this.el = document.querySelector('.header');
-            this.setupLocaleLinks();
             this.animationReveal();
+            this.setupLocaleLinks();
             if (viewport.w <= 991) {
                 this.interact();
             }
         }
         animationReveal() {
-            // gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: .6, ease: 'power2.inOut'})
+            gsap.set('.header-inner', {autoAlpha: 0,y: -100})
+            gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: 1, ease: 'power1.inOut'})
         }
         updateOnScroll(inst) {
             this.toggleHide(inst);
@@ -1079,6 +1080,22 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    allowMobile: true,
+                    tweenArr: [
+                       new FadeSplitText({ el: $('.announcement-link .txt').get(0), mask: 'lines' }),
+                       new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
+                       new FadeSplitText({ el: $('.home-hero-label .heading').get(0), mask: 'lines' }),
+                       new FadeSplitText({ el: $('.home-hero-sub .txt').get(0), mask: 'lines' }),
+                       ...Array.from($('.home-hero-btn')).map(btn => new FadeIn({ el: btn })),
+                       ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
+                    ]
+                });
             }
         },
         "home-partner-wrap": class extends TriggerSetup {
@@ -1097,7 +1114,7 @@ const script = () => {
                     repeat: -1,
                     repeatDelay: 0,
                     scrollTrigger: {
-                        trigger: '.home-partner-wrap',
+                        trigger: '.home-partner',
                         start: 'top bottom-=20%',
                         once: true
                     }
@@ -1143,6 +1160,36 @@ const script = () => {
                 animatePath([0, 1]);
                 tl.addLabel('delay1', '-=0.1');
                 animatePath([2, 3]);
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-partner',
+                            start: 'top top+=60%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-partner-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-partner-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.home-partner-map'), type: 'bottom' })
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-partner-figure',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.home-partner-figure-item')).flatMap((item) => [
+                            new FadeIn({ el: item}),
+                            new FadeSplitText({ el: $(item).find('.home-partner-figure-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.home-partner-figure-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
         },
         'home-product-wrap': class extends TriggerSetup {
@@ -1175,6 +1222,25 @@ const script = () => {
                     activeItem(['.home-product-item', '.home-product-img-item'], 0);
                     $('.home-product-item').eq(0).find('.home-product-item-content').slideDown();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {    
+                            trigger: '.home-product-wrap',
+                            start: 'top top+=60%',
+                            once: true,
+                        },
+                    }),
+                    allowMobile: true,
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-product-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-product-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-product-img-item:first-child .home-product-img-thumb-item')).map(item => new ScaleInset({ el: $(item).get(0), isDisableRevert: true})),
+                        ...Array.from($('.home-product-item')).map(item => new FadeIn({ el: item})),
+                        new FadeIn({ el: $('.home-product-img-list') }),
+                        new FadeSplitText({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-title .heading').get(0), delay: 0.1 }),
+                        new FadeIn({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-link') }),
+                    ]
+                });
             }
             setupScrollTriggers() {
                 if(this.mainTrigger) {
@@ -1373,6 +1439,20 @@ const script = () => {
                  let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
                  marquee.setup();
                  marquee.play();
+                 new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-trust',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.home-trust-logo-label .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-trust-logo-item')).map(item => new FadeIn({ el: item, delay: 0.1 })),
+                        new FadeIn({ el: $('.home-trust-star').get(0), delay: 0.2 }),
+                    ]
+                });
             }
         },
         'stories-support-wrap': class extends TriggerSetup {
@@ -1385,47 +1465,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                // let swiper = new Swiper('.stories-support-cms.swiper', {
-                //     slidesPerView: 'auto',
-                //     spaceBetween: cvUnit(20, 'rem'),
-                //     speed: 12000,
-                //     loop: true,
-                //     autoplay: {
-                //         delay: 0,
-                //         disableOnInteraction: true,
-                //     },
-                //     loopAdditionalSlides: 1,
-                //     pagination: {
-                //         el: '.stories-support-pagi',
-                //         bulletClass: 'stories-support-pagi-item',
-                //         bulletActiveClass: 'active',
-                //         clickable: true,  
-                //     },
-                //     breakpoints: {
-                //         991: {
-                //             slidesPerView: 2,
-                //         }
-                //     }
-                // });
                 
-                // let originalSpeed = swiper.params.speed;
-                
-                // $('.stories-support-cms.swiper').on('mouseenter', function() {
-                //     if(swiper.autoplay) {
-                //         swiper.params.speed = 600;
-                //         swiper.autoplay.stop();
-                //         setTimeout(() => {
-                //             swiper.setTranslate(swiper.getTranslate());
-                //         }, 0);
-                //     }
-                // });
-                
-                // $('.stories-support-cms.swiper').on('mouseleave', function() {
-                //     if(swiper.autoplay) {
-                //         swiper.params.speed = originalSpeed;
-                //         swiper.autoplay.start();
-                //     }
-                // });
                 if(viewport.w > 992) {
                     let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
                     marquee.setup();
@@ -1447,6 +1487,26 @@ const script = () => {
                         }
                     });
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.stories-support',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.stories-support-item')).flatMap(item => [
+                            new FadeIn({ el: item}),
+                            new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $(item).find('.stories-support-item-link') }),
+                        ]) 
+                    ]
+                });
             }
             animationScrub() {
             }

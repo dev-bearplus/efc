@@ -245,7 +245,7 @@ class FadeSplitText {
                     animation = gsap.to(self[this.splitType], {
                         autoAlpha: 1,
                         yPercent: 0,
-                        stagger: this.splitType === 'words' ? 0.02 : this.splitType === 'chars' ? 0.05 : 0.1,
+                        stagger: this.splitType === 'words' ? 0.025 : this.splitType === 'chars' ? 0.05 : 0.1,
                         duration: this.splitType === 'chars' ? 0.5 : .8,
                         willChange: 'transform, opacity',
                         ease: 'power2.out',
