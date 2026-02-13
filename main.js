@@ -2379,6 +2379,19 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        }
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.schedule-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.schedule-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.schedule-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.schedule-hero-form'), type: 'bottom' }),
+                    ]
+                });
             }
             interact() {
             }
@@ -2398,6 +2411,37 @@ const script = () => {
                 if(viewport.w < 768) {
                     this.initSwiper();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                       scrollTrigger: {
+                            trigger: '.schedule-benefit-title-wrap',
+                            start: 'top top+=75%',
+                            once: true,
+                       }
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.schedule-benefit-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.schedule-benefit-sub .txt').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.schedule-benefit-list',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.schedule-benefit-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', delay: 0.1 }),
+                            new FadeIn({ el: $(item).find('.schedule-benefit-item-ic').get(0) }),
+                            new FadeIn({ el: $(item).find('.schedule-benefit-item-number'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.schedule-benefit-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.schedule-benefit-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.schedule-benefit-cms').addClass('swiper');
@@ -2429,7 +2473,19 @@ const script = () => {
                 };
             }
             animationReveal() {
-                
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        }
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.contact-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.contact-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.contact-hero-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.contact-hero-form'), type: 'bottom' }),
+                    ]
+                });
             }
             animationScrub() {
             }
@@ -2699,10 +2755,38 @@ const script = () => {
                 }
             }
             animationReveal() {
-                console.log('test', viewport.w);
                 if(viewport.w < 992) {
                     this.initSwiper();
                 }
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                       scrollTrigger: {
+                            trigger: '.contact-benefit-title-wrap',
+                            start: 'top top+=75%',
+                            once: true,
+                       }
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.contact-benefit-title .heading').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.contact-benefit-list',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.contact-benefit-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', delay: 0.1 }),
+                            new FadeIn({ el: $(item).find('.contact-benefit-item-ic').get(0) }),
+                            new FadeSplitText({ el: $(item).find('.contact-benefit-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.contact-benefit-item-sub .txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
             }
             initSwiper() {
                 $('.contact-benefit-cms').addClass('swiper');
@@ -2716,6 +2800,36 @@ const script = () => {
                         bulletClass: 'contact-benefit-pagi-item',
                         bulletActiveClass: 'active'
                     }
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'contact-info-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.contact-info',
+                            start: 'top top+=60%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.contact-info-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.contact-info-item')).flatMap(item => [
+                            new FadeSplitText({ el: $(item).find('.contact-info-item-label .txt').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.contact-info-item-title .txt').get(0), mask: 'lines' }),
+                        ]),
+                        new ScaleInset({ el: $('.contact-info-img').get(0) }),
+                    ]
                 });
             }
             destroy() {
@@ -5532,6 +5646,42 @@ const script = () => {
         },
     }
     const ComparisonPage = {
+        'comp-hero-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        onStart: () => {
+                            $('[df-init]').removeAttr('df-init');
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.comp-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.comp-hero-sub .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.comp-hero-desc .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.comp-hero-btn')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' }),
+                        ]),
+                        new FadeIn({ el: $('.comp-hero-table'), type: 'bottom' }),
+                        ...Array.from($('.comp-hero-row')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom' }),
+                        ]),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
         'comp-diff-wrap': class extends TriggerSetup {
             constructor() {
                 super();
@@ -5541,6 +5691,41 @@ const script = () => {
                 };
             }
             animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-diff-title',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.comp-diff-title .heading').get(0), mask: 'lines' }),
+                    ]
+                });
+                gsap.set('.comp-diff-cms-bg', {autoAlpha: 0, y: 20});
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-diff-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                        onComplete: () => {
+                            gsap.to('.comp-diff-cms-bg', {autoAlpha: 1, y: 0, duration: .6, ease: 'power2.inOut'});
+                        }
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.comp-diff-row')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', delay: .2 }),
+                            new FadeSplitText({ el: $(item).find('.heading').get(0), mask: 'lines' }),
+                            ...Array.from($(item).find('.txt')).flatMap(txt => [
+                                new FadeSplitText({ el: $(txt).get(0), mask: 'lines' }),
+                            ]),
+
+                        ]),
+                    ]
+                });
             }
             interact() {
                 if(viewport.w < 768) {
@@ -5566,6 +5751,139 @@ const script = () => {
                     $item.addClass('active');
                     $itemSub.slideDown();
                 }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'comp-work-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-work-title-wrap',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.comp-work-title .heading').get(0), mask: 'lines' }),
+                        ...Array.from($('.comp-work-sub .txt.fs-16')).flatMap(item => [
+                            new FadeSplitText({ el: $(item).get(0), mask: 'lines'}),
+                        ]),
+                        new FadeIn({ el: $('.comp-work-btn'), type: 'bottom', delay: 0.8 }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.home-hero-flow',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
+                    ]
+                });
+            }   
+            animationScrub() {
+            }
+            interact() {
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'comp-platform-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-platform-title',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.comp-platform-title .heading').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-platform-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.comp-platform-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', delay: 0.2 }),
+                            new FadeSplitText({ el: $(item).find('.comp-platform-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.comp-platform-item-sub .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $(item).find('.comp-platform-item-desc .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $(item).find('.comp-platform-item-link'), type: 'bottom' }),
+                        ]),
+                    ]
+                });
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'comp-choose-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-choose-title',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.comp-choose-title .heading').get(0), mask: 'lines' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.comp-choose-main',
+                            start: 'top top+=75%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        ...Array.from($('.comp-choose-item')).flatMap(item => [
+                            new FadeIn({ el: item, type: 'bottom', delay: 0.2 }),
+                            new FadeIn({ el: $(item).find('.comp-choose-item-label'), type: 'bottom' }),
+                            new FadeSplitText({ el: $(item).find('.comp-choose-item-title .txt').get(0), mask: 'lines' }),
+                            ...Array.from($(item).find('.comp-choose-item-info')).flatMap(infoItem => [
+                                new FadeIn({ el: $(infoItem).find('.comp-choose-item-info-ic'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(infoItem).find('.txt').get(0), mask: 'lines' }),
+                            ]),
+                        ]),
+                    ]
+                });
             }
             destroy() {
                 super.destroy();
@@ -5617,6 +5935,37 @@ const script = () => {
                     $item.addClass('active');
                     $itemSub.slideDown();
                 }
+            }
+            destroy() {
+                super.destroy();
+            }
+        },
+        'cta-wrap': class extends TriggerSetup {
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    this.animationReveal();
+                };
+            }
+            animationReveal() {
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.cta',
+                            start: 'top top+=55%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.cta-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.cta-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.cta-btn'), type: 'bottom' }),
+                    ]
+                });
+            }
+            animationScrub() {
+            }
+            interact() {
             }
             destroy() {
                 super.destroy();
