@@ -4758,20 +4758,25 @@ const script = () => {
                 });
                 let tableItem = $('.dt-event-hero-tab-title-item').eq(0).clone();
                 $('.dt-event-hero-tab-title').empty();
-                $('.dt-event-hero-content h2').each((i, el) => {
-                    $(el).attr('data-title', `toch-${i}`);
-                    let tableItemClone = tableItem.clone();
-                    if(i == 0) {
-                        tableItemClone.addClass('active');
-                        if(viewport.w < 992) {
-                            $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
+                if($('.dt-event-hero-content h2').length > 0) {
+                    $('.dt-event-hero-content h2').each((i, el) => {
+                        $(el).attr('data-title', `toch-${i}`);
+                        let tableItemClone = tableItem.clone();
+                        if(i == 0) {
+                            tableItemClone.addClass('active');
+                            if(viewport.w < 992) {
+                                $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
+                            }
                         }
-                    }
-                    let cleanText = $(el).text();
-                    tableItemClone.find('.txt').text(cleanText);
-                    tableItemClone.attr('data-title', `toch-${i}`);
-                    $('.dt-event-hero-tab-title').append(tableItemClone);
-                })
+                        let cleanText = $(el).text();
+                        tableItemClone.find('.txt').text(cleanText);
+                        tableItemClone.attr('data-title', `toch-${i}`);
+                        $('.dt-event-hero-tab-title').append(tableItemClone);
+                    })
+                }
+                else {
+                    $('.dt-event-hero-tab-title').hide();
+                }
                 let topCenter = (viewport.h - $('.dt-event-hero-tab-inner').height()) / 2;
                 $('.dt-event-hero-tab-inner').css('top', topCenter);
             }
@@ -4858,20 +4863,25 @@ const script = () => {
             initContent() {
                 let tableItem = $('.dt-video-hero-tab-title-item').eq(0).clone();
                 $('.dt-video-hero-tab-title').empty();
-                $('.dt-video-hero-content h2').each((i, el) => {
-                    $(el).attr('data-title', `toch-${i}`);
-                    let tableItemClone = tableItem.clone();
-                    if(i == 0) {
-                        tableItemClone.addClass('active');
-                        if(viewport.w < 992) {
-                            $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
+                if($('.dt-video-hero-content h2').length > 0) {
+                    $('.dt-video-hero-content h2').each((i, el) => {
+                        $(el).attr('data-title', `toch-${i}`);
+                        let tableItemClone = tableItem.clone();
+                        if(i == 0) {
+                            tableItemClone.addClass('active');
+                            if(viewport.w < 992) {
+                                $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
+                            }
                         }
-                    }
-                    let cleanText = $(el).text();
-                    tableItemClone.find('.txt').text(cleanText);
-                    tableItemClone.attr('data-title', `toch-${i}`);
-                    $('.dt-video-hero-tab-title').append(tableItemClone);
-                })
+                        let cleanText = $(el).text();
+                        tableItemClone.find('.txt').text(cleanText);
+                        tableItemClone.attr('data-title', `toch-${i}`);
+                        $('.dt-video-hero-tab-title').append(tableItemClone);
+                    })
+                }
+                else {
+                    $('.dt-video-hero-tab-title').hide();
+                }
                 let topCenter = (viewport.h - $('.dt-video-hero-tab-inner').height()) / 2;
                 $('.dt-video-hero-tab-inner').css('top', topCenter);
             }
@@ -5180,22 +5190,27 @@ const script = () => {
             initContent() {
                 let tableItem = $('.dt-guide-hero-tab-title-item').eq(0).clone();
                 $('.dt-guide-hero-tab-title').empty();
-                $('.dt-guide-hero-content h2').each((i, el) => {
-                    $(el).attr('data-title', `toch-${i}`);
-                    let tableItemClone = tableItem.clone();
-                    if(i == 0) {
-                        tableItemClone.addClass('active');
-                        if(viewport.w < 992) {
-                            $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
+                if($('.dt-guide-hero-content h2').length > 0) {
+                    $('.dt-guide-hero-content h2').each((i, el) => {
+                        $(el).attr('data-title', `toch-${i}`);
+                        let tableItemClone = tableItem.clone();
+                        if(i == 0) {
+                            tableItemClone.addClass('active');
+                            if(viewport.w < 992) {
+                                $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
+                            }
                         }
-                    }
-                    let cleanText = $(el).text();
-                    tableItemClone.find('.txt').text(cleanText);
-                    tableItemClone.attr('data-title', `toch-${i}`);
-                    $('.dt-guide-hero-tab-title').append(tableItemClone);
-                    let topCenter = (viewport.h - $('.dt-guide-hero-tab-inner').height()) / 2;
-                    $('.dt-guide-hero-tab-inner').css('top', topCenter);
-                })
+                        let cleanText = $(el).text();
+                        tableItemClone.find('.txt').text(cleanText);
+                        tableItemClone.attr('data-title', `toch-${i}`);
+                        $('.dt-guide-hero-tab-title').append(tableItemClone);
+                        let topCenter = (viewport.h - $('.dt-guide-hero-tab-inner').height()) / 2;
+                        $('.dt-guide-hero-tab-inner').css('top', topCenter);
+                    })
+                }
+                else {
+                    $('.dt-guide-hero-tab-title').hide();
+                }
             }
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
@@ -6322,8 +6337,8 @@ const script = () => {
                 
                 this.scrollTrigger = ScrollTrigger.create({
                     trigger: '.fea-hero-intro-wrap',
-                    start: 'top+=25% bottom',
-                    end: 'bottom-=45% top',
+                    start: 'top+=35% bottom',
+                    end: 'bottom-=50% top',
                     scrub: 0.5,
                     onUpdate: (self) => {
                         if(this.isManualClick) return;
