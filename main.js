@@ -793,7 +793,7 @@ const script = () => {
                 });
                 break;
             case 'en-AU':
-                let urlRedirectToHomeAU = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner']
+                let urlRedirectToHomeAU = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner', '/schedule-a-demo']
                 urlRedirectToHomeAU.forEach(url => {
                     if(CurrentPathUrl.includes(url)) {
                         window.location.href = '/apac';
