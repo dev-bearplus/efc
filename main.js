@@ -2389,12 +2389,281 @@ const script = () => {
                         new FadeSplitText({ el: $('.schedule-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.schedule-hero-title .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.schedule-hero-sub .txt').get(0), mask: 'lines' }),
-                        new FadeIn({ el: $('.schedule-hero-form'), type: 'bottom' }),
+                        new FadeIn({ el: $('.schedule-hero-form-wrap'), type: 'bottom' }),
                     ]
                 });
             }
             interact() {
+                const $formSuccess = $('.schedule-hero-meeting');
+                const $inputGr = $('.schedule-hero-form-input-gr');
+                const $selectWrap = $('.schedule-hero-form-select-wrap');
+                const $selectDropdown = $('.schedule-hero-form-select-dropdown');
+                
+                const formReset = (form) => {
+                    $(form)[0].reset();
+                    reinitializeWebflow();
+                    $('.schedule-hero-form-option-input-wrap').slideUp();
+                    $inputGr.removeClass('active');
+                    $('.input:not(.input-hidden)').closest('.schedule-hero-form-input-gr').removeClass('filled');
+                    $selectWrap.removeClass('filled open');
+                    $('.schedule-hero-form-select-inner .txt').text('Select');
+                }
+                
+                const onSuccessForm = (form) => {
+                    console.log('success');
+                    $('.schedule-hero-form').addClass('hidden');
+                    let srcIframe = $('.schedule-hero-meeting iframe').attr('data-src');
+                    let firstName = $('input[name="First-Name"]').val();
+                    let lastName = $('input[name="Last-Name"]').val();
+                    let email = $('input[name="Email"]').val();
+                    let phone = $('input[name="Phone"]').val();
+                    let contact = $('input[name="contact"]:checked').val();
+                    let link = `${srcIframe}&firstName=${firstName}&lastName=${lastName}&email=${email}&phone=${phone}&preferred_contacting_method=${contact}`;
+                    $('.schedule-hero-meeting iframe').attr('src', link);
+                    $formSuccess.addClass('active');
+                    formReset(form);
+                }
+                formSubmitEvent.init({
+                    onlyWorkOnThisFormName: "Schedule a demo",
+                    onSuccess: () => onSuccessForm("#schedule-a-demo form"),
+                });
+                
+                $('.schedule-hero-form-input').on('focus', (e) => {
+                    $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
+                });
+                
+                $('.schedule-hero-form-input').on('blur', (e) => {
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
+                        ? $current.closest('.schedule-hero-form-input-gr') 
+                        : $current.closest('.schedule-hero-form-option-input-inner');
+                    
+                    $parent.removeClass('active')
+                        .toggleClass('filled', !!$current.val());
+                });
+                
+                $('.schedule-hero-form-select-inner').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
+                    
+                    $selectWrap.not($parent).removeClass('open');
+                    $selectDropdown.not($dropdown).removeClass('active');
+                    
+                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+                        $current.closest('.schedule-hero-form-input-gr').removeClass('active');
+                    }
+                    else {
+                        $('.schedule-hero-form-input-gr').removeClass('active');
+                        $current.closest('.schedule-hero-form-input-gr').addClass('active');
+                    }
+                    $parent.toggleClass('active open');
+                    $dropdown.toggleClass('active');
+                });
+                
+                $(document).on('click', (e) => {
+                    if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
+                        $selectWrap.removeClass('open');
+                        if($(e.target).closest('.schedule-hero-form-input').length) {
+                            $inputGr.removeClass('active');
+                            $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
+                        }
+                        else {
+                            $inputGr.removeClass('active');
+                        }
+                        $selectDropdown.removeClass('active');
+                    }
+                });
+                
+                $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
+                    e.preventDefault();
+                    const $current = $(e.currentTarget);
+                    const text = $current.find('.txt').text();
+                    const $parent = $current.closest('.schedule-hero-form-select-wrap');
+                    const $selectInner = $parent.find('.schedule-hero-form-select-inner');
+                    
+                    $inputGr.removeClass('active');
+                    $parent.addClass('filled').removeClass('open');
+                    $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
+                    $selectInner.find('.txt').text(text);
+                    $selectInner.find('input').val(text);
+                    
+                    $('.schedule-hero-form-select-dropdown-item').removeClass('active');
+                    $current.addClass('active');
+                });
+                
+                $('.schedule-hero-form-submit').on('click', (e) => {
+                    if (!this.checkFormValid()) {
+                        e.preventDefault();
+                    }
+                    else {
+                        this.submitHubspot();
+                    }
+                });
+                
+                $('button[type="submit"]').on("pointerenter", function () {
+                    $(this).prop("disabled", false);
+                });
             }
+            checkEmailValid(emailValue) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(emailRegex.test(emailValue)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            checkFormValid() {
+                const messageEmail = "Invalid email";
+                const email = $('input[name="Email"]');
+                const phone = $('input[name="Phone"]');
+                const firstName = $('input[name="First-Name"]');
+                const lastName = $('input[name="Last-Name"]');
+                const schoolName = $('input[name="School-Name"]');
+                const program = $('input[name="Program"]');
+                const activeStudents = $('input[name="ActiveStudents"]');
+                const contact = $('input[name="contact"]');
+                // chec
+                let isValid = true;
+                if(!firstName.val()) {
+                    firstName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    firstName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!lastName.val()) {
+                    lastName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!email.val()) {
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else if(!this.checkEmailValid(email.val())) {
+                    email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
+                    email.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    email.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!schoolName.val()) {
+                    schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!phone.val()) {
+                    phone.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    phone.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!program.val()) {
+                    program.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    program.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!activeStudents.val()) {
+                    activeStudents.closest('.schedule-hero-form-input-gr').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    activeStudents.closest('.schedule-hero-form-input-gr').removeClass('error');
+                }
+                if(!$('input[name="contact"]:checked').length) {
+                    contact.closest('.schedule-hero-form-option-wrap').addClass('error');
+                    isValid = false;
+                }
+                else {
+                    contact.closest('.schedule-hero-form-option-wrap').removeClass('error');
+                }
+                console.log(isValid);
+                return isValid;
+            }
+            submitHubspot() {
+                const hubspot = {
+                    portalId: 530303,
+                    formId: "39be3931-1e1b-497b-8b98-44a8b8dc9fb6",
+                    fields: [
+                        { name: "firstname", value: (data) => data["First-Name"] },
+                        { name: "lastname", value: (data) => data["Last-Name"] },
+                        { name: "email", value: (data) => data["Email"] },
+                        { name: "phone", value: (data) => data["Phone"] },
+                        { name: "contact_method", value: (data) => data["contact"] },
+                        { name: "school_name", value: (data) => data["School-Name"] },
+                        { name: "primary_program_type", value: (data) => data["Program"] },
+                        { name: "approximate_active_students", value: (data) => data["ActiveStudents"] },
+                        { name: "city", value: (data) => data["City"] },
+                        { name: "state", value: (data) => data["State"] },
+                    ],
+                };
+                //get current locale
+                const currentLocale = $('html').attr('lang');
+                if(currentLocale == 'en-GB') { //uk
+                    hubspot.formId = "6439cb2e-3e48-4215-9451-341217596e13";
+                }
+                else if(currentLocale == 'en-AU') { //apac
+                    hubspot.formId = "2f8f1029-f157-4dc0-a0df-e80cee0c9d41";
+                }
+                const { portalId, formId, fields } = hubspot;
+                let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+                const data = mapFormToObject($('#schedule-a-demo form').get(0));
+                const mapField = (data) => {
+                   if (!fields.length) return [];
+    
+                   const result = fields.map((field) => {
+                      const { name, value } = field;
+                      if (!value) {
+                      return {
+                         name,
+                         value: data[name] || "",
+                      };
+                      } else {
+                      const getValue = value(data);
+                      return {
+                         name,
+                         value: getValue || "",
+                      };
+                      }
+                   });
+                   return result;
+                };
+                const mappedFields = mapField(data);
+                const dataSend = {
+                   fields: mappedFields,
+                   context: {
+                      pageUri: window.location.href,
+                      pageName: "Contact page",
+                   },
+                };
+                $.ajax({
+                   url: url,
+                   method: "POST",
+                   data: JSON.stringify(dataSend),
+                   dataType: "json",
+                   headers: {
+                      accept: "application/json",
+                      "Access-Control-Allow-Origin": "*",
+                   },
+                   contentType: "application/json",
+                   success: function (response) {
+                      console.log(response);
+                   },
+                   error: function (xhr, resp, text) {
+                      console.log(xhr, resp, text);
+                   },
+                });
+             }
             destroy() {
                 super.destroy();
             }
@@ -2468,7 +2737,6 @@ const script = () => {
                 super();
                 this.onTrigger = () => {
                     this.animationReveal();
-                    this.animationScrub();
                     this.interact();
                 };
             }
@@ -2486,8 +2754,6 @@ const script = () => {
                         new FadeIn({ el: $('.contact-hero-form'), type: 'bottom' }),
                     ]
                 });
-            }
-            animationScrub() {
             }
             interact() {
                 const $formSuccess = $('.schedule-form-success');
