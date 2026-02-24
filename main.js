@@ -959,67 +959,69 @@ const script = () => {
             // get current year 
             const currentYear = new Date().getFullYear();
             $('.txt-year-current').text(currentYear);
-            new MasterTimeline({
-                timeline: gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '.footer-form',
-                        start: 'top top+=75%',
-                        once: true,
-                    },
-                }),
-                tweenArr: [
-                    new FadeSplitText({ el: $('.footer-form-title .heading').get(0), mask: 'lines' }),
-                    new FadeSplitText({ el: $('.footer-form-sub .txt').get(0), mask: 'lines' }),
-                    new FadeIn({ el: $('.footer-form-main'), type: 'bottom' }),
-                ]
-            });
-            $('.footer-menu').each((index, item) => {
+            if(viewport.w >= 992) {
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
-                            trigger: item,
+                            trigger: '.footer-form',
                             start: 'top top+=75%',
                             once: true,
                         },
                     }),
                     tweenArr: [
-                        new FadeSplitText({ el: $(item).find('.footer-menu-title .txt').get(0), mask: 'lines' }),
-                        ...($(item).find('.footer-menu-item').length > 0 ? Array.from($(item).find('.footer-menu-item')).flatMap(menuItem => [
-                                new FadeIn({ el: menuItem, delay: 0}),
-                                new FadeSplitText({ el: $(menuItem).find('.footer-menu-item-title .txt').get(0), mask: 'lines' }),
-                            ]) : []),
-                        ...($(item).find('.footer-menu-social').length > 0 ? [new FadeIn({ el: $(item).find('.footer-menu-social'), type: 'bottom' })] : []),
-                    ].filter(Boolean)
+                        new FadeSplitText({ el: $('.footer-form-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.footer-form-sub .txt').get(0), mask: 'lines' }),
+                        new FadeIn({ el: $('.footer-form-main'), type: 'bottom' }),
+                    ]
                 });
-            });
-            new MasterTimeline({
-                timeline: gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '.footer-logo-wrap',
-                        start: 'top top+=90%',
-                        once: true,
-                    },
-                }),
-                tweenArr: [
-                    new FadeIn({ el: $('.footer-logo'), type: 'bottom' }),
-                ]
-            });
-            new MasterTimeline({
-                timeline: gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '.footer-copyright-wrap',
-                        start: 'top bottom',
-                        once: true,
-                    },
-                }),
-                tweenArr: [
-                    new FadeSplitText({ el: $('.footer-copyright .txt').get(0), mask: 'lines' }),
-                    ...Array.from($('.footer-policy-item')).flatMap(item => [
-                        new FadeIn({ el: item, delay: 0}),
-                        new FadeSplitText({ el: $(item).find('.txt').get(0), mask: 'lines' }),
-                    ]),
-                ]
-            });
+                $('.footer-menu').each((index, item) => {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: item,
+                                start: 'top top+=75%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $(item).find('.footer-menu-title .txt').get(0), mask: 'lines' }),
+                            ...($(item).find('.footer-menu-item').length > 0 ? Array.from($(item).find('.footer-menu-item')).flatMap(menuItem => [
+                                    new FadeIn({ el: menuItem, delay: 0}),
+                                    new FadeSplitText({ el: $(menuItem).find('.footer-menu-item-title .txt').get(0), mask: 'lines' }),
+                                ]) : []),
+                            ...($(item).find('.footer-menu-social').length > 0 ? [new FadeIn({ el: $(item).find('.footer-menu-social'), type: 'bottom' })] : []),
+                        ].filter(Boolean)
+                    });
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.footer-logo-wrap',
+                            start: 'top top+=90%',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeIn({ el: $('.footer-logo'), type: 'bottom' }),
+                    ]
+                });
+                new MasterTimeline({
+                    timeline: gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.footer-copyright-wrap',
+                            start: 'top bottom',
+                            once: true,
+                        },
+                    }),
+                    tweenArr: [
+                        new FadeSplitText({ el: $('.footer-copyright .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.footer-policy-item')).flatMap(item => [
+                            new FadeIn({ el: item, delay: 0}),
+                            new FadeSplitText({ el: $(item).find('.txt').get(0), mask: 'lines' }),
+                        ]),
+                    ]
+                });
+            }
         }
         validateEmail() {
             const $input = $('.footer-form-input');
@@ -1283,25 +1285,26 @@ const script = () => {
                     activeItem(['.home-product-item', '.home-product-img-item'], 0);
                     $('.home-product-item').eq(0).find('.home-product-item-content').slideDown();
                 }
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: {    
-                            trigger: '.home-product-wrap',
-                            start: 'top top+=60%',
-                            once: true,
-                        },
-                    }),
-                    allowMobile: true,
-                    tweenArr: [
-                        new FadeSplitText({ el: $('.home-product-title .heading').get(0), mask: 'lines' }),
-                        new FadeSplitText({ el: $('.home-product-sub .txt').get(0), mask: 'lines' }),
-                        ...Array.from($('.home-product-img-item:first-child .home-product-img-thumb-item')).map(item => new ScaleInset({ el: $(item).get(0), isDisableRevert: true})),
-                        ...Array.from($('.home-product-item')).map(item => new FadeIn({ el: item})),
-                        new FadeIn({ el: $('.home-product-img-list') }),
-                        new FadeSplitText({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-title .heading').get(0), delay: 0.1 }),
-                        new FadeIn({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-link') }),
-                    ]
-                });
+                if(viewport.w >= 992) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {    
+                                trigger: '.home-product-wrap',
+                                start: 'top top+=60%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.home-product-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.home-product-sub .txt').get(0), mask: 'lines' }),
+                            ...Array.from($('.home-product-img-item:first-child .home-product-img-thumb-item')).map(item => new ScaleInset({ el: $(item).get(0), isDisableRevert: true})),
+                            ...Array.from($('.home-product-item')).map(item => new FadeIn({ el: item})),
+                            new FadeIn({ el: $('.home-product-img-list') }),
+                            new FadeSplitText({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-title .heading').get(0), delay: 0.1 }),
+                            new FadeIn({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-link') }),
+                        ]
+                    });
+                }
             }
             setupScrollTriggers() {
                 if(this.mainTrigger) {
@@ -1471,27 +1474,29 @@ const script = () => {
                 };
             }
             animationReveal() {
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: {
-                            trigger: '.home-trans',
-                            start: 'top top+=60%',
-                            once: true,
-                        },
-                    }),
-                    tweenArr: [
-                        new FadeSplitText({ el: $('.home-trans-title .heading').get(0), mask: 'lines' }),
-                        new FadeSplitText({ el: $('.home-trans-sub .txt').get(0), mask: 'lines' }),
-                        new FadeIn({ el: $('.home-trans-btn'), type: 'bottom'}),
-                        new FadeIn({ el: $('.home-trans-head'), type: 'bottom'}),
-                        ...Array.from($('.home-trans-head-inner .heading')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
-                        ...Array.from($('.home-trans-row')).flatMap(item => [
-                            new FadeIn({ el: item, type: 'bottom'}),
-                            new FadeSplitText({ el: $(item).find('.home-trans-row-title .heading').get(0), mask: 'lines'}),
-                            ...Array.from($(item).find('.home-trans-row-item')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
-                        ]),
-                    ]
-                });
+                if(viewport.w >= 992) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.home-trans',
+                                start: 'top top+=60%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.home-trans-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.home-trans-sub .txt').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.home-trans-btn'), type: 'bottom'}),
+                            new FadeIn({ el: $('.home-trans-head'), type: 'bottom'}),
+                            ...Array.from($('.home-trans-head-inner .heading')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                            ...Array.from($('.home-trans-row')).flatMap(item => [
+                                new FadeIn({ el: item, type: 'bottom'}),
+                                new FadeSplitText({ el: $(item).find('.home-trans-row-title .heading').get(0), mask: 'lines'}),
+                                ...Array.from($(item).find('.home-trans-row-item')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                            ]),
+                        ]
+                    });
+                }
 
             }
             initSwiper() {
@@ -1570,26 +1575,28 @@ const script = () => {
                         }
                     });
                 }
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: {
-                            trigger: '.stories-support',
-                            start: 'top top+=55%',
-                            once: true,
-                        },
-                    }),
-                    tweenArr: [
-                        new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
-                        ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
-                            new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
-                            new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
-                            new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
-                            new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
-                            $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null   ,
-                        ]).filter(Boolean)
-                    ]
-                });
+                if(viewport.w > 992) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.stories-support',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
+                            ...Array.from($('.stories-support-item')).flatMap(item => [
+                                new FadeIn({ el: item, delay: 0.05}),
+                                new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
+                                $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null   ,
+                            ]).filter(Boolean)
+                        ]
+                    });
+                }
             }
             animationScrub() {
             }
@@ -1712,24 +1719,26 @@ const script = () => {
                 if(viewport.w < 992) {
                     this.initSwiper();
                 }
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: {
-                            trigger: '.home-resource',
-                            start: 'top top+=55%',
-                            once: true,
-                        },
-                    }),
-                    tweenArr: [
-                        new FadeSplitText({ el: $('.home-resource-title .heading').get(0), mask: 'lines' }),
-                        ...Array.from($('.home-resource-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                            new ScaleInset({ el: $(item).find('.home-resource-item-img').get(0) }),
-                            new FadeSplitText({ el: $(item).find('.home-resource-item-title .heading').get(0), mask: 'lines' }),
-                            new FadeSplitText({ el: $(item).find('.home-resource-item-sub .txt').get(0), mask: 'lines' })
-                        ]),
-                    ]
-                });
+                else {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.home-resource',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.home-resource-title .heading').get(0), mask: 'lines' }),
+                            ...Array.from($('.home-resource-item')).flatMap(item => [
+                                new FadeIn({ el: item, delay: 0}),
+                                new ScaleInset({ el: $(item).find('.home-resource-item-img').get(0) }),
+                                new FadeSplitText({ el: $(item).find('.home-resource-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeSplitText({ el: $(item).find('.home-resource-item-sub .txt').get(0), mask: 'lines' })
+                            ]),
+                        ]
+                    });
+                }
             }
             initSwiper() {
                 $('.home-resource-cms').addClass('swiper');
@@ -1762,26 +1771,28 @@ const script = () => {
                 };
             }
             animationReveal() {
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: {
-                            trigger: '.home-grow',
-                            start: 'top top+=55%',
-                            once: true,
-                        },
-                    }),
-                    tweenArr: [
-                        new FadeSplitText({ el: $('.home-grow-title .heading').get(0), mask: 'lines' }),
-                        new FadeSplitText({ el: $('.home-grow-sub .txt').get(0), mask: 'lines' }),
-                        ...Array.from($('.home-grow-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                            new FadeIn({ el: $(item).find('.home-grow-item-ic'), type: 'bottom' }),
-                            new FadeSplitText({ el: $(item).find('.home-grow-item-title .heading').get(0), mask: 'lines' }),
-                        ]),
-                        new FadeIn({ el: $('.home-grow-btn'), type: 'bottom' }),
-                        new ScaleInset({ el: $('.home-grow-img').get(0) }),
-                    ]
-                });
+                if(viewport.w >= 992) {
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: {
+                                trigger: '.home-grow',
+                                start: 'top top+=55%',
+                                once: true,
+                            },
+                        }),
+                        tweenArr: [
+                            new FadeSplitText({ el: $('.home-grow-title .heading').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.home-grow-sub .txt').get(0), mask: 'lines' }),
+                            ...Array.from($('.home-grow-item')).flatMap(item => [
+                                new FadeIn({ el: item, delay: 0}),
+                                new FadeIn({ el: $(item).find('.home-grow-item-ic'), type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.home-grow-item-title .heading').get(0), mask: 'lines' }),
+                            ]),
+                            new FadeIn({ el: $('.home-grow-btn'), type: 'bottom' }),
+                            new ScaleInset({ el: $('.home-grow-img').get(0) }),
+                        ]
+                    });
+                }
             }
             animationScrub() {
             }
