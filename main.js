@@ -2946,7 +2946,7 @@ const script = () => {
                         { name: "email", value: (data) => data["Email"] },
                         { name: "what_can_we_help_you_with", value: (data) => data["Challenge"] },
                         { name: "message", value: (data) => data["Message"] },
-                        { name: "wants_marketing_emails", value: (data) => data["wants_marketing_emails"] }
+                        { name: "wants_marketing_emails", value: (data) => data["wants_marketing_emails"] ? "Yes" : "No" }
                     ],
                 };
                 if($('input[name="Location"]').length > 0) {
