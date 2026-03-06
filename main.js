@@ -3,6 +3,10 @@ const script = () => {
     ScrollTrigger.defaults({
         invalidateOnRefresh: true
     });
+    function isStagging() {
+        let currentUrl = window.location.href;
+        return currentUrl.includes('webflow.io')
+    }
     function autoRedirectByLocation() {
         console.log('autoRedirectByLocation')
         const hasRedirected = sessionStorage.getItem('locationRedirected');
@@ -6654,6 +6658,8 @@ const script = () => {
                 this.swiper = null;
                 this.isDesktop = false;
                 this.isUpdatingFromCode = false;
+                this.scrollScrub = null;
+                this.scrubCurrentIndex = -1;
                 this.onTrigger = () => {
                     this.animationReveal();
                 };
@@ -6724,6 +6730,60 @@ const script = () => {
                         ]),
                     ]
                 });
+                if(isStagging()) {
+                    this.setupTimelineScrub();
+                }
+            }
+            setupTimelineScrub() {
+                if (this.scrollScrub) {
+                    this.scrollScrub.kill();
+                    this.scrollScrub = null;
+                }
+                const steps = $('.how-progress-step');
+                this.scrubSteps = [];
+                steps.each((stepIndex) => {
+                    const itemCount = steps.eq(stepIndex).find('.how-progress-step-item').length;
+                    for (let i = 0; i < itemCount; i++) {
+                        this.scrubSteps.push([stepIndex, i]);
+                    }
+                });
+                const totalCount = this.scrubSteps.length;
+                if (totalCount === 0) return;
+                this.scrubCurrentIndex = -1;
+                this.scrollScrub = ScrollTrigger.create({
+                    trigger: '.how-progress-wrap',
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 1,
+                    onUpdate: (self) => {
+                        const progress = self.progress;
+                        let newIndex = Math.floor(progress * totalCount);
+                        newIndex = Math.min(Math.max(0, newIndex), totalCount - 1);
+                        if (newIndex !== this.scrubCurrentIndex) {
+                            this.scrubCurrentIndex = newIndex;
+                            const [stepIndex, itemIndex] = this.scrubSteps[newIndex];
+                            this.activateStep(stepIndex, itemIndex);
+                        }
+                    }
+                });
+            }
+            scrollToStepProgress(stepIndex, itemIndex) {
+                if (!this.scrollScrub || !this.scrubSteps) return;
+                const scrubIndex = this.scrubSteps.findIndex(([s, i]) => s === stepIndex && i === itemIndex);
+                if (scrubIndex === -1) return;
+                const totalCount = this.scrubSteps.length;
+                const targetProgress = (scrubIndex + 0.02) / totalCount;
+                const scrollStart = this.scrollScrub.start;
+                const scrollEnd = this.scrollScrub.end;
+                const targetScroll = scrollStart + (scrollEnd - scrollStart) * targetProgress;
+                if (smoothScroll && smoothScroll.lenis) {
+                    smoothScroll.scrollTo(targetScroll, {
+                        duration: 0.8,
+                        immediate: false
+                    });
+                } else {
+                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                }
             }
             
             setupNavigation() {
@@ -6744,6 +6804,7 @@ const script = () => {
                 
                 if(stepIndex === -1) {
                     this.activateStep(0, 0);
+                    this.scrollToStepProgress(0, 0);
                     return;
                 }
                 
@@ -6753,11 +6814,14 @@ const script = () => {
                 
                 if(itemIndex < items.length - 1) {
                     this.activateStep(stepIndex, itemIndex + 1);
+                    this.scrollToStepProgress(stepIndex, itemIndex + 1);
                 } else {
                     if(stepIndex < steps.length - 1) {
                         this.activateStep(stepIndex + 1, 0);
+                        this.scrollToStepProgress(stepIndex + 1, 0);
                     } else {
                         this.activateStep(0, 0);
+                        this.scrollToStepProgress(0, 0);
                     }
                 }
             }
@@ -6768,6 +6832,7 @@ const script = () => {
                 
                 if(stepIndex === -1) {
                     this.activateStep(0, 0);
+                    this.scrollToStepProgress(0, 0);
                     return;
                 }
                 
@@ -6777,15 +6842,18 @@ const script = () => {
                 
                 if(itemIndex > 0) {
                     this.activateStep(stepIndex, itemIndex - 1);
+                    this.scrollToStepProgress(stepIndex, itemIndex - 1);
                 } else {
                     if(stepIndex > 0) {
                         const prevStep = steps.eq(stepIndex - 1);
                         const prevItems = prevStep.find('.how-progress-step-item');
                         this.activateStep(stepIndex - 1, prevItems.length - 1);
+                        this.scrollToStepProgress(stepIndex - 1, prevItems.length - 1);
                     } else {
                         const lastStep = steps.eq(steps.length - 1);
                         const lastItems = lastStep.find('.how-progress-step-item');
                         this.activateStep(steps.length - 1, lastItems.length - 1);
+                        this.scrollToStepProgress(steps.length - 1, lastItems.length - 1);
                     }
                 }
             }
@@ -6860,11 +6928,14 @@ const script = () => {
                             const currentLineIndex = $allLines.index($activeLines.eq(0));
                             const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
                             this.activateStep(clickedIndex, nextLineIndex);
+                            this.scrollToStepProgress(clickedIndex, nextLineIndex);
                         } else {
                             this.activateStep(clickedIndex, 0);
+                            this.scrollToStepProgress(clickedIndex, 0);
                         }
                     } else {
                         this.activateStep(clickedIndex, 0);
+                        this.scrollToStepProgress(clickedIndex, 0);
                     }
                 });
                 
@@ -6873,6 +6944,7 @@ const script = () => {
                         e.stopPropagation();
                         const clickedItemIndex = $(step).find('.how-progress-step-item').index($(e.currentTarget));
                         this.activateStep(stepIndex, clickedItemIndex);
+                        this.scrollToStepProgress(stepIndex, clickedItemIndex);
                     });
                 });
             }
@@ -6891,11 +6963,14 @@ const script = () => {
                             const currentLineIndex = $allLines.index($activeLines.eq(0));
                             const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
                             this.activateStep(clickedIndex, nextLineIndex);
+                            this.scrollToStepProgress(clickedIndex, nextLineIndex);
                         } else {
                             this.activateStep(clickedIndex, 0);
+                            this.scrollToStepProgress(clickedIndex, 0);
                         }
                     } else {
                         this.activateStep(clickedIndex, 0);
+                        this.scrollToStepProgress(clickedIndex, 0);
                     }
                 });
                 
@@ -6907,6 +6982,7 @@ const script = () => {
                         
                         if (!$item.hasClass('active')) {
                             this.activateStep(stepIndex, itemIndex);
+                            this.scrollToStepProgress(stepIndex, itemIndex);
                         } else {
                             $item.removeClass('active');
                             $item.find('.how-progress-step-item-img').slideUp();
@@ -6917,6 +6993,10 @@ const script = () => {
             }
             
             destroy() {
+                if (this.scrollScrub) {
+                    this.scrollScrub.kill();
+                    this.scrollScrub = null;
+                }
                 if (this.swiper) {
                     this.swiper.destroy(true, true);
                     this.swiper = null;
