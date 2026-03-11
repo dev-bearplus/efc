@@ -6632,6 +6632,7 @@ const script = () => {
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         onStart: () => {
+                            console.log('how-hero-wrap khanh');
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
@@ -6709,6 +6710,7 @@ const script = () => {
                 this.swiper = new Swiper('.how-progress-tab-cms', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(24, 'rem'),
+                    speed: 800,
                     on: { slideChange: () => { if (!this.isUpdatingFromCode) this.activateStep(this.swiper.activeIndex, 0); } }
                 });
                 this.setupNavigation();
@@ -6731,7 +6733,7 @@ const script = () => {
                         ]),
                     ]
                 });
-                if (isStagging()) this.setupTimelineScrub();
+                if (isStagging() && viewport.w >= 992) this.setupTimelineScrub();
             }
             setupTimelineScrub() {
                 this.scrollScrub?.kill();
