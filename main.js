@@ -2400,6 +2400,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         }
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.schedule-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.schedule-hero-title .heading').get(0), mask: 'lines' }),
@@ -2762,6 +2763,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         }
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.contact-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.contact-hero-title .heading').get(0), mask: 'lines' }),
@@ -3154,6 +3156,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
@@ -3570,6 +3573,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
@@ -3840,6 +3844,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.stories-hero-title .heading').get(0), mask: 'lines' }),
@@ -4261,6 +4266,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.pricing-hero-title .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.pricing-hero-sub .txt').get(0), mask: 'lines' }),
@@ -4562,6 +4568,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.growth-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.growth-hero-title .heading').get(0), mask: 'lines' }),
@@ -5956,6 +5963,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.comp-hero-title .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.comp-hero-sub .heading').get(0), mask: 'lines' }),
@@ -6310,6 +6318,7 @@ const script = () => {
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.fea-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.fea-hero-title .heading').get(0), mask: 'lines' }),
@@ -6333,6 +6342,7 @@ const script = () => {
                             once: true,
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.fea-hero-intro-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.fea-hero-intro-item')).flatMap(item => 
@@ -6632,10 +6642,10 @@ const script = () => {
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         onStart: () => {
-                            console.log('how-hero-wrap khanh');
                             $('[df-init]').removeAttr('df-init');
                         },
                     }),
+                    allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.home-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
