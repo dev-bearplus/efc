@@ -6656,354 +6656,210 @@ const script = () => {
             constructor() {
                 super();
                 this.swiper = null;
-                this.isDesktop = false;
                 this.isUpdatingFromCode = false;
                 this.scrollScrub = null;
                 this.scrubCurrentIndex = -1;
-                this.onTrigger = () => {
-                    this.animationReveal();
-                };
+                this.$ = null;
+                this.onTrigger = () => this.animationReveal();
             }
-            async animationReveal() {
-                let lineClone = $('.how-progress-tab-item-line').eq(0).clone();
-                $('.how-progress-tab-item-line-wrap').html('');
-                $('.how-progress-tab-item-title').each((index, item) => {
-                    let indexReal = `${index+1}.` 
-                    $(item).find('.heading').eq(0).text(indexReal);
+            getEls() {
+                if (!this.$) this.$ = {
+                    steps: $('.how-progress-step'),
+                    tabItems: $('.how-progress-tab-item'),
+                };
+                return this.$;
+            }
+            getCurrentStepItem() {
+                const { steps } = this.getEls();
+                const $active = steps.filter('.active');
+                const stepIndex = steps.index($active);
+                if (stepIndex === -1) return [0, 0];
+                const items = $active.find('.how-progress-step-item');
+                const itemIndex = items.index(items.filter('.active'));
+                return [stepIndex, itemIndex === -1 ? 0 : itemIndex];
+            }
+            goToStep(stepIndex, itemIndex) {
+                this.activateStep(stepIndex, itemIndex);
+                this.scrollToStepProgress(stepIndex, itemIndex);
+            }
+            applyScrubProgress(progress) {
+                const { scrubSteps } = this;
+                const total = scrubSteps.length;
+                const idx = Math.min(Math.floor(progress * total), total - 1);
+                const [stepIndex, itemIndex] = scrubSteps[idx];
+                const segStart = idx / total;
+                const segEnd = (idx + 1) / total;
+                const itemProgress = Math.max(0, Math.min(1, (progress - segStart) / (segEnd - segStart)));
+                if (idx !== this.scrubCurrentIndex) {
+                    this.scrubCurrentIndex = idx;
+                    this.activateStep(stepIndex, itemIndex);
+                }
+                this.updateTabItemLineProgress(stepIndex, itemIndex, itemProgress);
+            }
+            animationReveal() {
+                const lineClone = $('.how-progress-tab-item-line').eq(0).clone();
+                $('.how-progress-tab-item-line-wrap').empty();
+                $('.how-progress-tab-item-title').each((i, el) => $(el).find('.heading').eq(0).text(`${i + 1}.`));
+                $('.how-progress-step').each((i, el) => {
+                    $(el).find('.how-progress-step-label').text(`Step ${i + 1}`);
+                    const qty = $(el).find('.how-progress-step-item').length;
+                    const html = lineClone.clone();
+                    for (let j = 0; j < qty; j++) $('.how-progress-tab-item').eq(i).find('.how-progress-tab-item-line-wrap').append(html.clone());
                 });
-                $('.how-progress-step').each((index, item) => {
-                    $(item).find('.how-progress-step-label').text(`Step ${index+1}`);
-                    let quantity = $(item).find('.how-progress-step-item').length;
-                    for(let i = 0; i < quantity; i++) {
-                        let html = lineClone.clone();
-                        $('.how-progress-tab-item').eq(index).find('.how-progress-tab-item-line-wrap').append(html);
-                    }
-                });
-                
                 this.swiper = new Swiper('.how-progress-tab-cms', {
                     slidesPerView: 'auto',
                     spaceBetween: cvUnit(24, 'rem'),
-                    on: {
-                        slideChange: () => {
-                            if(!this.isUpdatingFromCode) {
-                                const activeIndex = this.swiper.activeIndex;
-                                this.activateStep(activeIndex, 0);
-                            }
-                        }
-                    }
+                    on: { slideChange: () => { if (!this.isUpdatingFromCode) this.activateStep(this.swiper.activeIndex, 0); } }
                 });
-                
                 this.setupNavigation();
-                
-                this.isDesktop = window.innerWidth >= 992;
-                
-                if (this.isDesktop) {
-                    this.activateStep(0, 0);
-                    this.interactDesktop();
-                } else {
-                    header.registerDependent('.how-progress-tab-wrap');
-                    this.activateStep(0, 0);
-                    this.interactMobile();
-                }
+                this.activateStep(0, 0);
+                if (window.innerWidth >= 992) this.interactDesktop();
+                else { header.registerDependent('.how-progress-tab-wrap'); this.interactMobile(); }
                 new MasterTimeline({
                     timeline: gsap.timeline({
-                        scrollTrigger: {
-                            trigger: '.how-progress',
-                            start: 'top top+=75%',
-                            once: true,
-                        },
+                        scrollTrigger: { trigger: '.how-progress', start: 'top top+=75%', once: true },
                     }),
                     tweenArr: [
-                        ...Array.from($('.how-progress-tab-content-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                        ]),
-                        ...Array.from($('.how-progress-tab-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
-                        ]),
+                        ...$('.how-progress-tab-content-item, .how-progress-tab-item').get().map(el => new FadeIn({ el, delay: 0, isDisableRevert: el.classList.contains('how-progress-tab-item') })),
                         new FadeIn({ el: $('.how-progress-step:first-child .how-progress-step-label').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.how-progress-step:first-child .how-progress-step-title .heading').get(0), mask: 'lines' }),
                         new FadeIn({ el: $('.how-progress-step-img-list'), type: 'bottom' }),
-                        ...Array.from($('.how-progress-step:first-child .how-progress-step-item')).flatMap(item => [    
-                            new FadeIn({ el: item, delay: 0}),
-                            new FadeSplitText({ el: $(item).find('.how-progress-step-item-title .heading').get(0), mask: 'lines' }),
-                            new FadeIn({ el: $(item).find('.how-progress-step-item-ic'), type: 'bottom' }),
+                        ...$('.how-progress-step:first-child .how-progress-step-item').get().flatMap(el => [
+                            new FadeIn({ el, delay: 0 }),
+                            new FadeSplitText({ el: $(el).find('.how-progress-step-item-title .heading').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $(el).find('.how-progress-step-item-ic'), type: 'bottom' }),
                         ]),
                     ]
                 });
-                if(isStagging()) {
-                    this.setupTimelineScrub();
-                }
+                if (isStagging()) this.setupTimelineScrub();
             }
             setupTimelineScrub() {
-                if (this.scrollScrub) {
-                    this.scrollScrub.kill();
-                    this.scrollScrub = null;
-                }
-                const steps = $('.how-progress-step');
-                this.scrubSteps = [];
-                steps.each((stepIndex) => {
-                    const itemCount = steps.eq(stepIndex).find('.how-progress-step-item').length;
-                    for (let i = 0; i < itemCount; i++) {
-                        this.scrubSteps.push([stepIndex, i]);
-                    }
-                });
-                const totalCount = this.scrubSteps.length;
-                if (totalCount === 0) return;
+                this.scrollScrub?.kill();
+                this.scrollScrub = null;
+                gsap.set('.how-progress-tab-item-line-inner, .how-progress-step-child-line-progress', { x: '-101%' });
+                const { steps } = this.getEls();
+                this.scrubSteps = steps.get().flatMap((_, i) =>
+                    Array.from({ length: steps.eq(i).find('.how-progress-step-item').length }, (_, j) => [i, j])
+                );
+                if (!this.scrubSteps.length) return;
                 this.scrubCurrentIndex = -1;
                 this.scrollScrub = ScrollTrigger.create({
                     trigger: '.how-progress-wrap',
                     start: 'top top',
                     end: 'bottom bottom',
                     scrub: 1,
-                    onUpdate: (self) => {
-                        const progress = self.progress;
-                        let newIndex = Math.floor(progress * totalCount);
-                        newIndex = Math.min(Math.max(0, newIndex), totalCount - 1);
-                        if (newIndex !== this.scrubCurrentIndex) {
-                            this.scrubCurrentIndex = newIndex;
-                            const [stepIndex, itemIndex] = this.scrubSteps[newIndex];
-                            this.activateStep(stepIndex, itemIndex);
-                        }
-                    }
+                    onUpdate: (self) => this.applyScrubProgress(self.progress),
+                });
+                this.scrollScrub.refresh();
+                this.applyScrubProgress(this.scrollScrub.progress);
+            }
+            updateTabItemLineProgress(stepIndex, itemIndex, itemProgress) {
+                const x = (i) => itemIndex < 0 ? -101 : i < itemIndex ? 0 : i === itemIndex ? -101 + itemProgress * 101 : -101;
+                const $tab = $('.how-progress-tab-item').eq(stepIndex);
+                const $step = $('.how-progress-step').eq(stepIndex);
+                $tab.find('.how-progress-tab-item-line').each((i, el) => {
+                    const inner = el.querySelector('.how-progress-tab-item-line-inner');
+                    if (inner) gsap.set(inner, { x: x(i) + '%' });
+                });
+                $step.find('.how-progress-step-item').each((i, el) => {
+                    const prog = el.querySelector('.how-progress-step-child-line-progress');
+                    if (prog) gsap.set(prog, { x: x(i) + '%' });
                 });
             }
             scrollToStepProgress(stepIndex, itemIndex) {
                 if (!this.scrollScrub || !this.scrubSteps) return;
-                const scrubIndex = this.scrubSteps.findIndex(([s, i]) => s === stepIndex && i === itemIndex);
-                if (scrubIndex === -1) return;
-                const totalCount = this.scrubSteps.length;
-                const targetProgress = (scrubIndex + 0.02) / totalCount;
-                const scrollStart = this.scrollScrub.start;
-                const scrollEnd = this.scrollScrub.end;
-                const targetScroll = scrollStart + (scrollEnd - scrollStart) * targetProgress;
-                if (smoothScroll && smoothScroll.lenis) {
-                    smoothScroll.scrollTo(targetScroll, {
-                        duration: 0.8,
-                        immediate: false
-                    });
-                } else {
-                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                }
+                const idx = this.scrubSteps.findIndex(([s, i]) => s === stepIndex && i === itemIndex);
+                if (idx === -1) return;
+                const y = this.scrollScrub.start + (this.scrollScrub.end - this.scrollScrub.start) * (idx + 0.02) / this.scrubSteps.length;
+                smoothScroll?.lenis ? smoothScroll.scrollTo(y, { duration: 0.8, immediate: false }) : window.scrollTo({ top: y, behavior: 'smooth' });
             }
-            
             setupNavigation() {
-                $('.how-progress-tab-content-item.item-next').on('click', (e) => {
+                $('.how-progress-tab-content-item.item-next, .how-progress-tab-content-item.item-prev').on('click', (e) => {
                     e.preventDefault();
-                    this.navigateNext();
-                });
-                
-                $('.how-progress-tab-content-item.item-prev').on('click', (e) => {
-                    e.preventDefault();
-                    this.navigatePrev();
+                    this[e.currentTarget.classList.contains('item-next') ? 'navigateNext' : 'navigatePrev']();
                 });
             }
-            navigateNext() {
-                const steps = $('.how-progress-step');
-                const $activeStep = steps.filter('.active');
-                const stepIndex = steps.index($activeStep);
-                
-                if(stepIndex === -1) {
-                    this.activateStep(0, 0);
-                    this.scrollToStepProgress(0, 0);
-                    return;
-                }
-                
-                const items = $activeStep.find('.how-progress-step-item');
-                const $activeItem = items.filter('.active');
-                const itemIndex = items.index($activeItem);
-                
-                if(itemIndex < items.length - 1) {
-                    this.activateStep(stepIndex, itemIndex + 1);
-                    this.scrollToStepProgress(stepIndex, itemIndex + 1);
+            navigate(dir) {
+                const [stepIndex, itemIndex] = this.getCurrentStepItem();
+                const { steps } = this.getEls();
+                const items = steps.eq(stepIndex).find('.how-progress-step-item');
+                const count = items.length;
+                let nextStep = stepIndex, nextItem = itemIndex;
+                if (dir === 1) {
+                    if (itemIndex < count - 1) nextItem++;
+                    else if (stepIndex < steps.length - 1) { nextStep++; nextItem = 0; }
+                    else { nextStep = 0; nextItem = 0; }
                 } else {
-                    if(stepIndex < steps.length - 1) {
-                        this.activateStep(stepIndex + 1, 0);
-                        this.scrollToStepProgress(stepIndex + 1, 0);
-                    } else {
-                        this.activateStep(0, 0);
-                        this.scrollToStepProgress(0, 0);
-                    }
+                    if (itemIndex > 0) nextItem--;
+                    else if (stepIndex > 0) { nextStep--; nextItem = steps.eq(stepIndex - 1).find('.how-progress-step-item').length - 1; }
+                    else { nextStep = steps.length - 1; nextItem = steps.eq(nextStep).find('.how-progress-step-item').length - 1; }
                 }
+                this.goToStep(nextStep, nextItem);
             }
-            navigatePrev() {
-                const steps = $('.how-progress-step');
-                const $activeStep = steps.filter('.active');
-                const stepIndex = steps.index($activeStep);
-                
-                if(stepIndex === -1) {
-                    this.activateStep(0, 0);
-                    this.scrollToStepProgress(0, 0);
-                    return;
-                }
-                
-                const items = $activeStep.find('.how-progress-step-item');
-                const $activeItem = items.filter('.active');
-                const itemIndex = items.index($activeItem);
-                
-                if(itemIndex > 0) {
-                    this.activateStep(stepIndex, itemIndex - 1);
-                    this.scrollToStepProgress(stepIndex, itemIndex - 1);
-                } else {
-                    if(stepIndex > 0) {
-                        const prevStep = steps.eq(stepIndex - 1);
-                        const prevItems = prevStep.find('.how-progress-step-item');
-                        this.activateStep(stepIndex - 1, prevItems.length - 1);
-                        this.scrollToStepProgress(stepIndex - 1, prevItems.length - 1);
-                    } else {
-                        const lastStep = steps.eq(steps.length - 1);
-                        const lastItems = lastStep.find('.how-progress-step-item');
-                        this.activateStep(steps.length - 1, lastItems.length - 1);
-                        this.scrollToStepProgress(steps.length - 1, lastItems.length - 1);
-                    }
-                }
-            }
+            navigateNext() { this.navigate(1); }
+            navigatePrev() { this.navigate(-1); }
             activateStep(stepIndex, itemIndex) {
-                const steps = $('.how-progress-step');
-                const tabItems = $('.how-progress-tab-item');
-                
-                steps.removeClass('active');
-                tabItems.removeClass('active');
-                $('.how-progress-step-item').removeClass('active');
-                $('.how-progress-step-img-item').removeClass('active');
-                $('.how-progress-tab-item-line').removeClass('active');
-                
-                const currentStep = steps.eq(stepIndex);
-                const currentTabItem = tabItems.eq(stepIndex);
-                const items = currentStep.find('.how-progress-step-item');
-                const stepImages = currentStep.find('.how-progress-step-img-item');
-                const tabItemLines = currentTabItem.find('.how-progress-tab-item-line');
-                
-                currentStep.addClass('active');
-                currentTabItem.addClass('active');
+                const { steps, tabItems } = this.getEls();
+                steps.add(tabItems).removeClass('active');
+                $('.how-progress-step-item, .how-progress-step-img-item').removeClass('active');
+                const step = steps.eq(stepIndex), tab = tabItems.eq(stepIndex);
+                const items = step.find('.how-progress-step-item'), imgs = step.find('.how-progress-step-img-item');
+                step.add(tab).addClass('active');
                 items.eq(itemIndex).addClass('active');
-                stepImages.eq(itemIndex).addClass('active');
-                tabItemLines.eq(itemIndex).addClass('active');
-                
-                if(this.swiper && !this.swiper.destroyed) {
+                imgs.eq(itemIndex).addClass('active');
+                if (!this.scrollScrub) $('.how-progress-tab-item').each((i, _) => this.updateTabItemLineProgress(i, i === stepIndex ? itemIndex : -1, i === stepIndex ? 1 : 0));
+                if (this.swiper?.destroyed === false) {
                     this.isUpdatingFromCode = true;
                     this.swiper.slideTo(stepIndex);
-                    setTimeout(() => {
-                        this.isUpdatingFromCode = false;
-                    }, 100);
+                    setTimeout(() => this.isUpdatingFromCode = false, 100);
                 }
-                
-                if(viewport.w <= 992) {
+                if (viewport.w <= 992) {
                     items.eq(itemIndex).find('.how-progress-step-item-img').slideDown();
                     items.not(items.eq(itemIndex)).find('.how-progress-step-item-img').slideUp();
                 }
-                
-                this.updateNavigationState(stepIndex, itemIndex);
+                const isFirst = stepIndex === 0 && itemIndex === 0;
+                const isLast = stepIndex === steps.length - 1 && itemIndex === items.length - 1;
+                $('.how-progress-tab-content-item.item-prev').toggleClass('swiper-button-disabled', isFirst);
+                $('.how-progress-tab-content-item.item-next').toggleClass('swiper-button-disabled', isLast);
             }
-            updateNavigationState(stepIndex, itemIndex) {
-                const steps = $('.how-progress-step');
-                const currentStep = steps.eq(stepIndex);
-                const items = currentStep.find('.how-progress-step-item');
-                
-                const prevBtn = $('.how-progress-tab-content-item.item-prev');
-                const nextBtn = $('.how-progress-tab-content-item.item-next');
-                
-                if(stepIndex === 0 && itemIndex === 0) {
-                    prevBtn.addClass('swiper-button-disabled');
-                } else {
-                    prevBtn.removeClass('swiper-button-disabled');
-                }
-                
-                if(stepIndex === steps.length - 1 && itemIndex === items.length - 1) {
-                    nextBtn.addClass('swiper-button-disabled');
-                } else {
-                    nextBtn.removeClass('swiper-button-disabled');
-                }
+            handleTabClick(clickedIndex, isTabActive) {
+                const step = $('.how-progress-step').eq(clickedIndex);
+                const items = step.find('.how-progress-step-item');
+                const itemIndex = isTabActive
+                    ? (items.index(items.filter('.active')) + 1) % items.length
+                    : 0;
+                this.goToStep(clickedIndex, itemIndex);
             }
             interactDesktop() {
-                $('.how-progress-tab-item').on('click', (e) => {
-                    e.stopPropagation();
-                    const $clickedTab = $(e.currentTarget);
-                    const clickedIndex = $('.how-progress-tab-item').index($clickedTab);
-                    
-                    if($clickedTab.hasClass('active')) {
-                        const $activeLines = $clickedTab.find('.how-progress-tab-item-line.active');
-                        const $allLines = $clickedTab.find('.how-progress-tab-item-line');
-                        
-                        if($activeLines.length > 0) {
-                            const currentLineIndex = $allLines.index($activeLines.eq(0));
-                            const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
-                            this.activateStep(clickedIndex, nextLineIndex);
-                            this.scrollToStepProgress(clickedIndex, nextLineIndex);
-                        } else {
-                            this.activateStep(clickedIndex, 0);
-                            this.scrollToStepProgress(clickedIndex, 0);
-                        }
-                    } else {
-                        this.activateStep(clickedIndex, 0);
-                        this.scrollToStepProgress(clickedIndex, 0);
-                    }
-                });
-                
-                $('.how-progress-step').each((stepIndex, step) => {
+                $('.how-progress-tab-item').on('click', (e) => { e.stopPropagation(); const $t = $(e.currentTarget); this.handleTabClick($('.how-progress-tab-item').index($t), $t.hasClass('active')); });
+                $('.how-progress-step').each((si, step) => {
                     $(step).find('.how-progress-step-item').on('click', (e) => {
                         e.stopPropagation();
-                        const clickedItemIndex = $(step).find('.how-progress-step-item').index($(e.currentTarget));
-                        this.activateStep(stepIndex, clickedItemIndex);
-                        this.scrollToStepProgress(stepIndex, clickedItemIndex);
+                        this.goToStep(si, $(step).find('.how-progress-step-item').index(e.currentTarget));
                     });
                 });
             }
-            
             interactMobile() {
-                $('.how-progress-tab-item').on('click', (e) => {
-                    e.stopPropagation();
-                    const $clickedTab = $(e.currentTarget);
-                    const clickedIndex = $('.how-progress-tab-item').index($clickedTab);
-                    
-                    if($clickedTab.hasClass('active')) {
-                        const $activeLines = $clickedTab.find('.how-progress-tab-item-line.active');
-                        const $allLines = $clickedTab.find('.how-progress-tab-item-line');
-                        
-                        if($activeLines.length > 0) {
-                            const currentLineIndex = $allLines.index($activeLines.eq(0));
-                            const nextLineIndex = (currentLineIndex + 1) % $allLines.length;
-                            this.activateStep(clickedIndex, nextLineIndex);
-                            this.scrollToStepProgress(clickedIndex, nextLineIndex);
-                        } else {
-                            this.activateStep(clickedIndex, 0);
-                            this.scrollToStepProgress(clickedIndex, 0);
-                        }
-                    } else {
-                        this.activateStep(clickedIndex, 0);
-                        this.scrollToStepProgress(clickedIndex, 0);
-                    }
-                });
-                
-                $('.how-progress-step').each((stepIndex, step) => {
+                $('.how-progress-tab-item').on('click', (e) => { e.stopPropagation(); const $t = $(e.currentTarget); this.handleTabClick($('.how-progress-tab-item').index($t), $t.hasClass('active')); });
+                $('.how-progress-step').each((si, step) => {
                     $(step).find('.how-progress-step-item').on('click', function(e) {
                         e.stopPropagation();
-                        const $item = $(this);
-                        const itemIndex = $(step).find('.how-progress-step-item').index($item);
-                        
-                        if (!$item.hasClass('active')) {
-                            this.activateStep(stepIndex, itemIndex);
-                            this.scrollToStepProgress(stepIndex, itemIndex);
-                        } else {
-                            $item.removeClass('active');
-                            $item.find('.how-progress-step-item-img').slideUp();
-                            $('.how-progress-tab-item').eq(stepIndex).find('.how-progress-tab-item-line').eq(itemIndex).removeClass('active');
-                        }
+                        const $item = $(e.currentTarget);
+                        const idx = $(step).find('.how-progress-step-item').index($item);
+                        if ($item.hasClass('active')) {
+                            $item.removeClass('active').find('.how-progress-step-item-img').slideUp();
+                            this.updateTabItemLineProgress(si, -1, 0);
+                        } else this.goToStep(si, idx);
                     }.bind(this));
                 });
             }
-            
             destroy() {
-                if (this.scrollScrub) {
-                    this.scrollScrub.kill();
-                    this.scrollScrub = null;
-                }
-                if (this.swiper) {
-                    this.swiper.destroy(true, true);
-                    this.swiper = null;
-                }
-                $('.how-progress-tab-item').off('click');
-                $('.how-progress-step-item').off('click');
-                $('.how-progress-tab-content-item').off('click');
+                this.scrollScrub?.kill();
+                this.scrollScrub = null;
+                this.swiper?.destroy(true, true);
+                this.swiper = null;
+                this.$ = null;
+                $('.how-progress-tab-item, .how-progress-step-item, .how-progress-tab-content-item').off('click');
                 super.destroy();
             }
         },
