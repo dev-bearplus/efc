@@ -6808,9 +6808,9 @@ const script = () => {
                 items.eq(itemIndex).addClass('active');
                 imgs.eq(itemIndex).addClass('active');
                 if (!this.scrollScrub) $('.how-progress-tab-item').each((i, _) => this.updateTabItemLineProgress(i, i === stepIndex ? itemIndex : -1, i === stepIndex ? 1 : 0));
-                if (this.swiper?.destroyed === false) {
+                if (this.swiper && !this.swiper.destroyed) {
                     this.isUpdatingFromCode = true;
-                    this.swiper.slideTo(stepIndex);
+                    this.swiper.slideTo(stepIndex, 300);
                     setTimeout(() => this.isUpdatingFromCode = false, 100);
                 }
                 if (viewport.w <= 992) {
