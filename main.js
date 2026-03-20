@@ -6745,6 +6745,7 @@ const script = () => {
                     });
                 }
                 else {
+                    $('.how-progress-step-numb').each((i, el) => $(el).find('.txt').text(`${i + 1}.`));
                     $('.how-progress-step-child').each(function () {
                         $(this).find('.how-progress-step-cms').addClass('swiper');
                         $(this).find('.how-progress-step-list').addClass('swiper-wrapper');
