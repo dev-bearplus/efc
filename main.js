@@ -6751,8 +6751,8 @@ const script = () => {
                         $(this).find('.how-progress-step-list').addClass('swiper-wrapper');
                         $(this).find('.how-progress-step-item').addClass('swiper-slide');
                         this.swiper = new Swiper($(this).find('.how-progress-step-cms').get(0), {
-                            slidesPerView: 'auto',
-                            spaceBetween: cvUnit(20, 'rem'),
+                            slidesPerView: 1,
+                            spaceBetween: cvUnit(24, 'rem'),
                             speed: 400,
                             pagination: {
                                 el: $(this).find('.how-progress-step-child-pagi').get(0),
