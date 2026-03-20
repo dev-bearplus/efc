@@ -10,7 +10,7 @@ const script = () => {
     function autoRedirectByLocation() {
         console.log('autoRedirectByLocation')
         const hasRedirected = sessionStorage.getItem('locationRedirected');
-        if(hasRedirected) {
+        if (hasRedirected) {
             console.log('Already redirected in this session');
             return;
         }
@@ -21,25 +21,25 @@ const script = () => {
             uk: { subdirectory: '/uk', countries: ['GB', 'IE'] },
             apac: { subdirectory: '/apac', countries: ['AU', 'NZ'] }
         };
-        
+
         const detectLocationByTimezone = () => {
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             console.log(timezone)
             // UK: GB, IE
             const ukTimezones = ['Europe/London', 'Europe/Dublin', 'Europe/Belfast'];
-            if(ukTimezones.some(tz => timezone.includes(tz))) {
+            if (ukTimezones.some(tz => timezone.includes(tz))) {
                 return 'uk';
             }
-            
+
             // APAC: AU, NZ
             const apacTimezones = ['Australia', 'Pacific/Auckland'];
-            if(apacTimezones.some(tz => timezone.includes(tz))) {
+            if (apacTimezones.some(tz => timezone.includes(tz))) {
                 return 'apac';
             }
-            
+
             return 'default';
         };
-        
+
         const detectLocationByAPI = async () => {
             try {
                 const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
@@ -47,13 +47,13 @@ const script = () => {
                 const lines = data.split('\n');
                 const locLine = lines.find(line => line.startsWith('loc='));
                 const countryCode = locLine ? locLine.split('=')[1] : null;
-                
-                if(!countryCode) {
+
+                if (!countryCode) {
                     return detectLocationByTimezone();
                 }
-                
-                for(const [locale, config] of Object.entries(localeConfig)) {
-                    if(config.countries.includes(countryCode)) {
+
+                for (const [locale, config] of Object.entries(localeConfig)) {
+                    if (config.countries.includes(countryCode)) {
                         return locale;
                     }
                 }
@@ -63,93 +63,93 @@ const script = () => {
                 return detectLocationByTimezone();
             }
         };
-        
+
         const getCurrentLocale = () => {
-            if(currentPath.startsWith('/uk')) return 'uk';
-            if(currentPath.startsWith('/apac')) return 'apac';
+            if (currentPath.startsWith('/uk')) return 'uk';
+            if (currentPath.startsWith('/apac')) return 'apac';
             return 'default';
         };
-        
+
         const redirectToLocale = (targetLocale) => {
             const currentLocale = getCurrentLocale();
-            if(currentLocale === targetLocale) {
+            if (currentLocale === targetLocale) {
                 return;
             };
-            
+
             let basePath = currentPath;
-            if(currentPath.startsWith('/uk')) {
+            if (currentPath.startsWith('/uk')) {
                 basePath = currentPath.replace('/uk', '');
-            } else if(currentPath.startsWith('/apac')) {
+            } else if (currentPath.startsWith('/apac')) {
                 basePath = currentPath.replace('/apac', '');
             }
-            
+
             const targetPath = localeConfig[targetLocale].subdirectory + (basePath || '/');
             window.location.href = targetPath;
         };
-        
+
         // Detect và redirect
         detectLocationByAPI().then(detectedLocale => {
             redirectToLocale(detectedLocale);
         });
     }
-    
+
     autoRedirectByLocation();
-    function multiLineText(el){
+    function multiLineText(el) {
         let line = $(el).next('.line-arr');
         let textMapLine = $(el).find('.bp-line');
         console.log(line)
         let lineClone = line.clone();
         console.log(lineClone)
-        if(textMapLine.length >1){
+        if (textMapLine.length > 1) {
             line.remove();
             textMapLine.each((idx, item) => {
-              if(idx == 0){
-                $(item).attr('data-cursor-txtLink-child','')
-              }
+                if (idx == 0) {
+                    $(item).attr('data-cursor-txtLink-child', '')
+                }
                 $(item).css({
                     position: 'relative',
                     width: 'max-content'
-                  });
+                });
                 $(item).append(lineClone.clone());
             })
         }
     }
     const reinitializeWebflow = (data) => {
-		if (!window.Webflow) return;
+        if (!window.Webflow) return;
 
-		try {
-			window.Webflow.destroy();
-			window.Webflow.ready();
-			const ix2 = window.Webflow.require("ix2");
-			if (ix2 && typeof ix2.init === "function") {
-				ix2.init();
-			}
-			const forms = window.Webflow.require("forms");
-			if (forms && typeof forms.ready === "function") {
-				forms.ready();
-			}
-			["slider", "tabs", "dropdown", "navbar"].forEach((module) => {
-				try {
-					const mod = window.Webflow.require(module);
-					if (mod && typeof mod.ready === "function") {
-						mod.ready();
-					}
-				} catch (e) {}
-			});
-			if (window.Webflow.redraw) {
-				window.Webflow.redraw.up();
-         }
+        try {
+            window.Webflow.destroy();
+            window.Webflow.ready();
+            const ix2 = window.Webflow.require("ix2");
+            if (ix2 && typeof ix2.init === "function") {
+                ix2.init();
+            }
+            const forms = window.Webflow.require("forms");
+            if (forms && typeof forms.ready === "function") {
+                forms.ready();
+            }
+            ["slider", "tabs", "dropdown", "navbar"].forEach((module) => {
+                try {
+                    const mod = window.Webflow.require(module);
+                    if (mod && typeof mod.ready === "function") {
+                        mod.ready();
+                    }
+                } catch (e) { }
+            });
+            if (window.Webflow.redraw) {
+                window.Webflow.redraw.up();
+            }
 
-         if (data) {
-            let parser = new DOMParser();
-            let dom = parser.parseFromString(data.next.html, "text/html");
-            let webflowPageId = $(dom).find("html").attr("data-wf-page");
-            $("html").attr("data-wf-page", webflowPageId);
-         }
-		} catch (e) {
-			console.warn("Webflow reinit failed:", e);
-		}
-   };
+            if (data) {
+                let parser = new DOMParser();
+                let dom = parser.parseFromString(data.next.html, "text/html");
+                let webflowPageId = $(dom).find("html").attr("data-wf-page");
+                $("html").attr("data-wf-page", webflowPageId);
+            }
+        } catch (e) {
+            console.warn("Webflow reinit failed:", e);
+        }
+    };
     const cvUnit = (val, unit) => {
         let result;
         switch (true) {
@@ -167,12 +167,12 @@ const script = () => {
         return result;
     }
     const viewport = {
-		get w() {
-			return window.innerWidth;
-		},
-		get h() {
-			return window.innerHeight;
-		},
+        get w() {
+            return window.innerWidth;
+        },
+        get h() {
+            return window.innerHeight;
+        },
     }
     const device = { desktop: 991, tablet: 767, mobile: 479 }
     function activeItem(elArr, index) {
@@ -185,14 +185,14 @@ const script = () => {
         y: $(window).height() / 2,
         xNor: $(window).width() / 2 / $(window).width(),
         yNor: $(window).height() / 2 / $(window).height(),
-      };
-      const xSetter = (el) => gsap.quickSetter(el, "x", `px`);
-      const ySetter = (el) => gsap.quickSetter(el, "y", `px`);
-      const xGetter = (el) => gsap.getProperty(el, "x");
-      const yGetter = (el) => gsap.getProperty(el, "y");
-      const lerp = (a, b, t = 0.08) => {
+    };
+    const xSetter = (el) => gsap.quickSetter(el, "x", `px`);
+    const ySetter = (el) => gsap.quickSetter(el, "y", `px`);
+    const xGetter = (el) => gsap.getProperty(el, "x");
+    const yGetter = (el) => gsap.getProperty(el, "y");
+    const lerp = (a, b, t = 0.08) => {
         return a + (b - a) * t;
-      };
+    };
     const debounce = (func, timeout = 300) => {
         let timer
 
@@ -205,15 +205,15 @@ const script = () => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
         if (orientation == 'horizontal') {
-                return (
-                    rect.left <= (window.innerWidth) &&
-                    rect.right >= 0
-                );
+            return (
+                rect.left <= (window.innerWidth) &&
+                rect.right >= 0
+            );
         } else {
-                return (
-                    rect.top <= (window.innerHeight) &&
-                    rect.bottom >= 0
-                );
+            return (
+                rect.top <= (window.innerHeight) &&
+                rect.bottom >= 0
+            );
         }
     }
     const refreshOnBreakpoint = () => {
@@ -304,23 +304,23 @@ const script = () => {
     const shareLink = () => {
         const currentUrl = window.location.href;
         const pageTitle = document.title;
-        
+
         // Share Facebook
-        $('[data-share="facebook"]').on('click', function(e) {
+        $('[data-share="facebook"]').on('click', function (e) {
             e.preventDefault();
             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
             window.open(facebookUrl, '_blank', 'width=600,height=400');
         });
-        
+
         // Share LinkedIn
-        $('[data-share="linkedin"]').on('click', function(e) {
+        $('[data-share="linkedin"]').on('click', function (e) {
             e.preventDefault();
             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
         });
-        
+
         // Copy Link
-        $('[data-share="copy"]').on('click', function(e) {
+        $('[data-share="copy"]').on('click', function (e) {
             e.preventDefault();
             navigator.clipboard.writeText(currentUrl).then(() => {
                 // Hiển thị thông báo đã copy
@@ -336,259 +336,259 @@ const script = () => {
     }
     const isTouchDevice = () => {
         return (
-          "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          navigator.msMaxTouchPoints > 0
+            "ontouchstart" in window ||
+            navigator.maxTouchPoints > 0 ||
+            navigator.msMaxTouchPoints > 0
         );
-      };
+    };
     if (!isTouchDevice()) {
-    $("html").attr("data-has-cursor", "true");
-    window.addEventListener("pointermove", function (e) {
-        updatePointer(e);
-    });
+        $("html").attr("data-has-cursor", "true");
+        window.addEventListener("pointermove", function (e) {
+            updatePointer(e);
+        });
     } else {
-    $("html").attr("data-has-cursor", "false");
-    window.addEventListener("pointerdown", function (e) {
-        updatePointer(e);
-    });
+        $("html").attr("data-has-cursor", "false");
+        window.addEventListener("pointerdown", function (e) {
+            updatePointer(e);
+        });
     }
     function updatePointer(e) {
-    pointer.x = e.clientX;
-    pointer.y = e.clientY;
-    pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
-    pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
-    if (cursor.userMoved != true && viewport.w >= 992) {
-        cursor.userMoved = true;
-        cursor.init();
-    }
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        pointer.xNor = (e.clientX / $(window).width() - 0.5) * 2;
+        pointer.yNor = (e.clientY / $(window).height() - 0.5) * 2;
+        if (cursor.userMoved != true && viewport.w >= 992) {
+            cursor.userMoved = true;
+            cursor.init();
+        }
     }
     class Marquee {
         constructor(list, item, duration = 40, direction) {
-           this.list = list;
-           this.item = item;
-           this.duration = duration;
-           this.direction = direction || 'left';
+            this.list = list;
+            this.item = item;
+            this.duration = duration;
+            this.direction = direction || 'left';
         }
         setup() {
-           let itemWidth = this.item.width();
-           const windowWidth = $(window).width();
-           console.log(itemWidth, windowWidth);
-           if (!itemWidth || itemWidth <= 0 || !windowWidth || windowWidth <= 0) {
-              return;
-           }
-           const cloneAmount = Math.ceil(windowWidth / itemWidth) + 1;
-           if (!Number.isFinite(cloneAmount) || cloneAmount <= 0 || cloneAmount > 1000) {
-              return;
-           }
-  
-           let itemClone = this.item.clone();
-           this.list.html('');
-           new Array(cloneAmount).fill().forEach(() => {
-              let html = itemClone.clone()
-              html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
-              if(this.direction == 'left') {
-                 html.addClass('marquee-left');
-              } else {
-                 html.addClass('marquee-right');
-              }
-              this.list.append(html);
-           });
+            let itemWidth = this.item.width();
+            const windowWidth = $(window).width();
+            console.log(itemWidth, windowWidth);
+            if (!itemWidth || itemWidth <= 0 || !windowWidth || windowWidth <= 0) {
+                return;
+            }
+            const cloneAmount = Math.ceil(windowWidth / itemWidth) + 1;
+            if (!Number.isFinite(cloneAmount) || cloneAmount <= 0 || cloneAmount > 1000) {
+                return;
+            }
+
+            let itemClone = this.item.clone();
+            this.list.html('');
+            new Array(cloneAmount).fill().forEach(() => {
+                let html = itemClone.clone()
+                html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
+                if (this.direction == 'left') {
+                    html.addClass('marquee-left');
+                } else {
+                    html.addClass('marquee-right');
+                }
+                this.list.append(html);
+            });
         }
         play() {
-           if(this.direction == 'left') {
-              $(this.list).find('.marquee-left').addClass('anim');
-           } else {
-              $(this.list).find('.marquee-right').addClass('anim');
-           }
+            if (this.direction == 'left') {
+                $(this.list).find('.marquee-left').addClass('anim');
+            } else {
+                $(this.list).find('.marquee-right').addClass('anim');
+            }
         }
     }
     class Loading {
-        constructor() {}
+        constructor() { }
         isDoneLoading() {
-          return true;
+            return true;
         }
-      }
+    }
     let load = new Loading();
     class Cursor {
-    constructor() {
-        this.targetX = pointer.x;
-        this.targetY = pointer.y;
-        this.userMoved = false;
-        xSetter(".cursor-main")(this.targetX);
-        ySetter(".cursor-main")(this.targetY);
-    }
-    init() {
-        requestAnimationFrame(this.update.bind(this));
-        $(".cursor-main .cursor-inner").addClass("active");
-    }
-    isUserMoved() {
-        return this.userMoved;
-    }
-    update() {
-        if (this.userMoved || load.isDoneLoading()) {
-        this.updatePosition();
+        constructor() {
+            this.targetX = pointer.x;
+            this.targetY = pointer.y;
+            this.userMoved = false;
+            xSetter(".cursor-main")(this.targetX);
+            ySetter(".cursor-main")(this.targetY);
         }
-        requestAnimationFrame(this.update.bind(this));
-    }
-    updateHtml () {
-        $('[data-cursor="bg"]').each((idx, el) => {
-            let bg = '--cl-' + ($(el).attr('data-bg')  || 'white')
-            $(el).find('.txt, .heading').css({
-                'position': 'relative',
-                'z-index': '2'
-            })
-            $(el).find('.ic-embed:not(.ic-arr-main):not(.ic-arr-clone)').css({
-                'position': 'relative',
-                'z-index': '2'
-            })
-            let btnDot = $(document.createElement('div')).addClass('bg-dot');
-            let btnDotInner = $(document.createElement('div')).addClass('bg-dot-inner').css('background-color', `var(${bg})`);
-            btnDot.append(btnDotInner)
-            $(el).append(btnDot)
-        })
-    }
-    updatePosition() {
-        this.targetX = pointer.x;
-        this.targetY = pointer.y;
-        let targetInnerX = xGetter(".cursor-main");
-        let targetInnerY = yGetter(".cursor-main");
-
-        if ($("[data-cursor]:hover").length) {
-        this.onHover();
-        } else {
-        this.reset();
+        init() {
+            requestAnimationFrame(this.update.bind(this));
+            $(".cursor-main .cursor-inner").addClass("active");
         }
-
-        if (
-        Math.hypot(this.targetX - targetInnerX, this.targetY - targetInnerY) >
-            1 ||
-        Math.abs(smoothScroll.lenis.velocity) > 0.1
-        ) {
-        xSetter(".cursor-main")(lerp(targetInnerX, this.targetX, 0.1));
-        ySetter(".cursor-main")(
-            lerp(targetInnerY, this.targetY - smoothScroll.lenis.velocity / 16, 0.1)
-        );
+        isUserMoved() {
+            return this.userMoved;
         }
-        ['blue', 'black'].forEach(color => {
-        const inSectionColor = $(`[data-section="${color}"]`).toArray().some(el => this.isMouseInSection(el));
-        if(inSectionColor) {
-            $('.cursor-inner').addClass(`on-${color}`);
-        } else {
-            $('.cursor-inner').removeClass(`on-${color}`);
-        }
-        });
-        if ($('[data-cursor="drag"]:hover').length) {
-        const midX = viewport.w / 2;
-        let controlPrev = $('[data-cursor="drag"]:hover').attr('data-control-prev');
-        let controlNext = $('[data-cursor="drag"]:hover').attr('data-control-next');
-        if (pointer.x > midX) {
-            // Bên phải -> prev
-            $(".cursor").removeClass("left").addClass("right");
-            if ($(`.${controlNext}`).hasClass("swiper-button-disabled")) {
-            $(".cursor").addClass("disabled");
-            } else {
-            $(".cursor").removeClass("disabled");
+        update() {
+            if (this.userMoved || load.isDoneLoading()) {
+                this.updatePosition();
             }
-        } else {
-            // Bên trái -> next
-            $(".cursor").removeClass("right").addClass("left");
-        
-            if ($(`.${controlPrev}`).hasClass("swiper-button-disabled")) {
-            $(".cursor").addClass("disabled");
-            } else {
-            $(".cursor").removeClass("disabled");
-            }
+            requestAnimationFrame(this.update.bind(this));
         }
-        } else {
-        $(".cursor").removeClass("left right disabled");
-        }      
-    }
-    isMouseInSection(el) {
-        const rect = el.getBoundingClientRect();
-        return (
-        pointer.x >= rect.left &&
-        pointer.x <= rect.right &&
-        pointer.y >= rect.top &&
-        pointer.y <= rect.bottom
-        );
-    }
-    
-    onHover() {
-        let type = $("[data-cursor]:hover").attr("data-cursor");
-        let gotBtnSize = false;
-        if ($("[data-cursor]:hover").length && type != 'hidden') {
-            $('.cursor').addClass('on-hover');
-        switch (type) {
-            case "hidden":
-                $(".cursor").addClass("on-hover-hidden");
-                break;
-            case 'bg':
-                $('.cursor').addClass('on-hover-hidden');
-                let targetBg;
-                targetBg = $('[data-cursor="bg"]:hover')
-                this.targetX = targetBg.get(0).getBoundingClientRect().left + targetBg.get(0).getBoundingClientRect().width / 2;
-                this.targetY = targetBg.get(0).getBoundingClientRect().top + targetBg.get(0).getBoundingClientRect().height / 2;
-                let bgDotX, bgDotY;
-                if (!gotBtnSize) {
-                    if ($('[data-cursor]:hover').hasClass('home-ser-item-btn')) {
-                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width + cvUnit(130, 'rem'), '--cursor-height': targetBg.get(0).getBoundingClientRect().height + cvUnit(130, 'rem')})
-                    } else if ($('[data-cursor]:hover').hasClass('sm-menu')) {  
-                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width * 1.6, '--cursor-height': targetBg.get(0).getBoundingClientRect().height * 1.3})
+        updateHtml() {
+            $('[data-cursor="bg"]').each((idx, el) => {
+                let bg = '--cl-' + ($(el).attr('data-bg') || 'white')
+                $(el).find('.txt, .heading').css({
+                    'position': 'relative',
+                    'z-index': '2'
+                })
+                $(el).find('.ic-embed:not(.ic-arr-main):not(.ic-arr-clone)').css({
+                    'position': 'relative',
+                    'z-index': '2'
+                })
+                let btnDot = $(document.createElement('div')).addClass('bg-dot');
+                let btnDotInner = $(document.createElement('div')).addClass('bg-dot-inner').css('background-color', `var(${bg})`);
+                btnDot.append(btnDotInner)
+                $(el).append(btnDot)
+            })
+        }
+        updatePosition() {
+            this.targetX = pointer.x;
+            this.targetY = pointer.y;
+            let targetInnerX = xGetter(".cursor-main");
+            let targetInnerY = yGetter(".cursor-main");
+
+            if ($("[data-cursor]:hover").length) {
+                this.onHover();
+            } else {
+                this.reset();
+            }
+
+            if (
+                Math.hypot(this.targetX - targetInnerX, this.targetY - targetInnerY) >
+                1 ||
+                Math.abs(smoothScroll.lenis.velocity) > 0.1
+            ) {
+                xSetter(".cursor-main")(lerp(targetInnerX, this.targetX, 0.1));
+                ySetter(".cursor-main")(
+                    lerp(targetInnerY, this.targetY - smoothScroll.lenis.velocity / 16, 0.1)
+                );
+            }
+            ['blue', 'black'].forEach(color => {
+                const inSectionColor = $(`[data-section="${color}"]`).toArray().some(el => this.isMouseInSection(el));
+                if (inSectionColor) {
+                    $('.cursor-inner').addClass(`on-${color}`);
+                } else {
+                    $('.cursor-inner').removeClass(`on-${color}`);
+                }
+            });
+            if ($('[data-cursor="drag"]:hover').length) {
+                const midX = viewport.w / 2;
+                let controlPrev = $('[data-cursor="drag"]:hover').attr('data-control-prev');
+                let controlNext = $('[data-cursor="drag"]:hover').attr('data-control-next');
+                if (pointer.x > midX) {
+                    // Bên phải -> prev
+                    $(".cursor").removeClass("left").addClass("right");
+                    if ($(`.${controlNext}`).hasClass("swiper-button-disabled")) {
+                        $(".cursor").addClass("disabled");
                     } else {
-                        gsap.set('html', {'--cursor-width': targetBg.get(0).getBoundingClientRect().width*1.4, '--cursor-height': targetBg.get(0).getBoundingClientRect().height*1.4})
+                        $(".cursor").removeClass("disabled");
                     }
-
-                    bgDotX = (pointer.x - targetBg.get(0).getBoundingClientRect().left)
-                    bgDotY = (pointer.y - targetBg.get(0).getBoundingClientRect().top)
-                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
-                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
-                    gotBtnSize = true
                 } else {
-                    bgDotX = xGetter('[data-cursor]:hover .bg-dot')
-                    bgDotY = yGetter('[data-cursor]:hover .bg-dot')
-                    xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
-                    ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
-                }
+                    // Bên trái -> next
+                    $(".cursor").removeClass("right").addClass("left");
 
-                break;
-            case "txtLink":
-                $(".cursor-inner").addClass("on-hover-sm");
-                let targetEl;
-                if (
-                    $("[data-cursor]:hover").attr("data-cursor-txtLink") == "parent"
-                ) {
-                    targetEl = $("[data-cursor]:hover").parent();
-                } else if (
-                    $("[data-cursor]:hover").attr("data-cursor-txtLink") == "child"
-                ) {
-                    targetEl = $("[data-cursor]:hover").find(
-                    "[data-cursor-txtLink-child]"
-                    );
-                } else {
-                    targetEl = $("[data-cursor]:hover");
+                    if ($(`.${controlPrev}`).hasClass("swiper-button-disabled")) {
+                        $(".cursor").addClass("disabled");
+                    } else {
+                        $(".cursor").removeClass("disabled");
+                    }
                 }
-
-                let targetGap = cvUnit(8, 'rem');
-                this.targetX =
-                targetEl.get(0).getBoundingClientRect().left;
-                $('[data-cursor]:hover .txt').css('transform', `translateX(${targetGap + $(".cursor-inner.on-hover-sm").width()}px)`)
-                this.targetY =
-                    targetEl.get(0).getBoundingClientRect().top +
-                    targetEl.get(0).getBoundingClientRect().height / 2;
-                break;
-            default:
-                break;
+            } else {
+                $(".cursor").removeClass("left right disabled");
+            }
         }
-        } else {
+        isMouseInSection(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                pointer.x >= rect.left &&
+                pointer.x <= rect.right &&
+                pointer.y >= rect.top &&
+                pointer.y <= rect.bottom
+            );
+        }
+
+        onHover() {
+            let type = $("[data-cursor]:hover").attr("data-cursor");
+            let gotBtnSize = false;
+            if ($("[data-cursor]:hover").length && type != 'hidden') {
+                $('.cursor').addClass('on-hover');
+                switch (type) {
+                    case "hidden":
+                        $(".cursor").addClass("on-hover-hidden");
+                        break;
+                    case 'bg':
+                        $('.cursor').addClass('on-hover-hidden');
+                        let targetBg;
+                        targetBg = $('[data-cursor="bg"]:hover')
+                        this.targetX = targetBg.get(0).getBoundingClientRect().left + targetBg.get(0).getBoundingClientRect().width / 2;
+                        this.targetY = targetBg.get(0).getBoundingClientRect().top + targetBg.get(0).getBoundingClientRect().height / 2;
+                        let bgDotX, bgDotY;
+                        if (!gotBtnSize) {
+                            if ($('[data-cursor]:hover').hasClass('home-ser-item-btn')) {
+                                gsap.set('html', { '--cursor-width': targetBg.get(0).getBoundingClientRect().width + cvUnit(130, 'rem'), '--cursor-height': targetBg.get(0).getBoundingClientRect().height + cvUnit(130, 'rem') })
+                            } else if ($('[data-cursor]:hover').hasClass('sm-menu')) {
+                                gsap.set('html', { '--cursor-width': targetBg.get(0).getBoundingClientRect().width * 1.6, '--cursor-height': targetBg.get(0).getBoundingClientRect().height * 1.3 })
+                            } else {
+                                gsap.set('html', { '--cursor-width': targetBg.get(0).getBoundingClientRect().width * 1.4, '--cursor-height': targetBg.get(0).getBoundingClientRect().height * 1.4 })
+                            }
+
+                            bgDotX = (pointer.x - targetBg.get(0).getBoundingClientRect().left)
+                            bgDotY = (pointer.y - targetBg.get(0).getBoundingClientRect().top)
+                            xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
+                            ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
+                            gotBtnSize = true
+                        } else {
+                            bgDotX = xGetter('[data-cursor]:hover .bg-dot')
+                            bgDotY = yGetter('[data-cursor]:hover .bg-dot')
+                            xSetter('[data-cursor]:hover .bg-dot')(lerp(bgDotX, (pointer.x - targetBg.get(0).getBoundingClientRect().left)), .12)
+                            ySetter('[data-cursor]:hover .bg-dot')(lerp(bgDotY, (pointer.y - targetBg.get(0).getBoundingClientRect().top)), .12)
+                        }
+
+                        break;
+                    case "txtLink":
+                        $(".cursor-inner").addClass("on-hover-sm");
+                        let targetEl;
+                        if (
+                            $("[data-cursor]:hover").attr("data-cursor-txtLink") == "parent"
+                        ) {
+                            targetEl = $("[data-cursor]:hover").parent();
+                        } else if (
+                            $("[data-cursor]:hover").attr("data-cursor-txtLink") == "child"
+                        ) {
+                            targetEl = $("[data-cursor]:hover").find(
+                                "[data-cursor-txtLink-child]"
+                            );
+                        } else {
+                            targetEl = $("[data-cursor]:hover");
+                        }
+
+                        let targetGap = cvUnit(8, 'rem');
+                        this.targetX =
+                            targetEl.get(0).getBoundingClientRect().left;
+                        $('[data-cursor]:hover .txt').css('transform', `translateX(${targetGap + $(".cursor-inner.on-hover-sm").width()}px)`)
+                        this.targetY =
+                            targetEl.get(0).getBoundingClientRect().top +
+                            targetEl.get(0).getBoundingClientRect().height / 2;
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                $('.cursor').removeClass('on-hover');
+                gotBtnSize = false;
+            }
+        }
+        reset() {
+            $(".cursor").removeClass("on-hover-hidden");
             $('.cursor').removeClass('on-hover');
-            gotBtnSize = false;
+            $('[data-cursor] .txt').css('transform', 'translateX(0px)')
         }
-    }
-    reset() {
-        $(".cursor").removeClass("on-hover-hidden");
-        $('.cursor').removeClass('on-hover');
-        $('[data-cursor] .txt').css('transform', 'translateX(0px)')
-    }
     }
     let cursor = new Cursor();
     function scrollTop(onComplete) {
@@ -604,112 +604,112 @@ const script = () => {
         });
     }
     class SmoothScroll {
-		constructor() {
-			this.lenis = null;
-			this.scroller = {
-				scrollX: window.scrollX,
-				scrollY: window.scrollY,
-				velocity: 0,
-				direction: 0,
-			};
-			this.lastScroller = {
-				scrollX: window.scrollX,
-				scrollY: window.scrollY,
-				velocity: 0,
-				direction: 0,
-			};
-		}
+        constructor() {
+            this.lenis = null;
+            this.scroller = {
+                scrollX: window.scrollX,
+                scrollY: window.scrollY,
+                velocity: 0,
+                direction: 0,
+            };
+            this.lastScroller = {
+                scrollX: window.scrollX,
+                scrollY: window.scrollY,
+                velocity: 0,
+                direction: 0,
+            };
+        }
 
-		init() {
-			this.reInit();
+        init() {
+            this.reInit();
 
-			$.easing.lenisEase = function (t) {
-				return Math.min(1, 1.001 - Math.pow(2, -10 * t));
-			};
+            $.easing.lenisEase = function (t) {
+                return Math.min(1, 1.001 - Math.pow(2, -10 * t));
+            };
 
-			gsap.ticker.add((time) => {
-				if (this.lenis) {
-					this.lenis.raf(time * 1000);
-				}
-			});
-			gsap.ticker.lagSmoothing(0);
-		}
+            gsap.ticker.add((time) => {
+                if (this.lenis) {
+                    this.lenis.raf(time * 1000);
+                }
+            });
+            gsap.ticker.lagSmoothing(0);
+        }
 
-		reInit() {
-			if (this.lenis) {
-				this.lenis.destroy();
-			}
-			this.lenis = new Lenis();
-			this.lenis.on("scroll", (e) => {
-				this.updateOnScroll(e);
-				ScrollTrigger.update();
-			});
-		}
-		reachedThreshold(threshold) {
-			if (!threshold) return false;
-			const dist = distance(
-				this.scroller.scrollX,
-				this.scroller.scrollY,
-				this.lastScroller.scrollX,
-				this.lastScroller.scrollY
-			);
+        reInit() {
+            if (this.lenis) {
+                this.lenis.destroy();
+            }
+            this.lenis = new Lenis();
+            this.lenis.on("scroll", (e) => {
+                this.updateOnScroll(e);
+                ScrollTrigger.update();
+            });
+        }
+        reachedThreshold(threshold) {
+            if (!threshold) return false;
+            const dist = distance(
+                this.scroller.scrollX,
+                this.scroller.scrollY,
+                this.lastScroller.scrollX,
+                this.lastScroller.scrollY
+            );
 
-			if (dist > threshold) {
-				this.lastScroller = { ...this.scroller };
-				return true;
-			}
-			return false;
-		}
+            if (dist > threshold) {
+                this.lastScroller = { ...this.scroller };
+                return true;
+            }
+            return false;
+        }
 
-		updateOnScroll(e) {
-			this.scroller.scrollX = e.scroll;
-			this.scroller.scrollY = e.scroll;
-			this.scroller.velocity = e.velocity;
+        updateOnScroll(e) {
+            this.scroller.scrollX = e.scroll;
+            this.scroller.scrollY = e.scroll;
+            this.scroller.velocity = e.velocity;
             this.scroller.direction = e.direction;
             if (header) {
                 header.updateOnScroll(this.lenis);
             }
-		}
+        }
 
-		start() {
-			if (this.lenis) {
-				this.lenis.start();
-			}
-			$(".body").css("overflow", "initial");
-		}
+        start() {
+            if (this.lenis) {
+                this.lenis.start();
+            }
+            $(".body").css("overflow", "initial");
+        }
 
-		stop() {
-			if (this.lenis) {
-				this.lenis.stop();
-			}
-			$(".body").css("overflow", "hidden");
-		}
+        stop() {
+            if (this.lenis) {
+                this.lenis.stop();
+            }
+            $(".body").css("overflow", "hidden");
+        }
 
-		scrollTo(target, options = {}) {
-			if (this.lenis) {
-				this.lenis.scrollTo(target, options);
-			}
-		}
+        scrollTo(target, options = {}) {
+            if (this.lenis) {
+                this.lenis.scrollTo(target, options);
+            }
+        }
 
-		scrollToTop(options = {}) {
+        scrollToTop(options = {}) {
             if (this.lenis) {
                 this.lenis.scrollTo("top", { duration: .0001, immediate: true, lock: true, ...options });
             }
-		}
+        }
 
-		destroy() {
-			if (this.lenis) {
-				gsap.ticker.remove((time) => {
-					this.lenis.raf(time * 1000);
-				});
-				this.lenis.destroy();
-				this.lenis = null;
-			}
-		}
-	}
-	const smoothScroll = new SmoothScroll();
+        destroy() {
+            if (this.lenis) {
+                gsap.ticker.remove((time) => {
+                    this.lenis.raf(time * 1000);
+                });
+                this.lenis.destroy();
+                this.lenis = null;
+            }
+        }
+    }
+    const smoothScroll = new SmoothScroll();
     smoothScroll.init();
-    
+
     class TriggerSetup extends HTMLElement {
         constructor() {
             super();
@@ -738,85 +738,85 @@ const script = () => {
     }
     const formSubmitEvent = (function () {
         const init = ({
-           onlyWorkOnThisFormName,
-           onSuccess,
-           onFail
+            onlyWorkOnThisFormName,
+            onSuccess,
+            onFail
         }) => {
-           let inputSubmit = $(`#${getIDFormName(onlyWorkOnThisFormName)} button[type="submit"] .txt`);
-  
-           $(document).on('ajaxSend', function (event, xhr, settings) {
-              if (settings.url.includes("https://webflow.com/api/v1/form/")) {
+            let inputSubmit = $(`#${getIDFormName(onlyWorkOnThisFormName)} button[type="submit"] .txt`);
+
+            $(document).on('ajaxSend', function (event, xhr, settings) {
+                if (settings.url.includes("https://webflow.com/api/v1/form/")) {
                     inputSubmit?.text('Please wait...');
-              }
-           });
-           $(document).on('ajaxComplete', function (event, xhr, settings) {
-              if (settings.url.includes("https://webflow.com/api/v1/form/")) {
+                }
+            });
+            $(document).on('ajaxComplete', function (event, xhr, settings) {
+                if (settings.url.includes("https://webflow.com/api/v1/form/")) {
                     const isSuccessful = xhr.status === 200
                     const isWorkOnAllForm = onlyWorkOnThisFormName == undefined
                     const isCorrectForm = !isWorkOnAllForm && settings.data.includes(getSanitizedFormName(onlyWorkOnThisFormName));
-  
+
                     if (isWorkOnAllForm) {
-                       if (isSuccessful) {
-                          onSuccess?.()
-                          inputSubmit?.text('Submit');
-                       } else {
-                          onFail?.()
-                       }
+                        if (isSuccessful) {
+                            onSuccess?.()
+                            inputSubmit?.text('Submit');
+                        } else {
+                            onFail?.()
+                        }
                     } else if (isCorrectForm) {
-                       if (isSuccessful) {
-                          onSuccess?.()
-                          inputSubmit?.text('Submit');
-                       } else {
-                          onFail?.()
-                       }
+                        if (isSuccessful) {
+                            onSuccess?.()
+                            inputSubmit?.text('Submit');
+                        } else {
+                            onFail?.()
+                        }
                     }
-              }
-           });
+                }
+            });
         }
         function getIDFormName(name) {
-           return name.toLowerCase().replaceAll(" ", "-");
+            return name.toLowerCase().replaceAll(" ", "-");
         }
         function getSanitizedFormName(name) {
-           return name.replaceAll(" ", "+")
+            return name.replaceAll(" ", "+")
         }
         return {
-           init
+            init
         }
-     })();
-     function setupLocationRedirect() {
+    })();
+    function setupLocationRedirect() {
         let lang = $('html').attr('lang');
         let CurrentPathUrl = window.location.pathname;
-        switch(lang) {
+        switch (lang) {
             case 'en':
                 let urlRedirectToHome = ['/summit', '/efc-vs-white-belt', '/efc-vs-mind-body']
                 urlRedirectToHome.forEach(url => {
-                    if(CurrentPathUrl.includes(url)) {
+                    if (CurrentPathUrl.includes(url)) {
                         window.location.href = '/';
                         return;
                     }
                 });
                 break;
             case 'en-AU':
-                let urlRedirectToHomeAU = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner', '/schedule-a-demo']
+                let urlRedirectToHomeAU = ['/efc-vs-gymdesk', '/efc-vs-zen-planner', '/schedule-a-demo']
                 urlRedirectToHomeAU.forEach(url => {
-                    if(CurrentPathUrl.includes(url)) {
+                    if (CurrentPathUrl.includes(url)) {
                         window.location.href = '/apac';
                         return;
                     }
                 });
                 break;
             case 'en-GB':
-                let urlRedirectToHomeGB = [ '/efc-vs-gymdesk', '/efc-vs-zen-planner', '/efc-vs-white-belt', '/efc-vs-mind-body']
+                let urlRedirectToHomeGB = ['/efc-vs-gymdesk', '/efc-vs-zen-planner', '/efc-vs-white-belt', '/efc-vs-mind-body']
                 urlRedirectToHomeGB.forEach(url => {
-                    if(CurrentPathUrl.includes(url)) {
+                    if (CurrentPathUrl.includes(url)) {
                         window.location.href = '/uk';
                         return;
                     }
                 });
                 break;
         }
-     }
-     setupLocationRedirect();
+    }
+    setupLocationRedirect();
     class Header {
         constructor() {
             this.el = null;
@@ -832,8 +832,8 @@ const script = () => {
             }
         }
         animationReveal() {
-            gsap.set('.header-inner', {autoAlpha: 0,y: -100})
-            gsap.to('.header-inner', {autoAlpha: 1,y: 0, duration: 1, ease: 'power1.inOut'})
+            gsap.set('.header-inner', { autoAlpha: 0, y: -100 })
+            gsap.to('.header-inner', { autoAlpha: 1, y: 0, duration: 1, ease: 'power1.inOut' })
         }
         updateOnScroll(inst) {
             this.toggleHide(inst);
@@ -842,23 +842,23 @@ const script = () => {
         }
         onHideDependent() {
             let heightHeader = $(this.el).outerHeight();
-            if(!$(this.el).hasClass('on-hide')) {
-               this.listDependent.forEach((item) => {
-                  $(item).css('top', heightHeader);
-               });
+            if (!$(this.el).hasClass('on-hide')) {
+                this.listDependent.forEach((item) => {
+                    $(item).css('top', heightHeader);
+                });
             } else {
-               this.listDependent.forEach((item) => {
-                  $(item).css('top', 0);
-               });
+                this.listDependent.forEach((item) => {
+                    $(item).css('top', 0);
+                });
             }
         }
         registerDependent(dependentEl) {
-        this.listDependent.push(dependentEl);
+            this.listDependent.push(dependentEl);
         }
         unregisterDependent(dependentEl) {
-        if (this.listDependent.includes(dependentEl)) {
-            this.listDependent = this.listDependent.filter((item) => item !== dependentEl);
-        }
+            if (this.listDependent.includes(dependentEl)) {
+                this.listDependent = this.listDependent.filter((item) => item !== dependentEl);
+            }
         }
         toggleScroll(inst) {
             if (inst.scroll > cvUnit(44, 'rem')) $(this.el).addClass("on-scroll");
@@ -886,27 +886,27 @@ const script = () => {
                 { subdirectory: '/uk', index: 1 },
                 { subdirectory: '/apac', index: 2 }
             ];
-            
+
             let basePath = currentPath;
             let currentLocaleIndex = 0;
-            
+
             localeConfig.forEach((config, index) => {
                 if (config.subdirectory && (currentPath.startsWith(config.subdirectory + '/') || currentPath === config.subdirectory)) {
                     basePath = currentPath.replace(config.subdirectory, '') || '/';
                     currentLocaleIndex = index;
                 }
             });
-            
+
             $('.header-lang-dropdown-inner .header-lang-item').removeClass('active');
-            
+
             localeConfig.forEach(config => {
                 const newPath = config.subdirectory ? config.subdirectory + basePath : basePath;
                 const $item = $('.header-lang-dropdown-inner .header-lang-item').eq(config.index);
-                
+
                 if ($item.length) {
                     $item.attr('href', newPath);
                 }
-                
+
                 if (config.index === currentLocaleIndex) {
                     $item.addClass('active');
                     let text = $item.find('.txt').text();
@@ -916,24 +916,24 @@ const script = () => {
             });
         }
         interact() {
-            if(viewport.w <= 991) {
-                $(this.el).find('.header-toggle').on('click', (e)=>{
+            if (viewport.w <= 991) {
+                $(this.el).find('.header-toggle').on('click', (e) => {
                     e.preventDefault();
                     $(e.currentTarget).toggleClass('active');
                     $(this.el).find('.header-menu').toggleClass('active');
                 });
                 $(window).on('click', (e) => {
                     if (!$(e.target).closest('.header-toggle').length && !$(e.target).closest('.header-menu').length) {
-                    $(this.el).find('.header-toggle').removeClass('active');
-                    $(this.el).find('.header-menu').removeClass('active');
+                        $(this.el).find('.header-toggle').removeClass('active');
+                        $(this.el).find('.header-menu').removeClass('active');
                     }
                 });
-                $('.header-menu-item-wrap.parent').on('click','.header-menu-item', (e)=>{
+                $('.header-menu-item-wrap.parent').on('click', '.header-menu-item', (e) => {
                     e.preventDefault();
                     $(e.currentTarget).closest('.header-menu-item-wrap').toggleClass('active');
                     $(e.currentTarget).closest('.header-menu-item-wrap').find('.header-menu-sub-wrap').slideToggle();
                 });
-                $('.header-lang').on('click', (e)=>{
+                $('.header-lang').on('click', (e) => {
                     e.preventDefault();
                     $(e.currentTarget).closest('.header-lang-wrap').find('.header-lang-dropdown').toggleClass('active');
                     $(e.currentTarget).toggleClass('active');
@@ -963,7 +963,7 @@ const script = () => {
             // get current year 
             const currentYear = new Date().getFullYear();
             $('.txt-year-current').text(currentYear);
-            if(viewport.w >= 992) {
+            if (viewport.w >= 992) {
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
@@ -990,9 +990,9 @@ const script = () => {
                         tweenArr: [
                             new FadeSplitText({ el: $(item).find('.footer-menu-title .txt').get(0), mask: 'lines' }),
                             ...($(item).find('.footer-menu-item').length > 0 ? Array.from($(item).find('.footer-menu-item')).flatMap(menuItem => [
-                                    new FadeIn({ el: menuItem, delay: 0}),
-                                    new FadeSplitText({ el: $(menuItem).find('.footer-menu-item-title .txt').get(0), mask: 'lines' }),
-                                ]) : []),
+                                new FadeIn({ el: menuItem, delay: 0 }),
+                                new FadeSplitText({ el: $(menuItem).find('.footer-menu-item-title .txt').get(0), mask: 'lines' }),
+                            ]) : []),
                             ...($(item).find('.footer-menu-social').length > 0 ? [new FadeIn({ el: $(item).find('.footer-menu-social'), type: 'bottom' })] : []),
                         ].filter(Boolean)
                     });
@@ -1020,7 +1020,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.footer-copyright .txt').get(0), mask: 'lines' }),
                         ...Array.from($('.footer-policy-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.txt').get(0), mask: 'lines' }),
                         ]),
                     ]
@@ -1030,15 +1030,15 @@ const script = () => {
         validateEmail() {
             const $input = $('.footer-form-input');
             const $submitBtn = $('.footer-form-btn, .footer form [type="submit"]');
-            
-            if($input.length === 0) return;
-            
+
+            if ($input.length === 0) return;
+
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            $input.on('input', function() {
+
+            $input.on('input', function () {
                 const email = $(this).val().trim();
-                
-                if(emailRegex.test(email)) {
+
+                if (emailRegex.test(email)) {
                     $submitBtn.addClass('active');
                 } else {
                     $submitBtn.removeClass('active');
@@ -1047,16 +1047,16 @@ const script = () => {
         }
         handleSubmit() {
             const $form = $('.footer form');
-            if($form.length === 0) return;
-            
+            if ($form.length === 0) return;
+
             $form.on('submit', (e) => {
                 e.preventDefault();
-                
+
                 const $input = $('.footer-form-input');
                 const email = $input.val().trim();
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                
-                if(emailRegex.test(email)) {
+
+                if (emailRegex.test(email)) {
                     this.submitHubspot(email);
                 }
             });
@@ -1069,18 +1069,18 @@ const script = () => {
                     { name: "email", value: email }
                 ],
             };
-            
+
             const currentLocale = $('html').attr('lang');
-            if(currentLocale == 'en-GB') {
+            if (currentLocale == 'en-GB') {
                 hubspot.formId = "f52180a2-350e-4dd9-b180-73f2b394dcb7";
             }
-            else if(currentLocale == 'en-AU') {
+            else if (currentLocale == 'en-AU') {
                 hubspot.formId = "f9e6eafa-041f-4a90-9802-c7f5d04732e4";
             }
-            
+
             const { portalId, formId, fields } = hubspot;
             let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
-            
+
             const dataSend = {
                 fields: fields.map(field => ({
                     name: field.name,
@@ -1091,7 +1091,7 @@ const script = () => {
                     pageName: "Footer Newsletter",
                 },
             };
-            
+
             $.ajax({
                 url: url,
                 method: "POST",
@@ -1123,20 +1123,20 @@ const script = () => {
     function mapFormToObject(ele) {
         const formData = new FormData(ele);
         const result = {};
-        
-        for(const [name, val] of formData.entries()) {
+
+        for (const [name, val] of formData.entries()) {
             result[name] = val;
         }
-        
-        $(ele).find('input[type="checkbox"]').each(function() {
+
+        $(ele).find('input[type="checkbox"]').each(function () {
             const name = $(this).attr('name');
-            if(name) {
+            if (name) {
                 result[name] = this.checked;
             }
         });
-        
+
         return result;
-     }
+    }
 
     const HomePage = {
         "home-hero-wrap": class extends TriggerSetup {
@@ -1155,12 +1155,12 @@ const script = () => {
                     }),
                     allowMobile: true,
                     tweenArr: [
-                       new FadeSplitText({ el: $('.announcement-link .txt').get(0), mask: 'lines' }),
-                       new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
-                       new FadeSplitText({ el: $('.home-hero-label .heading').get(0), mask: 'lines' }),
-                       new FadeSplitText({ el: $('.home-hero-sub .txt').get(0), mask: 'lines' }),
-                       ...Array.from($('.home-hero-btn')).map(btn => new FadeIn({ el: btn })),
-                       ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
+                        new FadeSplitText({ el: $('.announcement-link .txt').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-hero-label .heading').get(0), mask: 'lines' }),
+                        new FadeSplitText({ el: $('.home-hero-sub .txt').get(0), mask: 'lines' }),
+                        ...Array.from($('.home-hero-btn')).map(btn => new FadeIn({ el: btn })),
+                        ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
                     ]
                 });
             }
@@ -1174,9 +1174,9 @@ const script = () => {
             }
             animationReveal() {
                 const pathMaps = $('.path-map');
-                
-                if(pathMaps.length === 0) return;
-                
+
+                if (pathMaps.length === 0) return;
+
                 const tl = gsap.timeline({
                     repeat: -1,
                     repeatDelay: 0,
@@ -1186,7 +1186,7 @@ const script = () => {
                         once: true
                     }
                 });
-                
+
                 pathMaps.each((index, path) => {
                     const totalLength = path.getTotalLength();
                     gsap.set(path, {
@@ -1194,25 +1194,25 @@ const script = () => {
                         strokeDashoffset: totalLength
                     });
                 });
-                
+
                 const animatePath = (indices) => {
                     const expandLabel = `expand-${indices.join('-')}`;
-                    
+
                     indices.forEach(index => {
                         const path = pathMaps[index];
                         const totalLength = path.getTotalLength();
-                        
+
                         tl.to(path, {
                             strokeDashoffset: 0,
                             duration: .8,
                             ease: 'power2.inOut'
                         }, expandLabel);
                     });
-                    
+
                     indices.forEach(index => {
                         const path = pathMaps[index];
                         const totalLength = path.getTotalLength();
-                        
+
                         tl.to(path, {
                             strokeDashoffset: -totalLength,
                             duration: .8,
@@ -1223,7 +1223,7 @@ const script = () => {
                         }, `${expandLabel}+=1.5`);
                     });
                 };
-                
+
                 animatePath([0, 1]);
                 tl.addLabel('delay1', '-=0.1');
                 animatePath([2, 3]);
@@ -1251,7 +1251,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.home-partner-figure-item')).flatMap((item) => [
-                            new FadeIn({ el: item}),
+                            new FadeIn({ el: item }),
                             new FadeSplitText({ el: $(item).find('.home-partner-figure-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.home-partner-figure-item-sub .txt').get(0), mask: 'lines' }),
                         ]),
@@ -1271,12 +1271,12 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(this.items.length > 0 && viewport.w > 992) {
+                if (this.items.length > 0 && viewport.w > 992) {
                     this.setupScrollTriggers();
                 }
-                if(viewport.w <= 992) {
+                if (viewport.w <= 992) {
                     this.toggleItem(0);
-                    $('.home-product-img-item').each(function(index, item) {
+                    $('.home-product-img-item').each(function (index, item) {
                         let list = $(item).find('.home-product-img-thumb-list').clone();
                         console.log(list);
                         $('.home-product-item').eq(index).find('.home-product-item-video').append(list);
@@ -1289,10 +1289,10 @@ const script = () => {
                     activeItem(['.home-product-item', '.home-product-img-item'], 0);
                     $('.home-product-item').eq(0).find('.home-product-item-content').slideDown();
                 }
-                if(viewport.w >= 992) {
+                if (viewport.w >= 992) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
-                            scrollTrigger: {    
+                            scrollTrigger: {
                                 trigger: '.home-product-wrap',
                                 start: 'top top+=60%',
                                 once: true,
@@ -1301,8 +1301,8 @@ const script = () => {
                         tweenArr: [
                             new FadeSplitText({ el: $('.home-product-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $('.home-product-sub .txt').get(0), mask: 'lines' }),
-                            ...Array.from($('.home-product-img-item:first-child .home-product-img-thumb-item')).map(item => new ScaleInset({ el: $(item).get(0), isDisableRevert: true})),
-                            ...Array.from($('.home-product-item')).map(item => new FadeIn({ el: item})),
+                            ...Array.from($('.home-product-img-item:first-child .home-product-img-thumb-item')).map(item => new ScaleInset({ el: $(item).get(0), isDisableRevert: true })),
+                            ...Array.from($('.home-product-item')).map(item => new FadeIn({ el: item })),
                             new FadeIn({ el: $('.home-product-img-list') }),
                             new FadeSplitText({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-title .heading').get(0), delay: 0.1 }),
                             new FadeIn({ el: $('.home-product-img-item:first-child .home-product-img-item-cta-link') }),
@@ -1311,16 +1311,16 @@ const script = () => {
                 }
             }
             setupScrollTriggers() {
-                if(this.mainTrigger) {
+                if (this.mainTrigger) {
                     this.mainTrigger.kill();
                 }
-                
+
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
-                
+
                 let itemCount = this.items.length;
-                
+
                 this.mainTrigger = ScrollTrigger.create({
                     trigger: '.home-product-wrap',
                     start: 'top+=30% center',
@@ -1329,20 +1329,20 @@ const script = () => {
                     onUpdate: (self) => {
                         let progress = self.progress;
                         let newIndex = Math.floor(progress * itemCount);
-                        
+
                         newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
-                        
-                        if(newIndex !== this.currentIndex) {
+
+                        if (newIndex !== this.currentIndex) {
                             this.currentIndex = newIndex;
                             this.activateItem(newIndex);
                         }
-                        
+
                         let itemStartProgress = this.currentIndex / itemCount;
                         let itemEndProgress = (this.currentIndex + 1) / itemCount;
                         let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
                         itemProgress = Math.max(0, Math.min(1, itemProgress));
-                        
-                        if(itemProgress >= 0 && itemProgress <= 1) {
+
+                        if (itemProgress >= 0 && itemProgress <= 1) {
                             this.updateProgressBar(this.currentIndex, itemProgress);
                         }
                     }
@@ -1352,12 +1352,12 @@ const script = () => {
                 this.items.removeClass('active');
                 $('.home-product-img-item').removeClass('active');
                 gsap.set('.home-product-item-line-progress', { x: '-101%' });
-                
+
                 $(this.items[index]).addClass('active');
                 $('.home-product-img-item').eq(index).addClass('active');
-                
-                $('.home-product-item-content').each(function(idx, item) {
-                    if(idx === index) {
+
+                $('.home-product-item-content').each(function (idx, item) {
+                    if (idx === index) {
                         $(item).slideDown();
                     } else {
                         // gsap.to(this, {
@@ -1375,22 +1375,22 @@ const script = () => {
             }
             updateProgressBar(index, progress) {
                 let progressBar = $(this.items[index]).find('.home-product-item-line-progress');
-                if(progressBar.length > 0) {
+                if (progressBar.length > 0) {
                     console.log(progress);
                     let xPos = -101 + (progress * 101);
                     gsap.set(progressBar[0], { x: xPos + '%' });
                 }
-                
-                if(index === 0) {
+
+                if (index === 0) {
                     const thumbContainer = $('.home-product-img-item').eq(index).find('.home-product-img-thumb');
                     const thumbList = thumbContainer.find('.home-product-img-thumb-list');
-                    
-                    if(thumbList.length > 0 && thumbContainer.length > 0) {
+
+                    if (thumbList.length > 0 && thumbContainer.length > 0) {
                         const containerWidth = thumbContainer.outerWidth();
                         const listWidth = thumbList.outerWidth();
                         const maxTranslate = listWidth - containerWidth;
-                        
-                        if(maxTranslate > 0) {
+
+                        if (maxTranslate > 0) {
                             const translateX = -(progress * maxTranslate);
                             gsap.set(thumbList[0], { x: translateX + 'px' });
                         }
@@ -1398,7 +1398,7 @@ const script = () => {
                 }
             }
             toggleItem(index) {
-                if($(this.items[index]).hasClass('active')) {
+                if ($(this.items[index]).hasClass('active')) {
                     $(this.items[index]).removeClass('active');
                     $(this.items[index]).find('.home-product-item-content').slideUp(300);
                 }
@@ -1410,7 +1410,7 @@ const script = () => {
                 }
             }
             interact() {
-                if(viewport.w > 992) {
+                if (viewport.w > 992) {
                     this.items.each((index, item) => {
                         $(item).find('.home-product-item-head').on('click', (e) => {
                             this.scrollToItem(index);
@@ -1423,7 +1423,7 @@ const script = () => {
                         });
                     });
                 }
-                
+
                 $('.home-product-img-item-cta-link').on('click', (e) => {
                     e.preventDefault();
                     let href = $(e.currentTarget).attr('href');
@@ -1437,17 +1437,17 @@ const script = () => {
                 });
             }
             scrollToItem(index) {
-                if(!this.mainTrigger) return;
-                
+                if (!this.mainTrigger) return;
+
                 const itemCount = this.items.length;
                 const targetProgress = (index + 0.02) / itemCount;
-                
+
                 const scrollStart = this.mainTrigger.start;
                 const scrollEnd = this.mainTrigger.end;
                 const scrollDistance = scrollEnd - scrollStart;
                 const targetScroll = scrollStart + (scrollDistance * targetProgress);
-                
-                if(smoothScroll && smoothScroll.lenis) {
+
+                if (smoothScroll && smoothScroll.lenis) {
                     smoothScroll.scrollTo(targetScroll, {
                         duration: 1,
                         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
@@ -1460,7 +1460,7 @@ const script = () => {
                 }
             }
             destroy() {
-                if(this.mainTrigger) {
+                if (this.mainTrigger) {
                     this.mainTrigger.kill();
                     this.mainTrigger = null;
                 }
@@ -1471,14 +1471,14 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 767) {
+                    if (viewport.w < 767) {
                         this.initSwiper();
                     }
                     this.animationReveal();
                 };
             }
             animationReveal() {
-                if(viewport.w >= 992) {
+                if (viewport.w >= 992) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -1490,13 +1490,13 @@ const script = () => {
                         tweenArr: [
                             new FadeSplitText({ el: $('.home-trans-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $('.home-trans-sub .txt').get(0), mask: 'lines' }),
-                            new FadeIn({ el: $('.home-trans-btn'), type: 'bottom'}),
-                            new FadeIn({ el: $('.home-trans-head'), type: 'bottom'}),
-                            ...Array.from($('.home-trans-head-inner .heading')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                            new FadeIn({ el: $('.home-trans-btn'), type: 'bottom' }),
+                            new FadeIn({ el: $('.home-trans-head'), type: 'bottom' }),
+                            ...Array.from($('.home-trans-head-inner .heading')).map(item => new FadeSplitText({ el: item, mask: 'lines' })),
                             ...Array.from($('.home-trans-row')).flatMap(item => [
-                                new FadeIn({ el: item, type: 'bottom'}),
-                                new FadeSplitText({ el: $(item).find('.home-trans-row-title .heading').get(0), mask: 'lines'}),
-                                ...Array.from($(item).find('.home-trans-row-item')).map(item => new FadeSplitText({ el: item, mask: 'lines'})),
+                                new FadeIn({ el: item, type: 'bottom' }),
+                                new FadeSplitText({ el: $(item).find('.home-trans-row-title .heading').get(0), mask: 'lines' }),
+                                ...Array.from($(item).find('.home-trans-row-item')).map(item => new FadeSplitText({ el: item, mask: 'lines' })),
                             ]),
                         ]
                     });
@@ -1524,13 +1524,13 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if($('.home-trust-logo-item').length == 0){
+                if ($('.home-trust-logo-item').length == 0) {
                     $('.home-trust').hide();
                     return;
                 }
-                 let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
-                 marquee.setup();
-                 marquee.play();
+                let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
+                marquee.setup();
+                marquee.play();
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
@@ -1557,8 +1557,8 @@ const script = () => {
                 };
             }
             animationReveal() {
-                
-                if(viewport.w > 992) {
+
+                if (viewport.w > 992) {
                     let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
                     marquee.setup();
                     marquee.play();
@@ -1579,7 +1579,7 @@ const script = () => {
                         }
                     });
                 }
-                if(viewport.w > 992) {
+                if (viewport.w > 992) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -1591,12 +1591,12 @@ const script = () => {
                         tweenArr: [
                             new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                             ...Array.from($('.stories-support-item')).flatMap(item => [
-                                new FadeIn({ el: item, delay: 0.05}),
+                                new FadeIn({ el: item, delay: 0.05 }),
                                 new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                                 new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                                 new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
                                 new FadeSplitText({ el: $(item).find('.stories-support-item-txt .txt').get(0), mask: 'lines' }),
-                                $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null   ,
+                                $(item).find('.stories-support-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-support-item-link') }) : null,
                             ]).filter(Boolean)
                         ]
                     });
@@ -1644,8 +1644,8 @@ const script = () => {
                         el: '.home-testi-pagi',
                         bulletClass: 'home-testi-pagi-item',
                         bulletActiveClass: 'active',
-                        clickable: true,  
-                      },
+                        clickable: true,
+                    },
                     breakpoints: {
                         991: {
                             slidesPerView: 2,
@@ -1669,7 +1669,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
@@ -1720,7 +1720,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
                 else {
@@ -1735,7 +1735,7 @@ const script = () => {
                         tweenArr: [
                             new FadeSplitText({ el: $('.home-resource-title .heading').get(0), mask: 'lines' }),
                             ...Array.from($('.home-resource-item')).flatMap(item => [
-                                new FadeIn({ el: item, delay: 0}),
+                                new FadeIn({ el: item, delay: 0 }),
                                 new ScaleInset({ el: $(item).find('.home-resource-item-img').get(0) }),
                                 new FadeSplitText({ el: $(item).find('.home-resource-item-title .heading').get(0), mask: 'lines' }),
                                 new FadeSplitText({ el: $(item).find('.home-resource-item-sub .txt').get(0), mask: 'lines' })
@@ -1775,7 +1775,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w >= 992) {
+                if (viewport.w >= 992) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -1788,7 +1788,7 @@ const script = () => {
                             new FadeSplitText({ el: $('.home-grow-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $('.home-grow-sub .txt').get(0), mask: 'lines' }),
                             ...Array.from($('.home-grow-item')).flatMap(item => [
-                                new FadeIn({ el: item, delay: 0}),
+                                new FadeIn({ el: item, delay: 0 }),
                                 new FadeIn({ el: $(item).find('.home-grow-item-ic'), type: 'bottom' }),
                                 new FadeSplitText({ el: $(item).find('.home-grow-item-title .heading').get(0), mask: 'lines' }),
                             ]),
@@ -1856,7 +1856,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.faq-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
                             new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
                         ]),
@@ -1872,7 +1872,7 @@ const script = () => {
                 const $item = $(item);
                 const $itemSub = $item.find('.faq-item-sub');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -1917,7 +1917,7 @@ const script = () => {
                 this.searchTimeout = null;
                 this.SCROLL_OFFSET = -100;
                 this.DEBOUNCE_DELAY = 150;
-                
+
                 this.onTrigger = () => {
                     this.cacheElements();
                     this.animationReveal();
@@ -1925,7 +1925,7 @@ const script = () => {
                     this.checkScrollTo();
                 };
             }
-            
+
             cacheElements() {
                 this.$els = {
                     tabInner: $('.faq-main-tab-inner'),
@@ -1945,15 +1945,15 @@ const script = () => {
                     relatesLinks: $('.faq-main-item-relates-item-link')
                 };
             }
-            
+
             animationReveal() {
                 this.updateUICateNew();
-                if(viewport.w <= 991) {
+                if (viewport.w <= 991) {
                     header.registerDependent(this.$els.categorySticky);
                 }
                 const topInit = (viewport.h - this.$els.tabInner.outerHeight()) / 2;
                 console.log($('.faq-main-category-cms.custom-scroll .faq-main-category-list').height(), $('.faq-main-category-cms.custom-scroll').height());
-                if($('.faq-main-category-cms.custom-scroll .faq-main-category-list').height() > $('.faq-main-category-cms.custom-scroll').height()) {
+                if ($('.faq-main-category-cms.custom-scroll .faq-main-category-list').height() > $('.faq-main-category-cms.custom-scroll').height()) {
                     console.log('prevent');
                     $('.faq-main-category-cms').attr('data-lenis-prevent', 'true');
                 }
@@ -1961,16 +1961,16 @@ const script = () => {
                 this.initContent();
                 this.searchFaqOnType();
             }
-            
+
             checkScrollTo() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const id = urlParams.get('id');
                 const category = urlParams.get('category');
-                
-                if(id) {
+
+                if (id) {
                     const $target = $(`#${id}`);
-                    if(!$target.length) return;
-                    
+                    if (!$target.length) return;
+
                     const $head = $target.find('.faq-main-item-head');
                     if (!$head.hasClass('active')) {
                         $head.trigger('click');
@@ -1978,15 +1978,15 @@ const script = () => {
                     this.scrollToFaq(id);
                     return;
                 }
-                
-                if(category) {
+
+                if (category) {
                     const $categoryItem = $(`.faq-main-category-item[data-category-slug="${category}"]`);
                     this.$els.categoryItems.removeClass('active');
                     $categoryItem.addClass('active');
-                    
+
                     const dataTitle = $categoryItem.attr('data-title');
                     const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
-                    if(content) {
+                    if (content) {
                         smoothScroll.scrollTo(content, {
                             offset: this.SCROLL_OFFSET,
                             duration: 1,
@@ -1994,30 +1994,30 @@ const script = () => {
                     }
                 }
             }
-            
+
             scrollToFaq(faqId) {
                 const $target = $(`#${faqId}`);
-                if(!$target.length) return;
-                
+                if (!$target.length) return;
+
                 const scrollOffset = (viewport.h - $target.outerHeight()) / 2;
-                smoothScroll.scrollTo(`#${faqId}`, {offset: -scrollOffset});
+                smoothScroll.scrollTo(`#${faqId}`, { offset: -scrollOffset });
             }
-            
+
             getUrl(id = '', category = '') {
                 const url = new URL(window.location.href);
-                
-                if(id) {
+
+                if (id) {
                     url.searchParams.set('id', id);
-                    if(!category) {
+                    if (!category) {
                         const $target = $(`#${id}`);
-                        if($target.length) {
+                        if ($target.length) {
                             const categoryTitle = $target.closest('.faq-main-view-item')
                                 .find('.faq-main-view-item-title .heading')
                                 .attr('data-title');
-                            if(categoryTitle) {
+                            if (categoryTitle) {
                                 const categorySlug = $(`.faq-main-category-item[data-title="${categoryTitle}"]`)
                                     .attr('data-category-slug');
-                                if(categorySlug) {
+                                if (categorySlug) {
                                     url.searchParams.set('category', categorySlug);
                                 }
                             }
@@ -2026,70 +2026,70 @@ const script = () => {
                 } else {
                     url.searchParams.delete('id');
                 }
-                
-                if(category) {
+
+                if (category) {
                     url.searchParams.set('category', category);
                 }
-                
+
                 return url.toString();
             }
-            
+
             initContent() {
                 // Batch DOM updates
                 this.$els.viewItemTitles.each((idx, item) => {
                     item.setAttribute('data-title', 'toch-' + idx);
                 });
-                
+
                 $('.faq-main-category-cms').each((idx, itemCate) => {
                     $(itemCate).find('.faq-main-category-item').each((idx, item) => {
                         item.setAttribute('data-title', 'toch-' + idx);
                     });
                 });
             }
-            
+
             updateUICateNew() {
                 const $firstItem = $('.faq-hero-form-dropdown-item').eq(0);
-                if(!$firstItem.length) return;
-                
+                if (!$firstItem.length) return;
+
                 const itemTemplate = $firstItem.clone();
                 const fragment = document.createDocumentFragment();
-                
+
                 $('.faq-main-view-item').each((idx, faq) => {
                     $(faq).find('.faq-main-item').each((idx, item) => {
                         const $item = $(item);
                         const newItem = itemTemplate.clone();
                         const dataScroll = $item.find('.faq-main-item-inner').attr('id');
                         const title = $item.find('.faq-main-item-title .txt').text();
-                        
+
                         newItem.attr('data-scrollto', dataScroll);
                         newItem.find('.fs-16').text(title);
                         fragment.appendChild(newItem[0]);
                     });
                 });
-                
+
                 this.$els.dropdownInner.empty().append(fragment);
             }
-            
+
             debounce(func, delay) {
                 return (...args) => {
                     clearTimeout(this.searchTimeout);
                     this.searchTimeout = setTimeout(() => func.apply(this, args), delay);
                 };
             }
-            
+
             filterSearchResults(value) {
-                if(!value) return;
-                
+                if (!value) return;
+
                 const compValue = value.toLowerCase().replace(/[\s-]/g, '');
                 const regex = new RegExp("(" + value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
                 const $items = $('.faq-hero-form-dropdown-item');
-                
+
                 $items.each((idx, el) => {
                     const $el = $(el);
                     const $textEl = $el.find('.fs-16');
                     const originalText = $textEl.text();
                     const compText = originalText.toLowerCase().replace(/[\s-]/g, '');
-                    
+
                     if (compText.includes(compValue)) {
                         $el.removeClass('hidden');
                         const highlightedText = originalText.replace(regex, "<span class='hl'>$1</span>");
@@ -2098,27 +2098,27 @@ const script = () => {
                         $el.addClass('hidden');
                     }
                 });
-                
+
                 this.updateDropdownUI();
             }
-            
+
             updateDropdownUI() {
                 const innerHeight = this.$els.dropdownInner.height();
                 const dropdownHeight = this.$els.searchDropdown.outerHeight();
-                
+
                 if (innerHeight === 0) {
                     this.$els.dropdownEmpty.slideDown();
                 } else {
                     this.$els.dropdownEmpty.slideUp();
                 }
-                
-                if(innerHeight > dropdownHeight) {
+
+                if (innerHeight > dropdownHeight) {
                     this.$els.searchDropdown.attr('data-lenis-prevent', 'true');
                 } else {
                     this.$els.searchDropdown.removeAttr('data-lenis-prevent');
                 }
             }
-            
+
             handleSearchKeyboard(e, $itemsActive) {
                 switch (e.key) {
                     case 'Tab':
@@ -2127,13 +2127,13 @@ const script = () => {
                         this.searchIndex = (this.searchIndex + 1) % $itemsActive.length;
                         this.setActiveSearchItem($itemsActive);
                         break;
-                    
+
                     case 'ArrowUp':
                         e.preventDefault();
                         this.searchIndex = (this.searchIndex - 1 + $itemsActive.length) % $itemsActive.length;
                         this.setActiveSearchItem($itemsActive);
                         break;
-                    
+
                     case 'Enter':
                         e.preventDefault();
                         // Nếu chưa chọn item nào (searchIndex = -1), auto-select item đầu tiên
@@ -2145,19 +2145,19 @@ const script = () => {
                             this.selectSearchItem($itemsActive.eq(this.searchIndex));
                         }
                         break;
-                    
+
                     case 'Escape':
                         this.$els.searchDropdown.removeClass('open');
                         break;
                 }
             }
-            
+
             setActiveSearchItem($items) {
                 $items.removeClass('active');
-                if(this.searchIndex >= 0 && this.searchIndex < $items.length) {
+                if (this.searchIndex >= 0 && this.searchIndex < $items.length) {
                     const $activeItem = $items.eq(this.searchIndex);
                     $activeItem.addClass('active');
-                    
+
                     const activeEl = $activeItem[0];
                     if (activeEl) {
                         // scroll cộng thêm .4rem
@@ -2168,42 +2168,42 @@ const script = () => {
                     }
                 }
             }
-            
+
             selectSearchItem($item) {
                 const faqId = $item.attr('data-scrollto');
-                if(!faqId) return;
-                
+                if (!faqId) return;
+
                 const $target = $(`#${faqId}`);
-                if(!$target.length) return;
-                
+                if (!$target.length) return;
+
                 const $head = $target.find('.faq-main-item-head');
                 if (!$head.hasClass('active')) {
                     $head.trigger('click');
                 }
-                
+
                 this.scrollToFaq(faqId);
                 window.history.pushState({}, '', this.getUrl(faqId));
                 setTimeout(() => {
                     this.$els.searchDropdown.removeClass('open');
                 }, 100);
             }
-            
+
             searchFaqOnType() {
                 this.$els.searchForm.attr('action', '').on('submit', (e) => {
                     e.preventDefault();
                     return false;
                 });
-                
+
                 const debouncedFilter = this.debounce((value) => {
                     this.filterSearchResults(value);
                 }, this.DEBOUNCE_DELAY);
-                
+
                 this.$els.searchInput.on('keyup', (e) => {
                     e.preventDefault();
                     const value = this.$els.searchInput.val();
-                    
+
                     // Chỉ handle keyboard navigation cho các phím điều hướng và Enter
-                    if(['Tab', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
+                    if (['Tab', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
                         const $itemsActive = this.$els.searchDropdown.find('.faq-hero-form-dropdown-item:not(.hidden)');
                         this.handleSearchKeyboard(e, $itemsActive);
                     } else {
@@ -2212,7 +2212,7 @@ const script = () => {
                         this.searchIndex = -1;
                         debouncedFilter(value);
                     }
-                    
+
                     // Toggle dropdown
                     if (value !== '') {
                         this.$els.searchDropdown.addClass('open');
@@ -2220,14 +2220,14 @@ const script = () => {
                         this.$els.searchDropdown.removeClass('open');
                     }
                 });
-                
+
                 // Handle input changes (paste, etc.) - không reset searchIndex
                 this.$els.searchInput.on('input', (e) => {
                     const value = this.$els.searchInput.val();
                     $('.faq-hero-form-dropdown-item').removeClass('active');
                     this.searchIndex = -1;
                     debouncedFilter(value);
-                    
+
                     // Toggle dropdown
                     if (value !== '') {
                         this.$els.searchDropdown.addClass('open');
@@ -2235,71 +2235,71 @@ const script = () => {
                         this.$els.searchDropdown.removeClass('open');
                     }
                 });
-                
+
                 this.$els.searchInput.on('focus', () => {
                     this.$els.categoryStickyInner.removeClass('active');
                     if (this.$els.searchInput.val() !== '') {
                         this.$els.searchDropdown.addClass('open');
                     }
                 });
-                
+
                 this.$els.searchInput.on('blur', () => {
                     if (!this.$els.searchDropdown.is(':hover')) {
                         this.$els.searchDropdown.removeClass('open');
                     }
                 });
-                
+
                 // Use event delegation
                 this.$els.searchDropdown.on('click', '.faq-hero-form-dropdown-item', (e) => {
                     e.preventDefault();
                     this.selectSearchItem($(e.currentTarget));
                 });
             }
-            
+
             updateMobileCategoryUI($currentTarget) {
-                if(viewport.w > 991) return;
-                
+                if (viewport.w > 991) return;
+
                 const $itemIc = $currentTarget.find('.faq-main-category-item-ic .w-embed');
                 const $itemTitle = $currentTarget.find('.faq-main-category-item-title .txt').eq(0);
                 this.$els.categoryStickyIc.html($itemIc.html());
                 this.$els.categoryStickyTitle.text($itemTitle.eq(0).text());
             }
-            
+
             interact() {
-                if(viewport.w <= 991) {
+                if (viewport.w <= 991) {
                     this.$els.categoryStickyInner.on('click', (e) => {
                         e.preventDefault();
                         $(e.currentTarget).toggleClass('active');
                     });
                 }
-                
+
                 this.$els.categoryItems.on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
-                    
+
                     this.updateMobileCategoryUI($current);
                     this.$els.categoryItems.removeClass('active');
                     $current.addClass('active');
                     this.$els.categoryStickyInner.removeClass('active');
-                    
+
                     const dataTitle = $current.attr('data-title');
                     const content = $(`.faq-main-view-item-title h2[data-title="${dataTitle}"]`)[0];
-                    
-                    if(content) {
+
+                    if (content) {
                         smoothScroll.scrollTo(content, {
                             offset: this.SCROLL_OFFSET,
                             duration: 1,
                         });
                     }
-                    
+
                     const slug = $current.attr('data-category-slug');
                     window.history.pushState({}, '', this.getUrl('', slug));
                 });
-                
+
                 // Throttled scroll handler
                 let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    if(!scrollTicking) {
+                    if (!scrollTicking) {
                         window.requestAnimationFrame(() => {
                             this.itemContentActiveCheck();
                             scrollTicking = false;
@@ -2307,13 +2307,13 @@ const script = () => {
                         scrollTicking = true;
                     }
                 });
-                
+
                 this.$els.itemHeads.on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const $item = $current.closest('.faq-main-item');
                     const $content = $item.find('.faq-main-item-content');
-                    
+
                     if (!$current.hasClass('active')) {
                         this.$els.itemHeads.removeClass('active');
                         $('.faq-main-item-content').slideUp();
@@ -2323,57 +2323,57 @@ const script = () => {
                         $current.removeClass('active');
                         $content.slideUp();
                     }
-                    
+
                     const id = $current.closest('.faq-main-item-inner').attr('id');
                     window.history.pushState({}, '', this.getUrl(id));
                 });
-                
+
                 this.$els.relatesLinks.on('click', (e) => {
                     e.preventDefault();
                     const scrollTo = $(e.currentTarget).attr('data-scrollto');
-                    
+
                     const $target = $(`#${scrollTo}`);
-                    if(!$target.length) return;
-                    
+                    if (!$target.length) return;
+
                     const $head = $target.find('.faq-main-item-head');
                     if (!$head.hasClass('active')) {
                         $head.trigger('click');
                     }
-                    
+
                     this.scrollToFaq(scrollTo);
                     window.history.pushState({}, '', this.getUrl(scrollTo));
                 });
             }
-            
+
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
                 const halfHeight = viewportHeight / 2;
-                
+
                 this.$els.viewItemTitles.each((i, el) => {
                     const rect = el.getBoundingClientRect();
                     const dataTitle = el.getAttribute('data-title');
-                    
+
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $categoryItem = $(`.faq-main-category-item[data-title="${dataTitle}"]`);
-                        
+
                         this.$els.categoryItems.removeClass('active');
                         $categoryItem.addClass('active');
-                        
-                        if(viewport.w <= 991 && $categoryItem.length) {
+
+                        if (viewport.w <= 991 && $categoryItem.length) {
                             this.updateMobileCategoryUI($categoryItem);
                         }
                     }
                 });
             }
-            
+
             destroy() {
                 // Cleanup event handlers
-                if(this.$els.searchInput) {
+                if (this.$els.searchInput) {
                     this.$els.searchInput.off();
                     this.$els.searchForm.off();
                     this.$els.searchDropdown.off();
                 }
-                if(this.$els.categoryItems) {
+                if (this.$els.categoryItems) {
                     this.$els.categoryItems.off();
                     this.$els.categoryStickyInner.off();
                     this.$els.itemHeads.off();
@@ -2414,7 +2414,7 @@ const script = () => {
                 const $inputGr = $('.schedule-hero-form-input-gr');
                 const $selectWrap = $('.schedule-hero-form-select-wrap');
                 const $selectDropdown = $('.schedule-hero-form-select-dropdown');
-                
+
                 const formReset = (form) => {
                     $(form)[0].reset();
                     reinitializeWebflow();
@@ -2424,7 +2424,7 @@ const script = () => {
                     $selectWrap.removeClass('filled open');
                     $('.schedule-hero-form-select-inner .txt').text('Select');
                 }
-                
+
                 const onSuccessForm = (form) => {
                     console.log('success');
                     $('.schedule-hero-form').addClass('hidden');
@@ -2443,31 +2443,31 @@ const script = () => {
                     onlyWorkOnThisFormName: "Schedule a demo",
                     onSuccess: () => onSuccessForm("#schedule-a-demo form"),
                 });
-                
+
                 $('.schedule-hero-form-input').on('focus', (e) => {
                     $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
                 });
-                
+
                 $('.schedule-hero-form-input').on('blur', (e) => {
                     const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
-                        ? $current.closest('.schedule-hero-form-input-gr') 
+                    const $parent = $current.closest('.schedule-hero-form-input-gr').length
+                        ? $current.closest('.schedule-hero-form-input-gr')
                         : $current.closest('.schedule-hero-form-option-input-inner');
-                    
+
                     $parent.removeClass('active')
                         .toggleClass('filled', !!$current.val());
                 });
-                
+
                 $('.schedule-hero-form-select-inner').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
                     const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
-                    
+
                     $selectWrap.not($parent).removeClass('open');
                     $selectDropdown.not($dropdown).removeClass('active');
-                    
-                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+
+                    if ($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
                         $current.closest('.schedule-hero-form-input-gr').removeClass('active');
                     }
                     else {
@@ -2477,11 +2477,11 @@ const script = () => {
                     $parent.toggleClass('active open');
                     $dropdown.toggleClass('active');
                 });
-                
+
                 $(document).on('click', (e) => {
                     if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
                         $selectWrap.removeClass('open');
-                        if($(e.target).closest('.schedule-hero-form-input').length) {
+                        if ($(e.target).closest('.schedule-hero-form-input').length) {
                             $inputGr.removeClass('active');
                             $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
                         }
@@ -2491,24 +2491,24 @@ const script = () => {
                         $selectDropdown.removeClass('active');
                     }
                 });
-                
+
                 $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const text = $current.find('.txt').text();
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
                     const $selectInner = $parent.find('.schedule-hero-form-select-inner');
-                    
+
                     $inputGr.removeClass('active');
                     $parent.addClass('filled').removeClass('open');
                     $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
                     $selectInner.find('.txt').text(text);
                     $selectInner.find('input').val(text);
-                    
+
                     $('.schedule-hero-form-select-dropdown-item').removeClass('active');
                     $current.addClass('active');
                 });
-                
+
                 $('.schedule-hero-form-submit').on('click', (e) => {
                     if (!this.checkFormValid()) {
                         e.preventDefault();
@@ -2517,14 +2517,14 @@ const script = () => {
                         this.submitHubspot();
                     }
                 });
-                
+
                 $('button[type="submit"]').on("pointerenter", function () {
                     $(this).prop("disabled", false);
                 });
             }
             checkEmailValid(emailValue) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if(emailRegex.test(emailValue)) {
+                if (emailRegex.test(emailValue)) {
                     return true;
                 } else {
                     return false;
@@ -2542,25 +2542,25 @@ const script = () => {
                 const contact = $('input[name="contact"]');
                 // chec
                 let isValid = true;
-                if(!firstName.val()) {
+                if (!firstName.val()) {
                     firstName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     firstName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!lastName.val()) {
+                if (!lastName.val()) {
                     lastName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!email.val()) {
+                if (!email.val()) {
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
-                else if(!this.checkEmailValid(email.val())) {
+                else if (!this.checkEmailValid(email.val())) {
                     email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
@@ -2568,35 +2568,35 @@ const script = () => {
                 else {
                     email.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!schoolName.val()) {
+                if (!schoolName.val()) {
                     schoolName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     schoolName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!phone.val()) {
+                if (!phone.val()) {
                     phone.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     phone.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!program.val()) {
+                if (!program.val()) {
                     program.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     program.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!activeStudents.val()) {
+                if (!activeStudents.val()) {
                     activeStudents.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     activeStudents.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!$('input[name="contact"]:checked').length) {
+                if (!$('input[name="contact"]:checked').length) {
                     contact.closest('.schedule-hero-form-option-wrap').addClass('error');
                     isValid = false;
                 }
@@ -2625,61 +2625,61 @@ const script = () => {
                 };
                 //get current locale
                 const currentLocale = $('html').attr('lang');
-                if(currentLocale == 'en-GB') { //uk
+                if (currentLocale == 'en-GB') { //uk
                     hubspot.formId = "6439cb2e-3e48-4215-9451-341217596e13";
                 }
-                else if(currentLocale == 'en-AU') { //apac
+                else if (currentLocale == 'en-AU') { //apac
                     hubspot.formId = "2f8f1029-f157-4dc0-a0df-e80cee0c9d41";
                 }
                 const { portalId, formId, fields } = hubspot;
                 let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
                 const data = mapFormToObject($('#schedule-a-demo form').get(0));
                 const mapField = (data) => {
-                   if (!fields.length) return [];
-    
-                   const result = fields.map((field) => {
-                      const { name, value } = field;
-                      if (!value) {
-                      return {
-                         name,
-                         value: data[name] || "",
-                      };
-                      } else {
-                      const getValue = value(data);
-                      return {
-                         name,
-                         value: getValue || "",
-                      };
-                      }
-                   });
-                   return result;
+                    if (!fields.length) return [];
+
+                    const result = fields.map((field) => {
+                        const { name, value } = field;
+                        if (!value) {
+                            return {
+                                name,
+                                value: data[name] || "",
+                            };
+                        } else {
+                            const getValue = value(data);
+                            return {
+                                name,
+                                value: getValue || "",
+                            };
+                        }
+                    });
+                    return result;
                 };
                 const mappedFields = mapField(data);
                 const dataSend = {
-                   fields: mappedFields,
-                   context: {
-                      pageUri: window.location.href,
-                      pageName: "Contact page",
-                   },
+                    fields: mappedFields,
+                    context: {
+                        pageUri: window.location.href,
+                        pageName: "Contact page",
+                    },
                 };
                 $.ajax({
-                   url: url,
-                   method: "POST",
-                   data: JSON.stringify(dataSend),
-                   dataType: "json",
-                   headers: {
-                      accept: "application/json",
-                      "Access-Control-Allow-Origin": "*",
-                   },
-                   contentType: "application/json",
-                   success: function (response) {
-                      console.log(response);
-                   },
-                   error: function (xhr, resp, text) {
-                      console.log(xhr, resp, text);
-                   },
+                    url: url,
+                    method: "POST",
+                    data: JSON.stringify(dataSend),
+                    dataType: "json",
+                    headers: {
+                        accept: "application/json",
+                        "Access-Control-Allow-Origin": "*",
+                    },
+                    contentType: "application/json",
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (xhr, resp, text) {
+                        console.log(xhr, resp, text);
+                    },
                 });
-             }
+            }
             destroy() {
                 super.destroy();
             }
@@ -2693,16 +2693,16 @@ const script = () => {
             }
             animationReveal() {
                 console.log('test', viewport.w);
-                if(viewport.w < 768) {
+                if (viewport.w < 768) {
                     this.initSwiper();
                 }
                 new MasterTimeline({
                     timeline: gsap.timeline({
-                       scrollTrigger: {
+                        scrollTrigger: {
                             trigger: '.schedule-benefit-title-wrap',
                             start: 'top top+=75%',
                             once: true,
-                       }
+                        }
                     }),
                     tweenArr: [
                         new FadeSplitText({ el: $('.schedule-benefit-title .heading').get(0), mask: 'lines' }),
@@ -2777,7 +2777,7 @@ const script = () => {
                 const $inputGr = $('.schedule-hero-form-input-gr');
                 const $selectWrap = $('.schedule-hero-form-select-wrap');
                 const $selectDropdown = $('.schedule-hero-form-select-dropdown');
-                
+
                 const formReset = (form) => {
                     $(form)[0].reset();
                     reinitializeWebflow();
@@ -2787,7 +2787,7 @@ const script = () => {
                     $selectWrap.removeClass('filled open');
                     $('.schedule-hero-form-select-inner .txt').text('Select');
                 }
-                
+
                 const onSuccessForm = (form) => {
                     console.log('success');
                     $formSuccess.addClass('active');
@@ -2796,48 +2796,48 @@ const script = () => {
                         $formSuccess.removeClass('active');
                     }, 5000);
                 }
-                
+
                 $('.schedule-form-success-btn').on('click', (e) => {
                     e.preventDefault();
                     $formSuccess.removeClass('active');
                 });
-                
+
                 formSubmitEvent.init({
                     onlyWorkOnThisFormName: "Contact Form",
                     onSuccess: () => onSuccessForm("#contact-form form"),
                 });
-                
+
                 $('input[type="checkbox"]').on('change', (e) => {
                     const $current = $(e.currentTarget);
                     const $inputWrap = $current.closest('.schedule-hero-form-option-item')
                         .find('.schedule-hero-form-option-input-wrap');
                     $inputWrap[$current.is(':checked') ? 'slideDown' : 'slideUp']();
                 });
-                
+
                 $('.schedule-hero-form-input').on('focus', (e) => {
                     $(e.currentTarget).closest('.schedule-hero-form-input-gr').addClass('active');
                 });
-                
+
                 $('.schedule-hero-form-input').on('blur', (e) => {
                     const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.schedule-hero-form-input-gr').length 
-                        ? $current.closest('.schedule-hero-form-input-gr') 
+                    const $parent = $current.closest('.schedule-hero-form-input-gr').length
+                        ? $current.closest('.schedule-hero-form-input-gr')
                         : $current.closest('.schedule-hero-form-option-input-inner');
-                    
+
                     $parent.removeClass('active')
                         .toggleClass('filled', !!$current.val());
                 });
-                
+
                 $('.schedule-hero-form-select-inner').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
                     const $dropdown = $parent.find('.schedule-hero-form-select-dropdown');
-                    
+
                     $selectWrap.not($parent).removeClass('open');
                     $selectDropdown.not($dropdown).removeClass('active');
-                    
-                    if($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
+
+                    if ($current.closest('.schedule-hero-form-input-gr').hasClass('active')) {
                         $current.closest('.schedule-hero-form-input-gr').removeClass('active');
                     }
                     else {
@@ -2847,11 +2847,11 @@ const script = () => {
                     $parent.toggleClass('active open');
                     $dropdown.toggleClass('active');
                 });
-                
+
                 $(document).on('click', (e) => {
                     if (!$(e.target).closest('.schedule-hero-form-select-wrap').length) {
                         $selectWrap.removeClass('open');
-                        if($(e.target).closest('.schedule-hero-form-input').length) {
+                        if ($(e.target).closest('.schedule-hero-form-input').length) {
                             $inputGr.removeClass('active');
                             $(e.target).closest('.schedule-hero-form-input-gr').addClass('active');
                         }
@@ -2861,24 +2861,24 @@ const script = () => {
                         $selectDropdown.removeClass('active');
                     }
                 });
-                
+
                 $('.schedule-hero-form-select-dropdown-item').on('click', (e) => {
                     e.preventDefault();
                     const $current = $(e.currentTarget);
                     const text = $current.find('.txt').text();
                     const $parent = $current.closest('.schedule-hero-form-select-wrap');
                     const $selectInner = $parent.find('.schedule-hero-form-select-inner');
-                    
+
                     $inputGr.removeClass('active');
                     $parent.addClass('filled').removeClass('open');
                     $parent.find('.schedule-hero-form-select-dropdown').removeClass('active');
                     $selectInner.find('.txt').text(text);
                     $selectInner.find('input').val(text);
-                    
+
                     $('.schedule-hero-form-select-dropdown-item').removeClass('active');
                     $current.addClass('active');
                 });
-                
+
                 $('.schedule-hero-form-submit').on('click', (e) => {
                     if (!this.checkFormValid()) {
                         e.preventDefault();
@@ -2887,14 +2887,14 @@ const script = () => {
                         this.submitHubspot();
                     }
                 });
-                
+
                 $('button[type="submit"]').on("pointerenter", function () {
                     $(this).prop("disabled", false);
                 });
             }
             checkEmailValid(emailValue) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if(emailRegex.test(emailValue)) {
+                if (emailRegex.test(emailValue)) {
                     return true;
                 } else {
                     return false;
@@ -2908,8 +2908,8 @@ const script = () => {
                 const challenge = $('input[name="Challenge"]');
                 const location = $('input[name="Location"]');
                 let isValid = true;
-                if(location.length > 0){
-                    if(!location.val()) {
+                if (location.length > 0) {
+                    if (!location.val()) {
                         location.closest('.schedule-hero-form-input-gr').addClass('error');
                         isValid = false;
                     }
@@ -2917,25 +2917,25 @@ const script = () => {
                         location.closest('.schedule-hero-form-input-gr').removeClass('error');
                     }
                 }
-                if(!firstName.val()) {
+                if (!firstName.val()) {
                     firstName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     firstName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!lastName.val()) {
+                if (!lastName.val()) {
                     lastName.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     lastName.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!email.val()) {
+                if (!email.val()) {
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
-                else if(!this.checkEmailValid(email.val())) {
+                else if (!this.checkEmailValid(email.val())) {
                     email.closest('.schedule-hero-form-input-gr').find('.schedule-hero-form-valid .txt').text(messageEmail);
                     email.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
@@ -2943,7 +2943,7 @@ const script = () => {
                 else {
                     email.closest('.schedule-hero-form-input-gr').removeClass('error');
                 }
-                if(!challenge.val()) {
+                if (!challenge.val()) {
                     challenge.closest('.schedule-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
@@ -2966,66 +2966,66 @@ const script = () => {
                         { name: "wants_marketing_emails", value: (data) => data["wants_marketing_emails"] ? "Yes" : "No" }
                     ],
                 };
-                if($('input[name="Location"]').length > 0) {
+                if ($('input[name="Location"]').length > 0) {
                     hubspot.fields.push({ name: "location", value: (data) => data["Location"] });
                 }
                 //get current locale
                 const currentLocale = $('html').attr('lang');
-                if(currentLocale == 'en-GB') { //uk
+                if (currentLocale == 'en-GB') { //uk
                     hubspot.formId = "ce557112-f014-4189-b3ca-ad1cc02691bb";
                 }
-                else if(currentLocale == 'en-AU') { //apac
+                else if (currentLocale == 'en-AU') { //apac
                     hubspot.formId = "e3e25e1f-9a2f-4d25-9d08-caf691c8c5db";
                 }
                 const { portalId, formId, fields } = hubspot;
                 let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
                 const data = mapFormToObject($('#contact-form form').get(0));
                 const mapField = (data) => {
-                   if (!fields.length) return [];
-    
-                   const result = fields.map((field) => {
-                      const { name, value } = field;
-                      if (!value) {
-                      return {
-                         name,
-                         value: data[name] || "",
-                      };
-                      } else {
-                      const getValue = value(data);
-                      return {
-                         name,
-                         value: getValue || "",
-                      };
-                      }
-                   });
-                   return result;
+                    if (!fields.length) return [];
+
+                    const result = fields.map((field) => {
+                        const { name, value } = field;
+                        if (!value) {
+                            return {
+                                name,
+                                value: data[name] || "",
+                            };
+                        } else {
+                            const getValue = value(data);
+                            return {
+                                name,
+                                value: getValue || "",
+                            };
+                        }
+                    });
+                    return result;
                 };
                 const mappedFields = mapField(data);
                 const dataSend = {
-                   fields: mappedFields,
-                   context: {
-                      pageUri: window.location.href,
-                      pageName: "Contact page",
-                   },
+                    fields: mappedFields,
+                    context: {
+                        pageUri: window.location.href,
+                        pageName: "Contact page",
+                    },
                 };
                 $.ajax({
-                   url: url,
-                   method: "POST",
-                   data: JSON.stringify(dataSend),
-                   dataType: "json",
-                   headers: {
-                      accept: "application/json",
-                      "Access-Control-Allow-Origin": "*",
-                   },
-                   contentType: "application/json",
-                   success: function (response) {
-                      console.log(response);
-                   },
-                   error: function (xhr, resp, text) {
-                      console.log(xhr, resp, text);
-                   },
+                    url: url,
+                    method: "POST",
+                    data: JSON.stringify(dataSend),
+                    dataType: "json",
+                    headers: {
+                        accept: "application/json",
+                        "Access-Control-Allow-Origin": "*",
+                    },
+                    contentType: "application/json",
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (xhr, resp, text) {
+                        console.log(xhr, resp, text);
+                    },
                 });
-             }
+            }
             destroy() {
                 super.destroy();
             }
@@ -3038,16 +3038,16 @@ const script = () => {
                 }
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
                 new MasterTimeline({
                     timeline: gsap.timeline({
-                       scrollTrigger: {
+                        scrollTrigger: {
                             trigger: '.contact-benefit-title-wrap',
                             start: 'top top+=75%',
                             once: true,
-                       }
+                        }
                     }),
                     tweenArr: [
                         new FadeSplitText({ el: $('.contact-benefit-title .heading').get(0), mask: 'lines' }),
@@ -3131,22 +3131,22 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 767) {
+                if (viewport.w < 767) {
                     this.initSwiper();
                 }
-                if($('.growth-articles-item').length == 0) {
+                if ($('.growth-articles-item').length == 0) {
                     $('.growth-articles').hide();
                     $('.growth-hero-category-item').eq(1).hide()
                 }
-                if($('.growth-guide-item').length == 0) {
+                if ($('.growth-guide-item').length == 0) {
                     $('.growth-guide').hide();
                     $('.growth-hero-category-item').eq(2).hide()
                 }
-                if($('.growth-training-item').length == 0) {
+                if ($('.growth-training-item').length == 0) {
                     $('.growth-training').hide();
                     $('.growth-hero-category-item').eq(3).hide()
                 }
-                if($('.growth-event-item').length == 0) {
+                if ($('.growth-event-item').length == 0) {
                     $('.growth-event').hide();
                     $('.growth-hero-category-item').eq(4).hide()
                 }
@@ -3169,7 +3169,7 @@ const script = () => {
                 });
             }
             animationScrub() {
-            }   
+            }
             initSwiper() {
                 $('.growth-hero-category-wrap').addClass('swiper');
                 $('.growth-hero-category-item').addClass('swiper-slide');
@@ -3180,16 +3180,16 @@ const script = () => {
                 });
             }
             interact() {
-                $('.growth-hero-form-inner').on('submit', function(e) {
+                $('.growth-hero-form-inner').on('submit', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     let value = $(this).find('.growth-hero-input').val();
-                    if(!value) {
+                    if (!value) {
                         return false;
                     }
                     else {
-                        let href ='/result?search=' + value;
+                        let href = '/result?search=' + value;
                         window.location.href = href;
                     }
                 });
@@ -3198,20 +3198,20 @@ const script = () => {
                     let scrollTop = $(window).scrollTop();
                     let stickySearch = $('.growth-hub-search-sticky');
                     let footer = $('.footer');
-                    
-                    if(scrollTop > heroBottom) {
+
+                    if (scrollTop > heroBottom) {
                         console.log('active');
                         stickySearch.addClass('active');
                     } else {
                         stickySearch.removeClass('active');
                     }
-                    
+
                     // Remove class active when bottom chạm .footer
-                    if(footer.length && stickySearch.length) {
+                    if (footer.length && stickySearch.length) {
                         let footerTop = footer.offset().top;
                         let stickyBottom = scrollTop + viewport.h;
-                        
-                        if(stickyBottom >= footerTop) {
+
+                        if (stickyBottom >= footerTop) {
                             stickySearch.removeClass('active');
                         }
                     }
@@ -3231,12 +3231,12 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
             animationScrub() {
-                if($('.growth-articles-item').length > 0) {
+                if ($('.growth-articles-item').length > 0) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -3262,7 +3262,7 @@ const script = () => {
                         ]
                     });
                 }
-            }   
+            }
             initSwiper() {
                 $('.growth-articles-cms').addClass('swiper');
                 $('.growth-articles-item').addClass('swiper-slide');
@@ -3294,12 +3294,12 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
             animationScrub() {
-                if($('.growth-guide-item').length > 0) {
+                if ($('.growth-guide-item').length > 0) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -3322,7 +3322,7 @@ const script = () => {
                         ]
                     });
                 }
-            }   
+            }
             initSwiper() {
                 $('.growth-guide-cms').addClass('swiper');
                 $('.growth-guide-item').addClass('swiper-slide');
@@ -3354,12 +3354,12 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
             animationScrub() {
-                if($('.growth-training-item').length > 0) {
+                if ($('.growth-training-item').length > 0) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -3384,7 +3384,7 @@ const script = () => {
                         ]
                     });
                 }
-            }   
+            }
             initSwiper() {
                 $('.growth-training-cms').addClass('swiper');
                 $('.growth-training-item').addClass('swiper-slide');
@@ -3418,7 +3418,7 @@ const script = () => {
             animationReveal() {
             }
             animationScrub() {
-                if($('.growth-event-item').length > 0) {
+                if ($('.growth-event-item').length > 0) {
                     new MasterTimeline({
                         timeline: gsap.timeline({
                             scrollTrigger: {
@@ -3443,7 +3443,7 @@ const script = () => {
                         ]
                     });
                 }
-            }   
+            }
             interact() {
 
             }
@@ -3461,7 +3461,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
@@ -3495,7 +3495,7 @@ const script = () => {
                         ]
                     });
                 });
-            }   
+            }
             initSwiper() {
                 $('.growth-topic-cms').addClass('swiper');
                 $('.growth-topic-item').addClass('swiper-slide');
@@ -3562,7 +3562,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
@@ -3584,7 +3584,7 @@ const script = () => {
                         ]),
                     ]
                 });
-            }   
+            }
             initSwiper() {
                 $('.growth-hero-category-wrap').addClass('swiper');
                 $('.growth-hero-category-item').addClass('swiper-slide');
@@ -3600,34 +3600,34 @@ const script = () => {
                     let scrollTop = $(window).scrollTop();
                     let stickySearch = $('.growth-hub-search-sticky');
                     let footer = $('.footer');
-                    
-                    if(scrollTop > heroBottom) {
+
+                    if (scrollTop > heroBottom) {
                         console.log('active');
                         stickySearch.addClass('active');
                     } else {
                         stickySearch.removeClass('active');
                     }
-                    
+
                     // Remove class active when bottom chạm .footer
-                    if(footer.length && stickySearch.length) {
+                    if (footer.length && stickySearch.length) {
                         let footerTop = footer.offset().top;
                         let stickyBottom = scrollTop + viewport.h;
-                        
-                        if(stickyBottom >= footerTop) {
+
+                        if (stickyBottom >= footerTop) {
                             stickySearch.removeClass('active');
                         }
                     }
                 });
-                $('.growth-hero-form-inner').on('submit', function(e) {
+                $('.growth-hero-form-inner').on('submit', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     let value = $(this).find('.growth-hero-input').val();
-                    if(!value) {
+                    if (!value) {
                         return false;
                     }
                     else {
-                        let href ='/result?search=' + value;
+                        let href = '/result?search=' + value;
                         window.location.href = href;
                     }
                 });
@@ -3659,8 +3659,8 @@ const script = () => {
                         new FadeIn({ el: $('.tp-articles-sort-wrap'), type: 'bottom' }),
                     ]
                 });
-                let sectionName =$('[data-section]').attr('data-section');
-                if(sectionName === 'article') {
+                let sectionName = $('[data-section]').attr('data-section');
+                if (sectionName === 'article') {
                     $('.tp-articles-item').each((_, item) => {
                         new MasterTimeline({
                             timeline: gsap.timeline({
@@ -3681,7 +3681,7 @@ const script = () => {
                         });
                     });
                 }
-                else if(sectionName === 'guide') {
+                else if (sectionName === 'guide') {
                     $('.tp-guide-item').each((_, item) => {
                         new MasterTimeline({
                             timeline: gsap.timeline({
@@ -3700,7 +3700,7 @@ const script = () => {
                         });
                     });
                 }
-                else if(sectionName === 'video') {
+                else if (sectionName === 'video') {
                     $('.tp-training-item').each((_, item) => {
                         new MasterTimeline({
                             timeline: gsap.timeline({
@@ -3720,7 +3720,7 @@ const script = () => {
                         });
                     });
                 }
-                else if(sectionName === 'event') {
+                else if (sectionName === 'event') {
                     $('.tp-event-item').each((_, item) => {
                         new MasterTimeline({
                             timeline: gsap.timeline({
@@ -3744,14 +3744,14 @@ const script = () => {
                 }
             }
             interact() {
-                $('.tp-articles-sort-inner').on('click', function(e) {
+                $('.tp-articles-sort-inner').on('click', function (e) {
                     e.preventDefault();
                     $(this).closest('.tp-articles-sort-main').toggleClass('active');
 
                 });
-                $('.tp-articles-sort-dropdown-item').on('click', (e) =>{
+                $('.tp-articles-sort-dropdown-item').on('click', (e) => {
                     e.preventDefault();
-                    let text = $(e.target).closest('.tp-articles-sort-dropdown-item')   .find('.txt').text();
+                    let text = $(e.target).closest('.tp-articles-sort-dropdown-item').find('.txt').text();
                     $('.tp-articles-sort-dropdown-item').removeClass('active');
                     $(e.target).addClass('active');
                     $('.tp-articles-sort-inner').find('.txt').text(text);
@@ -3759,8 +3759,8 @@ const script = () => {
                     let type = $(e.target).closest('.tp-articles-sort-dropdown-item').attr('data-type');
                     this.sortItem(type);
                 });
-                $(document).on('click', function(e) {
-                    if(!$(e.target).closest('.tp-articles-sort-main').length) {
+                $(document).on('click', function (e) {
+                    if (!$(e.target).closest('.tp-articles-sort-main').length) {
                         $('.tp-articles-sort-main').removeClass('active');
                     }
                 });
@@ -3769,15 +3769,15 @@ const script = () => {
                 console.log(type);
                 let items = $('[data-title][data-date]').toArray();
                 let container = $(items[0]).parent();
-                
-                if(type === 'name') {
+
+                if (type === 'name') {
                     // Sort theo title từ a-z
                     items.sort((a, b) => {
                         let titleA = $(a).attr('data-title').toLowerCase();
                         let titleB = $(b).attr('data-title').toLowerCase();
                         return titleA.localeCompare(titleB);
                     });
-                } else if(type === 'date') {
+                } else if (type === 'date') {
                     // Sort theo date mới nhất đến cũ nhất
                     items.sort((a, b) => {
                         let dateA = new Date($(a).attr('data-date'));
@@ -3785,7 +3785,7 @@ const script = () => {
                         return dateB - dateA; // Mới nhất trước
                     });
                 }
-                
+
                 // Sắp xếp lại vị trí trong DOM
                 items.forEach(item => {
                     container.append(item);
@@ -3865,10 +3865,10 @@ const script = () => {
                 };
             }
             animationReveal() {
-                 let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
-                 marquee.setup();
-                 marquee.play();
-                 new MasterTimeline({
+                let marquee = new Marquee($('.home-trust-logo-main'), $('.home-trust-logo-list'), 40);
+                marquee.setup();
+                marquee.play();
+                new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
                             trigger: '.home-trust',
@@ -3894,30 +3894,30 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 768) {
+                if (viewport.w < 768) {
                     $('.stories-people-item-content').attr('data-lenis-prevent', 'true');
                     $('.stories-people-item-content').on('touchstart', () => {
                         smoothScroll.stop();
                     });
-                    
+
                     // Kiểm tra khi scroll đến cuối thì tự động start smoothScroll
-                    $('.stories-people-item-content').on('scroll', function() {
+                    $('.stories-people-item-content').on('scroll', function () {
                         const element = $(this)[0];
                         const isAtBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 1;
-                        
+
                         if (isAtBottom) {
                             smoothScroll.start();
                         }
                     });
-                    
+
                     $('.stories-people-item-content').on('touchend', () => {
                         smoothScroll.start();
                     });
                     $('.stories-people').css('height', viewport.h);
-                    let heightContent = viewport.h - parseFloat($('.stories-people').css('padding-top'))*2 - $('.stories-people-title').outerHeight(true) - $('.stories-people-thumb-cms').outerHeight(true) - cvUnit(27, 'rem') ;
+                    let heightContent = viewport.h - parseFloat($('.stories-people').css('padding-top')) * 2 - $('.stories-people-title').outerHeight(true) - $('.stories-people-thumb-cms').outerHeight(true) - cvUnit(27, 'rem');
                     $('.stories-people-cms-wrap').css('height', heightContent + 'px');
                 }
-                activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);  
+                activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], 0);
                 const items = gsap.utils.toArray('.stories-people-thumb-item');
                 if (items.length === 0) return;
                 new MasterTimeline({
@@ -3931,7 +3931,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-people-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-people-thumb-item')).flatMap(item => [
-                            new FadeIn({ el: item}),
+                            new FadeIn({ el: item }),
                         ]),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-content-item:first-child .stories-people-item-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.stories-people-item:first-child .stories-people-item-sub .txt').get(0), mask: 'lines' }),
@@ -3957,12 +3957,13 @@ const script = () => {
                         start: 'top top+=55%',
                         once: true,
                     },
-                    repeat: -1 });
-                
+                    repeat: -1
+                });
+
                 items.forEach((item, index) => {
                     // Thêm label để dễ seek đến vị trí này
                     tl.addLabel(`item-${index}`);
-                    
+
                     tl.add(() => {
                         // Add class active cho item hiện tại
                         items.forEach(el => el.classList.remove('active'));
@@ -3972,24 +3973,24 @@ const script = () => {
                             this.swiperContent.slideTo(index);
                         }
                     })
-                    .to(item, {
-                        '--progress': 100,
-                        duration: 8, // Thời gian chạy từ 0-100 (có thể điều chỉnh)
-                        ease: 'linear',
-                        onStart: () => {
-                            gsap.set(item, { '--progress': 0 });
-                        },
-                        onComplete: () => {
-                            // Remove class active và reset --progress về 0
-                            item.classList.remove('active');
-                            $('.stories-people-bg-item').eq(index).removeClass('active');
-                            gsap.set(item, { '--progress': 0 });
-                        }
-                    });
+                        .to(item, {
+                            '--progress': 100,
+                            duration: 8, // Thời gian chạy từ 0-100 (có thể điều chỉnh)
+                            ease: 'linear',
+                            onStart: () => {
+                                gsap.set(item, { '--progress': 0 });
+                            },
+                            onComplete: () => {
+                                // Remove class active và reset --progress về 0
+                                item.classList.remove('active');
+                                $('.stories-people-bg-item').eq(index).removeClass('active');
+                                gsap.set(item, { '--progress': 0 });
+                            }
+                        });
                 });
-                
+
                 this.timeline = tl;
-                
+
                 // Khởi tạo Swiper và lắng nghe sự kiện slideChange
                 this.swiperContent = new Swiper('.stories-people-cms', {
                     slidesPerView: 1,
@@ -4004,22 +4005,22 @@ const script = () => {
                     on: {
                         slideChange: (swiper) => {
                             const activeIndex = swiper.activeIndex;
-                            
+
                             items.forEach((item, idx) => {
                                 gsap.set(item, { '--progress': 0 });
                                 item.classList.remove('active');
                                 $('.stories-people-bg-item').eq(idx).removeClass('active');
                             });
-                            
+
                             activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], activeIndex);
-                            
+
                             this.timeline.pause();
                             this.timeline.seek(`item-${activeIndex}`);
                             this.timeline.play();
                         }
                     }
                 });
-                
+
                 items.forEach((item, index) => {
                     $(item).on('click', () => {
                         items.forEach((el, idx) => {
@@ -4027,13 +4028,13 @@ const script = () => {
                             el.classList.remove('active');
                             $('.stories-people-bg-item').eq(idx).removeClass('active');
                         });
-                        
+
                         activeItem(['.stories-people-thumb-item', '.stories-people-bg-item'], index);
-                        
+
                         if (this.swiperContent) {
                             this.swiperContent.slideTo(index);
                         }
-                        
+
                         this.timeline.pause();
                         this.timeline.seek(`item-${index}`);
                         this.timeline.play();
@@ -4074,7 +4075,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w > 992) {
+                if (viewport.w > 992) {
                     let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
                     marquee.setup();
                     marquee.play();
@@ -4106,7 +4107,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: item, delay: 0.05 }),
                             new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
@@ -4146,25 +4147,25 @@ const script = () => {
                     this.interact();
                 };
             }
-            async  fetchReviews() {
+            async fetchReviews() {
                 const res = await fetch(
-                  "https://places.googleapis.com/v1/places/ChIJlbDSW2JIcUgRcMQMDznhlrg",
-                  {
-                    headers: {
-                      "X-Goog-Api-Key": "AIzaSyDH37VLLUhc-z6_s_ahMatC8ruQlmrNJAc",
-                      "X-Goog-FieldMask": "displayName,rating,userRatingCount,reviews"
+                    "https://places.googleapis.com/v1/places/ChIJlbDSW2JIcUgRcMQMDznhlrg",
+                    {
+                        headers: {
+                            "X-Goog-Api-Key": "AIzaSyDH37VLLUhc-z6_s_ahMatC8ruQlmrNJAc",
+                            "X-Goog-FieldMask": "displayName,rating,userRatingCount,reviews"
+                        }
                     }
-                  }
                 );
-              
+
                 const data = await res.json();
                 console.log(data);
-              }
+            }
             animationReveal() {
-                if($('.stories-fb-item').length == 0) {
+                if ($('.stories-fb-item').length == 0) {
                     $('.stories-fb').hide();
                 }
-                if(viewport.w > 992) {
+                if (viewport.w > 992) {
                     let marquee = new Marquee($('.stories-fb-cms'), $('.stories-fb-list'), 120, 'right');
                     marquee.setup();
                     marquee.play();
@@ -4196,12 +4197,12 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-fb-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-fb-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: item, delay: 0.05 }),
                             new FadeSplitText({ el: $(item).find('.stories-fb-item-name .heading').get(0), mask: 'lines' }),
                             new FadeIn({ el: $(item).find('.stories-fb-item-star'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-fb-item-message .txt').get(0), mask: 'lines' }),
                             $(item).find('.stories-fb-item-link').length > 0 ? new FadeIn({ el: $(item).find('.stories-fb-item-link') }) : null,
-                        ]) 
+                        ])
                     ].filter(Boolean)
                 });
             }
@@ -4252,7 +4253,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 767) {
+                    if (viewport.w < 767) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -4271,14 +4272,14 @@ const script = () => {
                         new FadeSplitText({ el: $('.pricing-hero-title .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.pricing-hero-sub .txt').get(0), mask: 'lines' }),
                         ...Array.from($('.pricing-hero-package-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: item, delay: 0.05 }),
                             new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-sub .txt').get(0), mask: 'lines' }),
                             $(item).find('.pricing-hero-package-item-desc').length > 0 ? new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-desc .txt').get(0), mask: 'lines' }) : null,
                             new FadeIn({ el: $(item).find('.pricing-hero-package-item-pricing'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-inclu-title .txt').get(0), mask: 'lines' }),
                             ...Array.from($(item).find('.pricing-hero-package-item-inclu-item')).flatMap(item => [
-                                new FadeIn({ el: $(item).find('.pricing-hero-package-item-inclu-item-ic'), delay: 0}),
+                                new FadeIn({ el: $(item).find('.pricing-hero-package-item-inclu-item-ic'), delay: 0 }),
                                 new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-inclu-item-title .txt').get(0), mask: 'lines' }),
                             ]),
                             $(item).find('.pricing-hero-package-item-link-popup').length > 0 ? new FadeIn({ el: $(item).find('.pricing-hero-package-item-link-popup'), type: 'bottom' }) : null,
@@ -4298,13 +4299,13 @@ const script = () => {
                         new FadeIn({ el: $('.pricing-hero-ticket-price-item-label') }),
                         new FadeSplitText({ el: $('.pricing-hero-ticket-price-name .heading').get(0), mask: 'lines' }),
                         new FadeIn({ el: $('.pricing-hero-ticket-price-most'), type: 'bottom' }),
-                        new FadeSplitText({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-desc .txt').get(0), mask: 'lines' }),    
+                        new FadeSplitText({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-desc .txt').get(0), mask: 'lines' }),
                         new FadeIn({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-title-wrap'), type: 'bottom' }),
                         new FadeSplitText({ el: $('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-price-item-desc-bot .txt').get(0), mask: 'lines' }),
                         ...Array.from($('.pricing-hero-ticket-main-wrap .pricing-hero-ticket-sub-wrap')).flatMap(item => [
                             new FadeSplitText({ el: $(item).find('.pricing-hero-ticket-sub-title .txt').get(0), mask: 'lines' }),
                             ...Array.from($(item).find('.pricing-hero-ticket-benefit-item')).flatMap(item => [
-                                new FadeIn({ el: $(item).find('.pricing-hero-ticket-benefit-item-ic'), delay: 0}),
+                                new FadeIn({ el: $(item).find('.pricing-hero-ticket-benefit-item-ic'), delay: 0 }),
                                 new FadeSplitText({ el: $(item).find('.pricing-hero-ticket-benefit-item-title .txt').get(0), mask: 'lines' }),
                             ]),
                         ]),
@@ -4315,7 +4316,7 @@ const script = () => {
             }
             interact() {
                 console.log('interact');
-                $('.pricing-hero-package-item-link-popup').on('click', function(e) {
+                $('.pricing-hero-package-item-link-popup').on('click', function (e) {
                     e.preventDefault();
                     let dataTable = $(this).attr('data-table');
                     $('.pricing-popup-table').removeClass('active');
@@ -4323,7 +4324,7 @@ const script = () => {
                     $('.pricing-popup').addClass('active');
                     smoothScroll.stop();
                 });
-                $('.pricing-popup-close').on('click', function(e) {
+                $('.pricing-popup-close').on('click', function (e) {
                     e.preventDefault();
                     $('.pricing-popup').removeClass('active');
                     $('.pricing-popup-table').removeClass('active');
@@ -4353,7 +4354,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -4382,8 +4383,8 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.pricing-plan-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                            new FadeIn({ el: $(item).find('.pricing-plan-item-ic'), delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: $(item).find('.pricing-plan-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.pricing-plan-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.pricing-plan-item-sub .txt').get(0), mask: 'lines' }),
                         ]),
@@ -4440,13 +4441,13 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.pricing-optional-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
-                            new FadeIn({ el: $(item).find('.pricing-optional-item-ic'), delay: 0}),
+                            new FadeIn({ el: item, delay: 0.05 }),
+                            new FadeIn({ el: $(item).find('.pricing-optional-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.pricing-optional-item-title-wrap .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.pricing-optional-item-sub .txt').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.pricing-optional-item-benefit-title .txt').get(0), mask: 'lines' }),
                             ...Array.from($(item).find('.pricing-optional-item-benefit-info')).flatMap(item => [
-                                new FadeIn({ el: $(item).find('.pricing-optional-item-benefit-info-ic'), delay: 0}),
+                                new FadeIn({ el: $(item).find('.pricing-optional-item-benefit-info-ic'), delay: 0 }),
                                 new FadeSplitText({ el: $(item).find('.pricing-optional-item-benefit-info-txt .txt').get(0), mask: 'lines' }),
                             ]),
                             new FadeIn({ el: $(item).find('.pricing-optional-item-btn'), type: 'bottom' }),
@@ -4514,7 +4515,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.faq-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
                             new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
                         ]),
@@ -4525,7 +4526,7 @@ const script = () => {
                 const $item = $(item);
                 const $itemSub = $item.find('.faq-item-sub');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -4555,7 +4556,7 @@ const script = () => {
                 let searchParams = new URLSearchParams(search);
                 let searchValue = searchParams.get('search');
                 let categoryValue = searchParams.get('category');
-                if(searchValue) {
+                if (searchValue) {
                     $('.growth-hero-input').val(searchValue);
                     this.searchValue(searchValue);
                 }
@@ -4589,7 +4590,7 @@ const script = () => {
                 items.each((_, item) => {
                     let itemTitle = $(item).attr('data-title');
                     isMatch = itemTitle.toLowerCase().includes(value.toLowerCase());
-                    if(isMatch) {
+                    if (isMatch) {
                         $(item).addClass('active').show();
                         countMatch++;
                     }
@@ -4597,17 +4598,17 @@ const script = () => {
                         $(item).removeClass('active').hide();
                     }
                 });
-                $('.result-section').each((_, item) => {   
+                $('.result-section').each((_, item) => {
                     let lengthActiveItem = $(item).find('[data-title].active').length;
 
-                    if(lengthActiveItem == 0){
+                    if (lengthActiveItem == 0) {
                         $(item).closest('.web-component').hide();
                     }
                     else {
                         $(item).closest('.web-component').show();
                     }
                 })
-                if(countMatch > 0) {
+                if (countMatch > 0) {
                     $('.result-loading').fadeOut();
                     setTimeout(() => {
                         $('.result-main-wrap').fadeIn();
@@ -4628,12 +4629,12 @@ const script = () => {
                 let countMatch = 0;
                 items.each((_, item) => {
                     let itemCategory = $(item).attr('data-category');
-                    if(!itemCategory) {
+                    if (!itemCategory) {
                         $(item).removeClass('active').hide();
                         return;
                     }
                     isMatch = itemCategory.toLowerCase().includes(value.toLowerCase());
-                    if(isMatch) {
+                    if (isMatch) {
                         $(item).addClass('active').show();
                         countMatch++;
                     }
@@ -4641,17 +4642,17 @@ const script = () => {
                         $(item).removeClass('active').hide();
                     }
                 });
-                $('.result-section').each((_, item) => {   
+                $('.result-section').each((_, item) => {
                     let lengthActiveItem = $(item).find('[data-title].active').length;
 
-                    if(lengthActiveItem == 0){
+                    if (lengthActiveItem == 0) {
                         $(item).closest('.web-component').hide();
                     }
                     else {
                         $(item).closest('.web-component').show();
                     }
                 })
-                if(countMatch > 0) {
+                if (countMatch > 0) {
                     $('.result-loading').fadeOut();
                     setTimeout(() => {
                         $('.result-main-wrap').fadeIn();
@@ -4721,31 +4722,31 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     header.registerDependent('.dt-event-hero-tab-wrap.only-tb');
                 }
             }
             interact() {
-                $('.dt-event-hero-tab-inner.only-tb').on('click', function(e) {
+                $('.dt-event-hero-tab-inner.only-tb').on('click', function (e) {
                     e.preventDefault();
                     $(this).toggleClass('active');
                 });
-                $('.dt-event-hero-tab-title-item').on('click', function(e) {
+                $('.dt-event-hero-tab-title-item').on('click', function (e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
                     $('.dt-event-hero-tab-title-item').removeClass('active');
                     $(this).addClass('active');
                     $('.dt-event-hero-content h2').each((i, el) => {
                         let elDataTitle = $(el).attr('data-title');
-                        if(elDataTitle == dataTitle) {
+                        if (elDataTitle == dataTitle) {
                             $(el).addClass('active');
                         }
                     })
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         $('.dt-event-hero-tab-inner.only-tb').removeClass('active');
                         $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(this).find('.txt').text());
                     }
-                    let offset = viewport.h / 2*-1;
+                    let offset = viewport.h / 2 * -1;
                     smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
                         offset: offset
                     });
@@ -4753,7 +4754,7 @@ const script = () => {
                 });
                 let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    if(!scrollTicking) {
+                    if (!scrollTicking) {
                         window.requestAnimationFrame(() => {
                             this.itemContentActiveCheck();
                             scrollTicking = false;
@@ -4780,13 +4781,13 @@ const script = () => {
                 });
                 let tableItem = $('.dt-event-hero-tab-title-item').eq(0).clone();
                 $('.dt-event-hero-tab-title').empty();
-                if($('.dt-event-hero-content h2').length > 0) {
+                if ($('.dt-event-hero-content h2').length > 0) {
                     $('.dt-event-hero-content h2').each((i, el) => {
                         $(el).attr('data-title', `toch-${i}`);
                         let tableItemClone = tableItem.clone();
-                        if(i == 0) {
+                        if (i == 0) {
                             tableItemClone.addClass('active');
-                            if(viewport.w < 992) {
+                            if (viewport.w < 992) {
                                 $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
                             }
                         }
@@ -4805,16 +4806,16 @@ const script = () => {
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
                 const halfHeight = viewportHeight / 2;
-                
+
                 $('.dt-event-hero-content h2').each((i, el) => {
                     const rect = el.getBoundingClientRect();
                     const dataTitle = el.getAttribute('data-title');
-                    
+
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $tableItem = $(`.dt-event-hero-tab-title-item[data-title="${dataTitle}"]`);
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-event-hero-tab-inner.only-tb .dt-event-hero-tab-txt .txt').text($(el).text());
-                            
+
                         }
                         $('.dt-event-hero-tab-title-item').removeClass('active');
                         $tableItem.addClass('active');
@@ -4837,34 +4838,34 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     header.registerDependent('.dt-video-hero-tab-wrap.only-tb');
                 }
             }
             interact() {
-                if(viewport.w < 992) {
-                    $('.dt-video-hero-tab-inner.only-tb ').on('click', function(e) {
+                if (viewport.w < 992) {
+                    $('.dt-video-hero-tab-inner.only-tb ').on('click', function (e) {
                         e.preventDefault();
                         $(this).toggleClass('active');
                     });
                 }
-                $('.dt-video-hero-tab-title-item').on('click', function(e) {
+                $('.dt-video-hero-tab-title-item').on('click', function (e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
                     $('.dt-video-hero-tab-title-item').removeClass('active');
                     $(this).addClass('active');
                     $('.dt-video-hero-content h2').each((i, el) => {
                         let elDataTitle = $(el).attr('data-title');
-                        if(elDataTitle == dataTitle) {
+                        if (elDataTitle == dataTitle) {
                             $(el).addClass('active');
                         }
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
                             $(this).addClass('active');
                             $('.dt-video-hero-tab-inner:not(.mode-dk)').removeClass('active');
                         }
                     })
-                    let offset = viewport.h / 2*-1;
+                    let offset = viewport.h / 2 * -1;
                     smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
                         offset: offset
                     });
@@ -4872,7 +4873,7 @@ const script = () => {
                 });
                 let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    if(!scrollTicking) {
+                    if (!scrollTicking) {
                         window.requestAnimationFrame(() => {
                             this.itemContentActiveCheck();
                             scrollTicking = false;
@@ -4885,13 +4886,13 @@ const script = () => {
             initContent() {
                 let tableItem = $('.dt-video-hero-tab-title-item').eq(0).clone();
                 $('.dt-video-hero-tab-title').empty();
-                if($('.dt-video-hero-content h2').length > 0) {
+                if ($('.dt-video-hero-content h2').length > 0) {
                     $('.dt-video-hero-content h2').each((i, el) => {
                         $(el).attr('data-title', `toch-${i}`);
                         let tableItemClone = tableItem.clone();
-                        if(i == 0) {
+                        if (i == 0) {
                             tableItemClone.addClass('active');
-                            if(viewport.w < 992) {
+                            if (viewport.w < 992) {
                                 $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
                             }
                         }
@@ -4907,20 +4908,20 @@ const script = () => {
                 let topCenter = (viewport.h - $('.dt-video-hero-tab-inner').height()) / 2;
                 $('.dt-video-hero-tab-inner').css('top', topCenter);
             }
-            
+
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
                 const halfHeight = viewportHeight / 2;
-                
+
                 $('.dt-video-hero-content h2').each((i, el) => {
                     const rect = el.getBoundingClientRect();
                     const dataTitle = el.getAttribute('data-title');
-                    
+
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $tableItem = $(`.dt-video-hero-tab-title-item[data-title="${dataTitle}"]`);
-                        
+
                         $('.dt-video-hero-tab-title-item').removeClass('active');
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-video-hero-tab-inner:not(.mode-dk) .dt-video-hero-tab-txt .txt').text($(el).text());
 
                         }
@@ -4936,7 +4937,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                 };
@@ -4972,66 +4973,66 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     header.registerDependent('.dt-guide-hero-tab-wrap.only-tb')
                 }
             }
             interact() {
-                $( 'a[data-download]').on('click', async function (e) {
+                $('a[data-download]').on('click', async function (e) {
                     e.preventDefault();
                     console.log('Downloading file...');
                     const url = $(this).attr("href");
                     const filename = $(this).data("download");
-                    
+
                     try {
                         const response = await fetch(url);
                         const blob = await response.blob();
                         const objectUrl = URL.createObjectURL(blob);
-                        
+
                         const a = document.createElement("a");
                         a.href = objectUrl;
                         a.download = filename;
-                        
+
                         document.body.appendChild(a);
                         a.click();
-                        
+
                         setTimeout(() => {
                             document.body.removeChild(a);
                             URL.revokeObjectURL(objectUrl);
                         }, 100);
-                        
+
                         console.log('Download started:', filename);
                     } catch (error) {
                         console.error('Download failed:', error);
                         window.open(url, '_blank');
                     }
                 });
-                  
-                if(viewport.w < 992) {
-                    $('.dt-guide-hero-tab-inner:not(.mode-dk)').on('click', function(e) {
+
+                if (viewport.w < 992) {
+                    $('.dt-guide-hero-tab-inner:not(.mode-dk)').on('click', function (e) {
                         e.preventDefault();
                         $(this).toggleClass('active');
                     })
                 }
-                $('.dt-guide-hero-tab-title-item').on('click', function(e) {
+                $('.dt-guide-hero-tab-title-item').on('click', function (e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
                     $('.dt-guide-hero-tab-title-item').removeClass('active');
                     $(this).addClass('active');
                     $('.dt-guide-hero-content h2').each((i, el) => {
                         let elDataTitle = $(el).attr('data-title');
-                        if(elDataTitle == dataTitle) {
+                        if (elDataTitle == dataTitle) {
                             $(el).addClass('active');
                         }
                     })
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         $('.dt-guide-hero-tab-inner:not(.mode-dk)').removeClass('active');
                         $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(this).text());
 
                         $(this).addClass('active');
 
                     }
-                    let offset = viewport.h / 2*-1;
+                    let offset = viewport.h / 2 * -1;
                     smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
                         offset: offset
                     });
@@ -5039,7 +5040,7 @@ const script = () => {
                 });
                 let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    if(!scrollTicking) {
+                    if (!scrollTicking) {
                         window.requestAnimationFrame(() => {
                             this.itemContentActiveCheck();
                             scrollTicking = false;
@@ -5051,19 +5052,19 @@ const script = () => {
                 $('.dt-guide-hero-form-input').on('focus', (e) => {
                     $(e.currentTarget).closest('.dt-guide-hero-form-input-gr').addClass('active');
                 });
-                
+
                 $('.dt-guide-hero-form-input').on('blur', (e) => {
                     const $current = $(e.currentTarget);
-                    const $parent = $current.closest('.dt-guide-hero-form-input-gr').length 
-                        ? $current.closest('.dt-guide-hero-form-input-gr') 
+                    const $parent = $current.closest('.dt-guide-hero-form-input-gr').length
+                        ? $current.closest('.dt-guide-hero-form-input-gr')
                         : $current.closest('.dt-guide-hero-form-option-input-inner');
-                    
+
                     $parent.removeClass('active')
                         .toggleClass('filled', !!$current.val());
                 });
                 const $formSuccess = $('.dt-guide-hero-form-mess');
                 const $inputGr = $('.dt-guide-hero-form-input-gr');
-                
+
                 const formReset = (form) => {
                     $(form)[0].reset();
                     reinitializeWebflow();
@@ -5072,7 +5073,7 @@ const script = () => {
                     $('.input:not(.input-hidden)').closest('.dt-guide-hero-form-input-gr').removeClass('filled');
                     $('.dt-guide-hero-form-select-inner .txt').text('Select');
                 }
-                
+
                 const onSuccessForm = (form) => {
                     console.log('success');
                     $formSuccess.addClass('active');
@@ -5086,7 +5087,7 @@ const script = () => {
                     e.preventDefault();
                     $formSuccess.removeClass('active');
                 });
-                
+
                 $('.dt-guide-hero-form-submit-new').on('click', (e) => {
                     if (this.checkFormValid()) {
                         this.submitHubspot();
@@ -5099,7 +5100,7 @@ const script = () => {
             }
             checkEmailValid(emailValue) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if(emailRegex.test(emailValue)) {
+                if (emailRegex.test(emailValue)) {
                     return true;
                 } else {
                     return false;
@@ -5110,18 +5111,18 @@ const script = () => {
                 const email = $('input[name="Email"]');
                 const messageEmail = "Invalid email";
                 let isValid = true;
-                if(!fullName.val()) {
+                if (!fullName.val()) {
                     fullName.closest('.dt-guide-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
                 else {
                     fullName.closest('.dt-guide-hero-form-input-gr').removeClass('error');
                 }
-                if(!email.val()) {
+                if (!email.val()) {
                     email.closest('.dt-guide-hero-form-input-gr').addClass('error');
                     isValid = false;
                 }
-                else if(!this.checkEmailValid(email.val())) {
+                else if (!this.checkEmailValid(email.val())) {
                     email.closest('.dt-guide-hero-form-input-gr').find('.dt-guide-hero-form-valid .txt').text(messageEmail);
                     email.closest('.dt-guide-hero-form-input-gr').addClass('error');
                     isValid = false;
@@ -5140,22 +5141,22 @@ const script = () => {
                         { name: "email", value: (data) => data["Email"] }
                     ],
                 };
-                
+
                 const currentLocale = $('html').attr('lang');
-                if(currentLocale == 'en-GB') {
+                if (currentLocale == 'en-GB') {
                     hubspot.formId = "680ebb16-a7f0-46cd-adc2-334d5381c441";
                 }
-                else if(currentLocale == 'en-AU') {
+                else if (currentLocale == 'en-AU') {
                     hubspot.formId = "4dca4fbb-2260-4085-8caa-362a9bd497e0";
                 }
-                
+
                 const { portalId, formId, fields } = hubspot;
                 let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
                 const data = mapFormToObject($('#download-free-guide').get(0));
-                
+
                 const mapField = (data) => {
                     if (!fields.length) return [];
-                    
+
                     const result = fields.map((field) => {
                         const { name, value } = field;
                         if (!value) {
@@ -5173,7 +5174,7 @@ const script = () => {
                     });
                     return result;
                 };
-                
+
                 const mappedFields = mapField(data);
                 console.log(mappedFields);
                 const dataSend = {
@@ -5183,7 +5184,7 @@ const script = () => {
                         pageName: "Guide Download",
                     },
                 };
-                
+
                 $.ajax({
                     url: url,
                     method: "POST",
@@ -5212,13 +5213,13 @@ const script = () => {
             initContent() {
                 let tableItem = $('.dt-guide-hero-tab-title-item').eq(0).clone();
                 $('.dt-guide-hero-tab-title').empty();
-                if($('.dt-guide-hero-content h2').length > 0) {
+                if ($('.dt-guide-hero-content h2').length > 0) {
                     $('.dt-guide-hero-content h2').each((i, el) => {
                         $(el).attr('data-title', `toch-${i}`);
                         let tableItemClone = tableItem.clone();
-                        if(i == 0) {
+                        if (i == 0) {
                             tableItemClone.addClass('active');
-                            if(viewport.w < 992) {
+                            if (viewport.w < 992) {
                                 $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
                             }
                         }
@@ -5237,17 +5238,17 @@ const script = () => {
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
                 const halfHeight = viewportHeight / 2;
-                
+
                 $('.dt-guide-hero-content h2').each((i, el) => {
                     const rect = el.getBoundingClientRect();
                     const dataTitle = el.getAttribute('data-title');
-                    
+
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $tableItem = $(`.dt-guide-hero-tab-title-item[data-title="${dataTitle}"]`);
-                        
+
                         $('.dt-guide-hero-tab-title-item').removeClass('active');
                         $tableItem.addClass('active');
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-guide-hero-tab-inner:not(.mode-dk) .dt-guide-hero-tab-txt .txt').text($(el).text());
 
                         }
@@ -5259,31 +5260,31 @@ const script = () => {
             }
         },
         'dt-guide-related-wrap': class extends TriggerSetup {
-                constructor() {
-                    super();
-                    this.onTrigger = () => {
-                        if(viewport.w < 992) {
-                            this.initSwiper();
-                        }
-                    };
-                }
-                initSwiper() {
-                    console.log('initSwiper');
-                    $('.dt-guide-related-cms').addClass('swiper');
-                    $('.dt-guide-related-list').addClass('swiper-wrapper');
-                    $('.dt-guide-related-item').addClass('swiper-slide');
-
-                    const swiper = new Swiper(".dt-guide-related-cms", {
-                        slidesPerView: 'auto',
-                        spaceBetween: cvUnit(16, 'rem'),
-                        pagination: {
-                            el: '.dt-guide-related-pagi',
-                            bulletClass: 'dt-guide-related-pagi-item',
-                            bulletActiveClass: 'active'
-                        }
-                    })
-                }
+            constructor() {
+                super();
+                this.onTrigger = () => {
+                    if (viewport.w < 992) {
+                        this.initSwiper();
+                    }
+                };
             }
+            initSwiper() {
+                console.log('initSwiper');
+                $('.dt-guide-related-cms').addClass('swiper');
+                $('.dt-guide-related-list').addClass('swiper-wrapper');
+                $('.dt-guide-related-item').addClass('swiper-slide');
+
+                const swiper = new Swiper(".dt-guide-related-cms", {
+                    slidesPerView: 'auto',
+                    spaceBetween: cvUnit(16, 'rem'),
+                    pagination: {
+                        el: '.dt-guide-related-pagi',
+                        bulletClass: 'dt-guide-related-pagi-item',
+                        bulletActiveClass: 'active'
+                    }
+                })
+            }
+        }
     }
     const ArticleDetailPage = {
         'dt-article-hero-wrap': class extends TriggerSetup {
@@ -5296,34 +5297,34 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     header.registerDependent('.dt-article-hero-tab-wrap.only-tb');
                 }
             }
             interact() {
-                if(viewport.w < 992) {
-                    $('.dt-article-hero-tab-inner.only-tb').on('click', function(e) {
+                if (viewport.w < 992) {
+                    $('.dt-article-hero-tab-inner.only-tb').on('click', function (e) {
                         e.preventDefault();
                         $(this).toggleClass('active');
                     })
                 }
-                $('.dt-article-hero-tab-title-item').on('click', function(e) {
+                $('.dt-article-hero-tab-title-item').on('click', function (e) {
                     e.preventDefault();
                     let dataTitle = $(this).attr('data-title');
                     $('.dt-article-hero-tab-title-item').removeClass('active');
                     $(this).addClass('active');
                     $('.dt-article-hero-content h2').each((i, el) => {
                         let elDataTitle = $(el).attr('data-title');
-                        if(elDataTitle == dataTitle) {
+                        if (elDataTitle == dataTitle) {
                             $(el).addClass('active');
                         }
                     })
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         $('.dt-article-hero-tab-inner.only-tb').removeClass('active');
                         $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(this).find('.txt').text());
                     }
                     // i want to get offset center viewport height
-                    let offset = viewport.h / 2*-1;
+                    let offset = viewport.h / 2 * -1;
                     smoothScroll.scrollTo(`.dt-article-hero-content h2[data-title="${dataTitle}"]`, {
                         offset: offset
                     });
@@ -5331,7 +5332,7 @@ const script = () => {
                 });
                 let scrollTicking = false;
                 smoothScroll.lenis.on('scroll', () => {
-                    if(!scrollTicking) {
+                    if (!scrollTicking) {
                         window.requestAnimationFrame(() => {
                             this.itemContentActiveCheck();
                             scrollTicking = false;
@@ -5347,9 +5348,9 @@ const script = () => {
                 $('.dt-article-hero-content h2').each((i, el) => {
                     $(el).attr('data-title', `toch-${i}`);
                     let tableItemClone = tableItem.clone();
-                    if(i == 0) {
+                    if (i == 0) {
                         tableItemClone.addClass('active');
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(el).text());
                         }
                     }
@@ -5364,17 +5365,17 @@ const script = () => {
             itemContentActiveCheck() {
                 const viewportHeight = $(window).height();
                 const halfHeight = viewportHeight / 2;
-                
+
                 $('.dt-article-hero-content h2').each((i, el) => {
                     const rect = el.getBoundingClientRect();
                     const dataTitle = el.getAttribute('data-title');
-                    
+
                     if (rect.top > 0 && rect.top - $(el).height() < halfHeight) {
                         const $tableItem = $(`.dt-article-hero-tab-title-item[data-title="${dataTitle}"]`);
-                        
+
                         $('.dt-article-hero-tab-title-item').removeClass('active');
                         $tableItem.addClass('active');
-                        if(viewport.w < 992) {
+                        if (viewport.w < 992) {
                             $('.dt-article-hero-tab-inner.only-tb .dt-article-hero-tab-txt .txt').text($(el).text());
                         }
                     }
@@ -5388,7 +5389,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                 };
@@ -5422,9 +5423,9 @@ const script = () => {
             animationReveal() {
             }
             interact() {
-                $('.about-story-faq-item-head').on('click', function(e) {
+                $('.about-story-faq-item-head').on('click', function (e) {
                     e.preventDefault();
-                    if($(this).closest('.about-story-faq-item').hasClass('active')) {
+                    if ($(this).closest('.about-story-faq-item').hasClass('active')) {
                         $(this).closest('.about-story-faq-item').removeClass('active');
                         $(this).closest('.about-story-faq-item').find('.about-story-faq-item-content').slideUp();
                     } else {
@@ -5451,8 +5452,8 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w > 992) {
-                    if(viewport.w > 992) {
+                if (viewport.w > 992) {
+                    if (viewport.w > 992) {
                         let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
                         marquee.setup();
                         marquee.play();
@@ -5501,7 +5502,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: item, delay: 0.05 }),
                             new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
@@ -5543,10 +5544,10 @@ const script = () => {
             animationReveal() {
             }
             interact() {
-                if(viewport.w < 992) {
-                    $('.about-approach-item-title-wrap').on('click', function(e) {
+                if (viewport.w < 992) {
+                    $('.about-approach-item-title-wrap').on('click', function (e) {
                         e.preventDefault();
-                        if($(this).closest('.about-approach-item').hasClass('active')) {
+                        if ($(this).closest('.about-approach-item').hasClass('active')) {
                             $(this).closest('.about-approach-item').removeClass('active');
                             $(this).closest('.about-approach-item').find('.about-approach-item-img-main').slideUp();
                         } else {
@@ -5567,7 +5568,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -5599,7 +5600,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -5608,14 +5609,14 @@ const script = () => {
             animationReveal() {
                 this.tlStickFade = gsap.timeline({
                     scrollTrigger: {
-                       trigger: $('.about-mission-title').get(0),
-                       start: 'center+=20% bottom+=10%',
-                       end: `center+=20% top+=40%`,
-                       scrub: true,
+                        trigger: $('.about-mission-title').get(0),
+                        start: 'center+=20% bottom+=10%',
+                        end: `center+=20% top+=40%`,
+                        scrub: true,
                     }
-                 });
-                 let title = new SplitText( $('.about-mission-title .txt').get(0), {type: 'chars,words, lines'});
-                 this.tlStickFade.fromTo(title.chars, {color: '#ffffff4d'}, { color: '#fff', stagger: 0.03 })
+                });
+                let title = new SplitText($('.about-mission-title .txt').get(0), { type: 'chars,words, lines' });
+                this.tlStickFade.fromTo(title.chars, { color: '#ffffff4d' }, { color: '#fff', stagger: 0.03 })
             }
             interact() {
             }
@@ -5642,7 +5643,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -5684,13 +5685,13 @@ const script = () => {
             animationReveal() {
                 $('.summit-event-row-content').hide();
                 this.activeFaqItem($(this).find('.summit-event-row-head').eq(0));
-                
+
             }
             activeFaqItem(item) {
                 const $item = $(item);
                 const $itemSub = $item.closest('.summit-event-row').find('.summit-event-row-content');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -5720,7 +5721,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
@@ -5748,7 +5749,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 768) {
+                if (viewport.w < 768) {
                     this.initSwiper();
                 }
             }
@@ -5781,7 +5782,7 @@ const script = () => {
             }
             animationReveal() {
                 console.log('animationReveal');
-                let titleLinkMap = SplitText.create('.summit-location-sub-txt .txt', {type: ' lines', linesClass: 'bp-line'});
+                let titleLinkMap = SplitText.create('.summit-location-sub-txt .txt', { type: ' lines', linesClass: 'bp-line' });
                 multiLineText($('.summit-location-sub-txt .txt'));
             }
             interact() {
@@ -5799,7 +5800,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w < 992) {
+                if (viewport.w < 992) {
                     this.initSwiper();
                 }
             }
@@ -5833,7 +5834,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if(viewport.w > 992) {
+                if (viewport.w > 992) {
                     let marquee = new Marquee($('.stories-support-cms'), $('.stories-support-list'), 120);
                     marquee.setup();
                     marquee.play();
@@ -5865,7 +5866,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05}),
+                            new FadeIn({ el: item, delay: 0.05 }),
                             new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
@@ -5878,7 +5879,7 @@ const script = () => {
             animationScrub() {
             }
             interact() {
-                 $('.stories-support-item-link').on('click', (e) => {
+                $('.stories-support-item-link').on('click', (e) => {
                     console.log('click');
                     e.preventDefault();
                     let link = $(e.target).closest('.stories-support-item-link').attr('href');
@@ -5921,7 +5922,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.faq-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
                             new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
                         ]),
@@ -5932,7 +5933,7 @@ const script = () => {
                 const $item = $(item);
                 const $itemSub = $item.find('.faq-item-sub');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -6007,7 +6008,7 @@ const script = () => {
                         new FadeSplitText({ el: $('.comp-diff-title .heading').get(0), mask: 'lines' }),
                     ]
                 });
-                gsap.set('.comp-diff-cms-bg', {autoAlpha: 0, y: 20});
+                gsap.set('.comp-diff-cms-bg', { autoAlpha: 0, y: 20 });
                 new MasterTimeline({
                     timeline: gsap.timeline({
                         scrollTrigger: {
@@ -6016,7 +6017,7 @@ const script = () => {
                             once: true,
                         },
                         onComplete: () => {
-                            gsap.to('.comp-diff-cms-bg', {autoAlpha: 1, y: 0, duration: .6, ease: 'power2.inOut'});
+                            gsap.to('.comp-diff-cms-bg', { autoAlpha: 1, y: 0, duration: .6, ease: 'power2.inOut' });
                         }
                     }),
                     tweenArr: [
@@ -6032,7 +6033,7 @@ const script = () => {
                 });
             }
             interact() {
-                if(viewport.w < 768) {
+                if (viewport.w < 768) {
                     $('.comp-diff-item').on('click', (e) => {
                         e.preventDefault();
                         this.activeCompItem(e.currentTarget.closest('.comp-diff-item'));
@@ -6045,7 +6046,7 @@ const script = () => {
                 const $item = $(item).find('.comp-diff-col-head');
                 const $itemSub = $(item).find('.comp-diff-col-wrap');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -6079,7 +6080,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.comp-work-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.comp-work-sub .txt.fs-16')).flatMap(item => [
-                            new FadeSplitText({ el: $(item).get(0), mask: 'lines'}),
+                            new FadeSplitText({ el: $(item).get(0), mask: 'lines' }),
                         ]),
                         new FadeIn({ el: $('.comp-work-btn'), type: 'bottom', delay: 0.8 }),
                     ]
@@ -6096,7 +6097,7 @@ const script = () => {
                         ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
                     ]
                 });
-            }   
+            }
             animationScrub() {
             }
             interact() {
@@ -6193,7 +6194,7 @@ const script = () => {
                 super.destroy();
             }
         },
-       'faq-wrap': class extends TriggerSetup {
+        'faq-wrap': class extends TriggerSetup {
             constructor() {
                 super();
                 this.onTrigger = () => {
@@ -6218,7 +6219,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.faq-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.faq-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.faq-item-title .heading').get(0), mask: 'lines' }),
                             new ScaleInset({ el: $(item).find('.faq-item-ic').get(0) }),
                         ]),
@@ -6229,7 +6230,7 @@ const script = () => {
                 const $item = $(item);
                 const $itemSub = $item.find('.faq-item-sub');
                 const isActive = $item.hasClass('active');
-                
+
                 if (isActive) {
                     $item.removeClass('active');
                     $itemSub.slideUp();
@@ -6291,7 +6292,7 @@ const script = () => {
             }
             animationReveal() {
 
-                if($('.fea-hero-img-cms').length> 0) {
+                if ($('.fea-hero-img-cms').length > 0) {
                     $('.fea-hero-img-cms').each((_, item) => {
                         let direction = $(item).attr('data-direction');
                         let marquee = new Marquee($(item), $(item).find('.fea-hero-img-list'), 40, direction);
@@ -6299,10 +6300,10 @@ const script = () => {
                         marquee.play();
                     });
                 }
-                
-                if(viewport.w >= 992) {
+
+                if (viewport.w >= 992) {
                     this.items = $('.fea-hero-intro-item');
-                    if(this.items.length > 0) {
+                    if (this.items.length > 0) {
                         this.setupTimeline();
                     }
                 }
@@ -6322,9 +6323,9 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.fea-hero-label .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.fea-hero-title .heading').get(0), mask: 'lines' }),
-                        new FadeSplitText({ el: $('.fea-hero-sub .txt').get(0), mask: 'lines', delay: 0.5}),
+                        new FadeSplitText({ el: $('.fea-hero-sub .txt').get(0), mask: 'lines', delay: 0.5 }),
                         ...Array.from($('.fea-hero-btn')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                         ]),
                         ...Array.from($('.fea-hero-img-cms')).flatMap(item => [
                             ...Array.from($(item).find('.fea-hero-img-list')).flatMap(list => [
@@ -6345,8 +6346,8 @@ const script = () => {
                     allowMobile: true,
                     tweenArr: [
                         new FadeSplitText({ el: $('.fea-hero-intro-title .heading').get(0), mask: 'lines' }),
-                        ...Array.from($('.fea-hero-intro-item')).flatMap(item => 
-                            new FadeIn({ el: item, delay: 0}),
+                        ...Array.from($('.fea-hero-intro-item')).flatMap(item =>
+                            new FadeIn({ el: item, delay: 0 }),
                         ),
                         new FadeIn({ el: $('.fea-hero-intro-img'), type: 'bottom' }),
                     ]
@@ -6356,34 +6357,34 @@ const script = () => {
                 this.items.removeClass('active');
                 $('.fea-hero-intro-item-content').hide();
                 $('.fea-hero-intro-img-item').removeClass('active');
-                
+
                 const itemCount = this.items.length;
                 this.currentIndex = -1;
-                
+
                 this.scrollTrigger = ScrollTrigger.create({
                     trigger: '.fea-hero-intro-wrap',
                     start: 'top+=35% bottom',
                     end: 'bottom-=50% top',
                     scrub: 0.5,
                     onUpdate: (self) => {
-                        if(this.isManualClick) return;
-                        
+                        if (this.isManualClick) return;
+
                         let progress = self.progress;
                         let newIndex = Math.floor(progress * itemCount);
-                        
+
                         newIndex = Math.min(Math.max(0, newIndex), itemCount - 1);
-                        
-                        if(newIndex !== this.currentIndex) {
+
+                        if (newIndex !== this.currentIndex) {
                             this.currentIndex = newIndex;
                             this.activateItem(newIndex);
                         }
-                        
+
                         let itemStartProgress = this.currentIndex / itemCount;
                         let itemEndProgress = (this.currentIndex + 1) / itemCount;
                         let itemProgress = (progress - itemStartProgress) / (itemEndProgress - itemStartProgress);
                         itemProgress = Math.max(0, Math.min(1, itemProgress));
-                        
-                        if(itemProgress >= 0 && itemProgress <= 1) {
+
+                        if (itemProgress >= 0 && itemProgress <= 1) {
                             this.updateProgressBar(this.currentIndex, itemProgress);
                         }
                     }
@@ -6393,22 +6394,22 @@ const script = () => {
                 this.items.removeClass('active');
                 $('.fea-hero-intro-img-item').removeClass('active');
                 gsap.set('.fea-hero-intro-item-line-progress', { x: '-101%' });
-                
+
                 this.items.eq(index).addClass('active');
                 $('.fea-hero-intro-img-item').eq(index).addClass('active');
-                
+
                 $('.fea-hero-intro-item-content').slideUp(400);
                 this.items.eq(index).find('.fea-hero-intro-item-content').slideDown(400);
             }
             updateProgressBar(index, progress) {
                 let progressBar = this.items.eq(index).find('.fea-hero-intro-item-line-progress');
-                if(progressBar.length > 0) {
+                if (progressBar.length > 0) {
                     let xPos = -101 + (progress * 101);
                     gsap.set(progressBar[0], { x: xPos + '%' });
                 }
             }
             interact() {
-                if(viewport.w >= 992 && this.items) {
+                if (viewport.w >= 992 && this.items) {
                     this.items.each((index, item) => {
                         $(item).find('.fea-hero-intro-item-head').on('click', (e) => {
                             e.preventDefault();
@@ -6417,12 +6418,12 @@ const script = () => {
                     });
                 }
                 else {
-                    $('.fea-hero-intro-item-head').on('click', function(e) {
+                    $('.fea-hero-intro-item-head').on('click', function (e) {
                         e.preventDefault();
                         let $item = $(this).closest('.fea-hero-intro-item');
                         let $content = $item.find('.fea-hero-intro-item-content');
-                        
-                        if($item.hasClass('active')) {
+
+                        if ($item.hasClass('active')) {
                             $item.removeClass('active');
                             $content.slideUp();
                         }
@@ -6436,22 +6437,22 @@ const script = () => {
                 }
             }
             jumpToItem(index) {
-                if(!this.scrollTrigger) return;
-                
+                if (!this.scrollTrigger) return;
+
                 this.isManualClick = true;
                 this.currentIndex = index;
                 this.activateItem(index);
                 this.updateProgressBar(index, 0);
-                
+
                 const itemCount = this.items.length;
                 const targetProgress = (index + 0.02) / itemCount;
-                
+
                 const scrollStart = this.scrollTrigger.start;
                 const scrollEnd = this.scrollTrigger.end;
                 const scrollDistance = scrollEnd - scrollStart;
                 const targetScroll = scrollStart + (scrollDistance * targetProgress);
-                
-                if(smoothScroll && smoothScroll.lenis) {
+
+                if (smoothScroll && smoothScroll.lenis) {
                     smoothScroll.scrollTo(targetScroll, {
                         duration: 0.8,
                         immediate: false
@@ -6462,13 +6463,13 @@ const script = () => {
                         behavior: 'smooth'
                     });
                 }
-                
+
                 setTimeout(() => {
                     this.isManualClick = false;
                 }, 1000);
             }
             destroy() {
-                if(this.scrollTrigger) {
+                if (this.scrollTrigger) {
                     this.scrollTrigger.kill();
                     this.scrollTrigger = null;
                 }
@@ -6484,7 +6485,7 @@ const script = () => {
                 };
             }
             animationReveal() {
-                if($('.fea-system-item-grow').length > 0) {
+                if ($('.fea-system-item-grow').length > 0) {
                     this.waveAnim();
                 }
                 new MasterTimeline({
@@ -6510,10 +6511,10 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.fea-system-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                         ]),
                         ...Array.from($('.fea-system-space')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                         ]),
                         new FadeIn({ el: $('.fea-system-btn'), type: 'bottom' }),
                     ]
@@ -6525,11 +6526,11 @@ const script = () => {
                 let waveArr = $(".fea-system-item-grow-block").eq(0).clone();
                 $(".fea-system-item-grow").html("");
                 for (let i = 0; i < countWave; i++) {
-                  let html = waveArr.clone();
-                  html.css("animation-delay", `${(-15 / countWave) * i}s`);
-                  $(".fea-system-item-grow").append(html);
+                    let html = waveArr.clone();
+                    html.css("animation-delay", `${(-15 / countWave) * i}s`);
+                    $(".fea-system-item-grow").append(html);
                 }
-              }
+            }
             interact() {
             }
             destroy() {
@@ -6540,7 +6541,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -6570,7 +6571,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.fea-complete-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
                             new FadeIn({ el: $(item).find('.fea-complete-item-ic'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
@@ -6589,8 +6590,8 @@ const script = () => {
                         el: '.fea-complete-pagi',
                         bulletClass: 'fea-complete-pagi-item',
                         bulletActiveClass: 'active',
-                        clickable: true,  
-                      },
+                        clickable: true,
+                    },
                 });
             }
             interact() {
@@ -6651,7 +6652,7 @@ const script = () => {
                         new FadeSplitText({ el: $('.home-hero-title .heading').get(0), mask: 'lines' }),
                         new FadeSplitText({ el: $('.home-hero-sub .txt').get(0), mask: 'lines' }),
                         new FadeIn({ el: $('.home-hero-btn'), type: 'bottom' }),
-                       ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
+                        ...Array.from($('.home-hero-flow-item')).map(item => new FadeIn({ el: item, isDisableRevert: true })),
                     ]
                 });
             }
@@ -6708,42 +6709,68 @@ const script = () => {
                 this.updateTabItemLineProgress(stepIndex, itemIndex, itemProgress);
             }
             animationReveal() {
-                const lineClone = $('.how-progress-tab-item-line').eq(0).clone();
-                $('.how-progress-tab-item-line-wrap').empty();
-                $('.how-progress-tab-item-title').each((i, el) => $(el).find('.heading').eq(0).text(`${i + 1}.`));
-                $('.how-progress-step').each((i, el) => {
-                    $(el).find('.how-progress-step-label').text(`Step ${i + 1}`);
-                    const qty = $(el).find('.how-progress-step-item').length;
-                    const html = lineClone.clone();
-                    for (let j = 0; j < qty; j++) $('.how-progress-tab-item').eq(i).find('.how-progress-tab-item-line-wrap').append(html.clone());
-                });
-                this.swiper = new Swiper('.how-progress-tab-cms', {
-                    slidesPerView: 'auto',
-                    spaceBetween: cvUnit(24, 'rem'),
-                    speed: 800,
-                    on: { slideChange: () => { if (!this.isUpdatingFromCode) this.activateStep(this.swiper.activeIndex, 0); } }
-                });
-                this.setupNavigation();
                 this.activateStep(0, 0);
+                if (viewport.w > 767) {
+                    const lineClone = $('.how-progress-tab-item-line').eq(0).clone();
+                    $('.how-progress-tab-item-line-wrap').empty();
+                    $('.how-progress-tab-item-title').each((i, el) => $(el).find('.heading').eq(0).text(`${i + 1}.`));
+                    $('.how-progress-step').each((i, el) => {
+                        $(el).find('.how-progress-step-label').text(`Step ${i + 1}`);
+                        const qty = $(el).find('.how-progress-step-item').length;
+                        const html = lineClone.clone();
+                        for (let j = 0; j < qty; j++) $('.how-progress-tab-item').eq(i).find('.how-progress-tab-item-line-wrap').append(html.clone());
+                    });
+                    header.registerDependent('.how-progress-tab-wrap');
+                    this.swiper = new Swiper('.how-progress-tab-cms', {
+                        slidesPerView: 'auto',
+                        spaceBetween: cvUnit(24, 'rem'),
+                        speed: 800,
+                        on: { slideChange: () => { if (!this.isUpdatingFromCode) this.activateStep(this.swiper.activeIndex, 0); } }
+                    });
+                    new MasterTimeline({
+                        timeline: gsap.timeline({
+                            scrollTrigger: { trigger: '.how-progress', start: 'top top+=75%', once: true },
+                        }),
+                        tweenArr: [
+                            ...$('.how-progress-tab-content-item, .how-progress-tab-item').get().map(el => new FadeIn({ el, delay: 0, isDisableRevert: el.classList.contains('how-progress-tab-item') })),
+                            new FadeIn({ el: $('.how-progress-step:first-child .how-progress-step-label').get(0), mask: 'lines' }),
+                            new FadeSplitText({ el: $('.how-progress-step:first-child .how-progress-step-title .heading').get(0), mask: 'lines' }),
+                            new FadeIn({ el: $('.how-progress-step-img-list'), type: 'bottom' }),
+                            ...$('.how-progress-step:first-child .how-progress-step-item').get().flatMap(el => [
+                                new FadeIn({ el, delay: 0 }),
+                                new FadeSplitText({ el: $(el).find('.how-progress-step-item-title .heading').get(0), mask: 'lines' }),
+                                new FadeIn({ el: $(el).find('.how-progress-step-item-ic'), type: 'bottom' }),
+                            ]),
+                        ]
+                    });
+                }
+                else {
+                    $('.how-progress-step-child').each(function () {
+                        $(this).find('.how-progress-step-cms').addClass('swiper');
+                        $(this).find('.how-progress-step-list').addClass('swiper-wrapper');
+                        $(this).find('.how-progress-step-item').addClass('swiper-slide');
+                        this.swiper = new Swiper($(this).find('.how-progress-step-cms').get(0), {
+                            slidesPerView: 'auto',
+                            spaceBetween: cvUnit(20, 'rem'),
+                            speed: 400,
+                            pagination: {
+                                el: $(this).find('.how-progress-step-child-pagi').get(0),
+                                bulletClass: 'how-progress-step-child-pagi-item',
+                                bulletActiveClass: 'active',
+                                clickable: true,
+                            }
+                        });
+                    })
+                }
                 if (window.innerWidth >= 992) this.interactDesktop();
-                else { header.registerDependent('.how-progress-tab-wrap'); this.interactMobile(); }
-                new MasterTimeline({
-                    timeline: gsap.timeline({
-                        scrollTrigger: { trigger: '.how-progress', start: 'top top+=75%', once: true },
-                    }),
-                    tweenArr: [
-                        ...$('.how-progress-tab-content-item, .how-progress-tab-item').get().map(el => new FadeIn({ el, delay: 0, isDisableRevert: el.classList.contains('how-progress-tab-item') })),
-                        new FadeIn({ el: $('.how-progress-step:first-child .how-progress-step-label').get(0), mask: 'lines' }),
-                        new FadeSplitText({ el: $('.how-progress-step:first-child .how-progress-step-title .heading').get(0), mask: 'lines' }),
-                        new FadeIn({ el: $('.how-progress-step-img-list'), type: 'bottom' }),
-                        ...$('.how-progress-step:first-child .how-progress-step-item').get().flatMap(el => [
-                            new FadeIn({ el, delay: 0 }),
-                            new FadeSplitText({ el: $(el).find('.how-progress-step-item-title .heading').get(0), mask: 'lines' }),
-                            new FadeIn({ el: $(el).find('.how-progress-step-item-ic'), type: 'bottom' }),
-                        ]),
-                    ]
-                });
-                if (isStagging() && viewport.w >= 992) this.setupTimelineScrub();
+                else if (window.innerWidth >= 768) {
+                    this.interactTablet();
+                }
+                else {
+                    this.interactMobile();
+                }
+
+                if (viewport.w >= 992) this.setupTimelineScrub();
             }
             setupTimelineScrub() {
                 this.scrollScrub?.kill();
@@ -6767,9 +6794,10 @@ const script = () => {
             }
             updateTabItemLineProgress(stepIndex, itemIndex, itemProgress) {
                 const x = (i) => itemIndex < 0 ? -101 : i < itemIndex ? 0 : i === itemIndex ? -101 + itemProgress * 101 : -101;
-                const $tab = $('.how-progress-tab-item').eq(stepIndex);
-                const $step = $('.how-progress-step').eq(stepIndex);
+                const $tab = $('.how-progress-tab-item').eq(stepIndex)
+                const $step = $('.how-progress-step').eq(stepIndex)
                 $tab.find('.how-progress-tab-item-line').each((i, el) => {
+                    console.log(el);
                     const inner = el.querySelector('.how-progress-tab-item-line-inner');
                     if (inner) gsap.set(inner, { x: x(i) + '%' });
                 });
@@ -6825,7 +6853,7 @@ const script = () => {
                     this.swiper.slideTo(stepIndex, 300);
                     setTimeout(() => this.isUpdatingFromCode = false, 100);
                 }
-                if (viewport.w <= 992) {
+                if (viewport.w <= 992 && viewport.w > 768) {
                     items.eq(itemIndex).find('.how-progress-step-item-img').slideDown();
                     items.not(items.eq(itemIndex)).find('.how-progress-step-item-img').slideUp();
                 }
@@ -6851,10 +6879,10 @@ const script = () => {
                     });
                 });
             }
-            interactMobile() {
+            interactTablet() {
                 $('.how-progress-tab-item').on('click', (e) => { e.stopPropagation(); const $t = $(e.currentTarget); this.handleTabClick($('.how-progress-tab-item').index($t), $t.hasClass('active')); });
                 $('.how-progress-step').each((si, step) => {
-                    $(step).find('.how-progress-step-item').on('click', function(e) {
+                    $(step).find('.how-progress-step-item').on('click', function (e) {
                         e.stopPropagation();
                         const $item = $(e.currentTarget);
                         const idx = $(step).find('.how-progress-step-item').index($item);
@@ -6864,6 +6892,19 @@ const script = () => {
                         } else this.goToStep(si, idx);
                     }.bind(this));
                 });
+            }
+            interactMobile() {
+                $('.how-progress-step').on('click', (e) => {
+                    console.log(e);
+                    let item = $(e.currentTarget).closest('.how-progress-step');
+                    if (item.hasClass('active')) {
+                        item.removeClass('active').find('.how-progress-step-child').slideUp();
+                    } else {
+                        $('.how-progress-step').removeClass('active').find('.how-progress-step-child').slideUp();
+                        item.addClass('active').find('.how-progress-step-child').slideDown();
+                    }
+                })
+                $('.how-progress-step').eq(0).find('.how-progress-step-child').slideDown()
             }
             destroy() {
                 this.scrollScrub?.kill();
@@ -6879,7 +6920,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -6908,8 +6949,8 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.how-work-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                            new FadeIn({ el: $(item).find('.how-work-item-ic'), delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: $(item).find('.how-work-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.how-work-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.how-work-item-sub .txt').get(0), mask: 'lines' }),
                         ]),
@@ -6927,8 +6968,8 @@ const script = () => {
                         el: '.how-work-pagi',
                         bulletClass: 'how-work-pagi-item',
                         bulletActiveClass: 'active',
-                        clickable: true,  
-                      },
+                        clickable: true,
+                    },
                 });
             }
             interact() {
@@ -6941,7 +6982,7 @@ const script = () => {
             constructor() {
                 super();
                 this.onTrigger = () => {
-                    if(viewport.w < 992) {
+                    if (viewport.w < 992) {
                         this.initSwiper();
                     }
                     this.animationReveal();
@@ -6971,8 +7012,8 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.fea-complete-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0}),
-                            new FadeIn({ el: $(item).find('.fea-complete-item-ic'), delay: 0}),
+                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: $(item).find('.fea-complete-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
                         ]),
@@ -6990,8 +7031,8 @@ const script = () => {
                         el: '.fea-complete-pagi',
                         bulletClass: 'fea-complete-pagi-item',
                         bulletActiveClass: 'active',
-                        clickable: true,  
-                      },
+                        clickable: true,
+                    },
                 });
             }
             interact() {
@@ -7090,7 +7131,7 @@ const script = () => {
         featured: FeaturedPage,
         howItWork: howItWorkPage,
     };
-    if(!isTouchDevice() && viewport.w >= 992) {
+    if (!isTouchDevice() && viewport.w >= 992) {
         cursor.updateHtml();
         cursor.init();
     }
