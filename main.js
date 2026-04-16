@@ -4197,7 +4197,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-fb-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-fb-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05 }),
+                            new FadeIn({ el: item, delay: 0.05, isDisableRevert: true }),
                             new FadeSplitText({ el: $(item).find('.stories-fb-item-name .heading').get(0), mask: 'lines' }),
                             new FadeIn({ el: $(item).find('.stories-fb-item-star'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-fb-item-message .txt').get(0), mask: 'lines' }),
@@ -4383,7 +4383,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.pricing-plan-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
                             new FadeIn({ el: $(item).find('.pricing-plan-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.pricing-plan-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.pricing-plan-item-sub .txt').get(0), mask: 'lines' }),
@@ -5502,7 +5502,7 @@ const script = () => {
                     tweenArr: [
                         new FadeSplitText({ el: $('.stories-support-title .heading').get(0), mask: 'lines' }),
                         ...Array.from($('.stories-support-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0.05 }),
+                            new FadeIn({ el: item, delay: 0.05, isDisableRevert: true }),
                             new FadeIn({ el: $(item).find('.stories-support-item-img'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-name .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.stories-support-item-position .txt').get(0), mask: 'lines' }),
@@ -6571,7 +6571,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.fea-complete-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
                             new FadeIn({ el: $(item).find('.fea-complete-item-ic'), type: 'bottom' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
@@ -7015,7 +7015,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.fea-complete-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
                             new FadeIn({ el: $(item).find('.fea-complete-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.fea-complete-item-sub .txt').get(0), mask: 'lines' }),
