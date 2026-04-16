@@ -6720,7 +6720,9 @@ const script = () => {
                         const html = lineClone.clone();
                         for (let j = 0; j < qty; j++) $('.how-progress-tab-item').eq(i).find('.how-progress-tab-item-line-wrap').append(html.clone());
                     });
-                    header.registerDependent('.how-progress-tab-wrap');
+                    if (viewport.w < 992) {
+                        header.registerDependent('.how-progress-tab-wrap');
+                    }
                     this.swiper = new Swiper('.how-progress-tab-cms', {
                         slidesPerView: 'auto',
                         spaceBetween: cvUnit(24, 'rem'),
@@ -6950,7 +6952,7 @@ const script = () => {
                     }),
                     tweenArr: [
                         ...Array.from($('.how-work-item')).flatMap(item => [
-                            new FadeIn({ el: item, delay: 0 }),
+                            new FadeIn({ el: item, delay: 0, isDisableRevert: true }),
                             new FadeIn({ el: $(item).find('.how-work-item-ic'), delay: 0 }),
                             new FadeSplitText({ el: $(item).find('.how-work-item-title .heading').get(0), mask: 'lines' }),
                             new FadeSplitText({ el: $(item).find('.how-work-item-sub .txt').get(0), mask: 'lines' }),
